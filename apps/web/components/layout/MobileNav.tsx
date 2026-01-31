@@ -16,7 +16,7 @@ export function MobileNav() {
                     <span className="material-icons-round">shopping_basket</span>
                 </Link>
             </div>
-            <Link href="/profile" className="flex flex-col items-center gap-1 text-slate-500 hover:text-primary active:text-primary transition-colors">
+            <Link href="/profile/wishlist" className="flex flex-col items-center gap-1 text-slate-500 hover:text-primary active:text-primary transition-colors">
                 <span className="material-icons-round">favorite_border</span>
                 <span className="text-[10px] font-medium">Wishlist</span>
             </Link>

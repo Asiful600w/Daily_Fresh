@@ -4,7 +4,6 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { PromotionalBanners } from "@/components/home/PromotionalBanners";
 import { Footer } from "@/components/layout/Footer";
-import { MobileNav } from "@/components/layout/MobileNav";
 import { getCategories, getFeaturedProducts, getBestSellingProducts, getSpecialCategories, getHeroSettings, getNotices, getAds } from "@/lib/api";
 import { AdvertiseScroller } from "@/components/home/AdvertiseScroller";
 import { NoticeScroller } from "@/components/home/NoticeScroller";
@@ -45,7 +44,6 @@ export default async function Home() {
         <FeaturesSection />
       </main>
       <Footer />
-      <MobileNav />
     </>
   );
 }

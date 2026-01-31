@@ -251,12 +251,12 @@ export function ProductInfo({ product }: { product: Product }) {
                 </div>
 
                 <div className="mt-auto pt-8 border-t border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 w-36 justify-between">
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 md:gap-6">
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-full p-1 justify-between md:w-36">
                             <button
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                 disabled={isOutOfStock}
-                                className="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-full shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-12 h-12 md:w-10 md:h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg md:rounded-full shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <span className="material-icons-round text-sm">remove</span>
                             </button>
@@ -264,7 +264,7 @@ export function ProductInfo({ product }: { product: Product }) {
                             <button
                                 onClick={() => setQuantity(quantity + 1)}
                                 disabled={isOutOfStock || quantity >= product.stockQuantity}
-                                className="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-12 h-12 md:w-10 md:h-10 flex items-center justify-center bg-primary text-white rounded-lg md:rounded-full shadow-lg shadow-green-500/20 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <span className="material-icons-round text-sm">add</span>
                             </button>
@@ -272,7 +272,7 @@ export function ProductInfo({ product }: { product: Product }) {
                         <button
                             onClick={handleAddToCart}
                             disabled={isOutOfStock}
-                            className="flex-1 bg-primary text-white font-bold py-4 px-8 rounded-full shadow-xl shadow-green-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            className="flex-1 bg-primary text-white font-bold py-4 px-8 rounded-xl md:rounded-full shadow-xl shadow-green-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg md:text-base"
                         >
                             <span className="material-icons-round">shopping_basket</span>
                             {isOutOfStock ? 'Out of Stock' : 'Add to cart'}

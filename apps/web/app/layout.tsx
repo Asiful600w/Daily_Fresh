@@ -7,6 +7,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
+import { MobileNav } from "@/components/layout/MobileNav";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
               <FlyToCartProvider>
                 <NextTopLoader color="#22C55E" showSpinner={false} />
                 {children}
+                <MobileNav />
               </FlyToCartProvider>
             </CartProvider>
           </WishlistProvider>
