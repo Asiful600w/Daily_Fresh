@@ -160,7 +160,7 @@ export function ShopView({ products, categories }: ShopViewProps) {
     return (
         <div className="flex flex-col lg:flex-row gap-12 relative pb-32 lg:pb-0">
             {/* Mobile Sticky Header */}
-            <div className="lg:hidden sticky top-[56px] md:top-[80px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
+            <div className="lg:hidden sticky top-[56px] z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
                 <MobileFilterBar
                     totalResults={filteredAndSortedProducts.length}
                     onFilterClick={() => setIsMobileFiltersOpen(true)}

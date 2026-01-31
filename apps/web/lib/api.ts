@@ -384,7 +384,8 @@ export async function searchProducts(query: string): Promise<Product[]> {
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false) // Soft delete filter
         .ilike('name', `%${query}%`)
@@ -447,7 +448,8 @@ export async function getProducts(options?: ProductFilterOptions | string): Prom
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false);
 
@@ -503,7 +505,8 @@ export async function getProductsPaginated(options: ProductFilterOptions): Promi
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `, { count: 'exact' })
         .eq('is_deleted', false);
 
@@ -647,7 +650,8 @@ export async function getProductsBySpecialCategory(specialCategoryName: string, 
         .select(`
             *,
             categories (name, slug),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false)
         .eq('special_category_id', specialCat.id);
@@ -679,7 +683,8 @@ export async function getFeaturedProducts(): Promise<Product[]> {
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false)
         .limit(8);
@@ -698,7 +703,8 @@ export async function getBestSellingProducts(limit: number = 8): Promise<Product
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false)
         .order('sold_count', { ascending: false })
@@ -730,7 +736,8 @@ export async function getRelatedProducts(productId: string | number, limit: numb
         .select(`
             *,
             categories (name),
-            special_categories (name)
+            special_categories (name),
+            subcategories (name)
         `)
         .eq('is_deleted', false)
         .eq('category_id', currentProduct.category_id)
