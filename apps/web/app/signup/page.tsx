@@ -108,14 +108,14 @@ export default function SignupPage() {
                     {/* Form */}
                     <form className="space-y-5" onSubmit={handleSignup}>
                         {/* Full Name TextField */}
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-semibold text-[#0f1a14] dark:text-white/90">Full Name</label>
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#539373] text-xl">person</span>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Full Name</label>
+                            <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">person</span>
                                 <input
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="flex w-full rounded-xl border border-[#d1e5db] dark:border-white/10 bg-white dark:bg-[#2A3038] h-14 pl-12 pr-4 text-[#0f1a14] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#26d980]/30 focus:border-[#26d980] placeholder:text-[#539373]/50 transition-all"
+                                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 h-14 pl-12 pr-4 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#26d980]/20 focus:border-[#26d980] placeholder:text-slate-400 transition-all"
                                     placeholder="Jane Doe"
                                     type="text"
                                     required
@@ -123,14 +123,14 @@ export default function SignupPage() {
                             </div>
                         </div>
                         {/* Email Address TextField */}
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-semibold text-[#0f1a14] dark:text-white/90">Email Address</label>
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#539373] text-xl">mail</span>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Email Address</label>
+                            <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">mail</span>
                                 <input
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="flex w-full rounded-xl border border-[#d1e5db] dark:border-white/10 bg-white dark:bg-[#2A3038] h-14 pl-12 pr-4 text-[#0f1a14] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#26d980]/30 focus:border-[#26d980] placeholder:text-[#539373]/50 transition-all"
+                                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 h-14 pl-12 pr-4 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#26d980]/20 focus:border-[#26d980] placeholder:text-slate-400 transition-all"
                                     placeholder="jane@example.com"
                                     type="email"
                                     required
@@ -138,43 +138,43 @@ export default function SignupPage() {
                             </div>
                         </div>
                         {/* Phone Number TextField */}
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-semibold text-[#0f1a14] dark:text-white/90">Phone Number</label>
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#539373] text-xl">call</span>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Phone Number</label>
+                            <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">call</span>
                                 <input
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
-                                    className="flex w-full rounded-xl border border-[#d1e5db] dark:border-white/10 bg-white dark:bg-[#2A3038] h-14 pl-12 pr-4 text-[#0f1a14] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#26d980]/30 focus:border-[#26d980] placeholder:text-[#539373]/50 transition-all"
+                                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 h-14 pl-12 pr-4 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#26d980]/20 focus:border-[#26d980] placeholder:text-slate-400 transition-all"
                                     placeholder="+1 (555) 000-0000"
                                     type="tel"
                                 />
                             </div>
                         </div>
                         {/* Password Fields */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-[#0f1a14] dark:text-white/90">Password</label>
-                                <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#539373] text-xl">lock</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Password</label>
+                                <div className="relative group">
+                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">lock</span>
                                     <input
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="flex w-full rounded-xl border border-[#d1e5db] dark:border-white/10 bg-white dark:bg-[#2A3038] h-14 pl-12 pr-4 text-[#0f1a14] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#26d980]/30 focus:border-[#26d980] placeholder:text-[#539373]/50 transition-all"
+                                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 h-14 pl-12 pr-4 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#26d980]/20 focus:border-[#26d980] placeholder:text-slate-400 transition-all"
                                         placeholder="••••••••"
                                         type="password"
                                         required
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-[#0f1a14] dark:text-white/90">Confirm</label>
-                                <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#539373] text-xl">shield</span>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Confirm</label>
+                                <div className="relative group">
+                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">shield</span>
                                     <input
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="flex w-full rounded-xl border border-[#d1e5db] dark:border-white/10 bg-white dark:bg-[#2A3038] h-14 pl-12 pr-4 text-[#0f1a14] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#26d980]/30 focus:border-[#26d980] placeholder:text-[#539373]/50 transition-all"
+                                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 h-14 pl-12 pr-4 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#26d980]/20 focus:border-[#26d980] placeholder:text-slate-400 transition-all"
                                         placeholder="••••••••"
                                         type="password"
                                         required
