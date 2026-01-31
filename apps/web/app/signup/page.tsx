@@ -20,10 +20,43 @@ export default function SignupPage() {
         setLoading(true);
         setError(null);
 
+        // Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError("Please enter a valid email address.");
+            setLoading(false);
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError("Passwords do not match");
             setLoading(false);
             return;
+        }
+
+        // Phone Validation (Bangladeshi)
+        let formattedPhone = phone.trim();
+        // Remove spaces/dashes
+        formattedPhone = formattedPhone.replace(/[\s-]/g, '');
+
+        const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+        const match = formattedPhone.match(bdPhoneRegex);
+
+        if (!match && phone.length > 0) {
+            setError("Please enter a valid Bangladeshi phone number (e.g. 01700000000)");
+            setLoading(false);
+            return;
+        }
+
+        if (match) {
+            // Ensure +88 prefix
+            if (!formattedPhone.startsWith('+88')) {
+                if (formattedPhone.startsWith('88')) {
+                    formattedPhone = '+' + formattedPhone;
+                } else {
+                    formattedPhone = '+88' + formattedPhone;
+                }
+            }
         }
 
         const { error } = await supabase.auth.signUp({
@@ -32,7 +65,7 @@ export default function SignupPage() {
             options: {
                 data: {
                     full_name: fullName,
-                    phone: phone,
+                    phone: formattedPhone, // Use formatted phone
                 },
             },
         });

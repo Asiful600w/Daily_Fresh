@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,14 +27,14 @@ export default function LoginPage() {
             setError(error.message);
             setLoading(false);
         } else {
-            router.push('/');
+            const redirectUrl = searchParams.get('redirect') || '/';
+            router.push(redirectUrl);
             router.refresh();
         }
     };
 
     const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-        // Placeholder for social login logic (to be implemented with Supabase Auth)
-        console.log(`Login with ${provider}`);
+        // Placeholder for social login logic
         alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon.`);
     }
 
@@ -88,21 +89,23 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    {/* Social Login Buttons - Professional */}
+                    {/* Social Login Buttons - Disabled */}
                     <div className="grid grid-cols-2 gap-4">
                         <button
                             onClick={() => handleSocialLogin('google')}
-                            className="flex items-center justify-center gap-3 h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all group"
+                            className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-6 transition-transform group-hover:scale-110" alt="Google" />
-                            <span className="font-bold text-slate-700 dark:text-slate-200">Google</span>
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-5 grayscale" alt="Google" />
+                            <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
+                            <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
                         <button
                             onClick={() => handleSocialLogin('facebook')}
-                            className="flex items-center justify-center gap-3 h-14 bg-[#1877F2] border border-[#1877F2] rounded-xl hover:bg-[#166fe5] hover:shadow-lg hover:shadow-blue-500/20 transition-all group"
+                            className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
-                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-6 brightness-0 invert transition-transform group-hover:scale-110" alt="Facebook" />
-                            <span className="font-bold text-white">Facebook</span>
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5 grayscale" alt="Facebook" />
+                            <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
+                            <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
                     </div>
 
