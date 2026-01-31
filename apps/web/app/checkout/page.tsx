@@ -62,45 +62,35 @@ export default function CheckoutPage() {
         }
     };
 
+    const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+
+    // ... (rest of logic)
+
     const handlePlaceOrder = async () => {
         if (!user) return;
         setLoading(true);
 
         try {
-            let finalShippingDetails = {
-                name: '',
-                phone: '',
-                address: ''
-            };
-
-            // 1. Resolve Address
+            // ... (Address logic same as before)
+            let finalShippingDetails = { name: '', phone: '', address: '' };
             if (isNewAddress || !selectedAddressId) {
-                // Validate new address
+                // ... (validate)
                 if (!newAddress.fullName || !newAddress.street || !newAddress.phone || !newAddress.city) {
                     alert('Please fill in all required shipping fields.');
                     setLoading(false);
                     return;
                 }
-
-                // Construct address string
                 finalShippingDetails = {
                     name: newAddress.fullName,
                     phone: newAddress.phone,
                     address: `${newAddress.street}, ${newAddress.city}, ${newAddress.state} ${newAddress.postalCode}, ${newAddress.country}`
                 };
-
-                // Save if requested
                 if (newAddress.saveForLater) {
-                    await saveAddress(user.id, {
-                        ...newAddress,
-                        label: 'Home', // Simple default
-                        isDefault: addresses.length === 0
-                    });
+                    await saveAddress(user.id, { ...newAddress, label: 'Home', isDefault: addresses.length === 0 });
                 }
             } else {
                 const addr = addresses.find(a => a.id === selectedAddressId);
                 if (!addr) throw new Error('Selected address not found');
-
                 finalShippingDetails = {
                     name: addr.fullName,
                     phone: addr.phone,
@@ -108,27 +98,39 @@ export default function CheckoutPage() {
                 };
             }
 
-            // 2. Create Order
-            const total = totalPrice * 1.05; // Including Tax (5%)? Or just subtotal? Logic below implies 5% tax.
-            // Let's match the review section logic:
-            // Subtotal = totalPrice
-            // Tax = totalPrice * 0.05
-            // Total = totalPrice * 1.05
-            // Note: OrderSummary had fixed delivery fee. CheckoutPage implies Free Shipping.
-
+            const total = totalPrice * 1.05;
             const order = await createOrder(user.id, total, cart, finalShippingDetails, 'cod');
 
-            // 3. Success
-            await clearCart();
-            router.push(`/orders/${order.id}?success=true`);
+            // Trigger Animation
+            setShowSuccessAnimation(true);
+
+            // Wait for animation before redirect
+            setTimeout(async () => {
+                await clearCart();
+                router.push(`/orders/${order.id}?success=true`);
+            }, 3000);
 
         } catch (error) {
             console.error('Checkout failed:', error);
             alert('Failed to place order. Please try again.');
-        } finally {
             setLoading(false);
         }
     };
+
+    if (showSuccessAnimation) {
+        return (
+            <div className="fixed inset-0 z-50 bg-white dark:bg-[#0d1b17] flex flex-col items-center justify-center animate-in fade-in duration-300">
+                <div className="relative w-32 h-32 mb-8">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+                    <div className="absolute inset-0 bg-white dark:bg-[#0d1b17] rounded-full m-2 flex items-center justify-center border-4 border-primary shadow-2xl shadow-primary/40">
+                        <span className="material-icons-round text-6xl text-primary animate-bounce">receipt_long</span>
+                    </div>
+                </div>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Generating Receipt</h2>
+                <p className="text-slate-500 font-medium animate-pulse">Please wait while we confirm your order...</p>
+            </div>
+        );
+    }
 
     if (authLoading || (!user && loading)) return null;
 

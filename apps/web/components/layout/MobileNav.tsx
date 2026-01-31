@@ -12,7 +12,7 @@ export function MobileNav() {
                 <span className="text-[10px] font-medium">Categories</span>
             </Link>
             <div className="-mt-8">
-                <Link href="/cart" className="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-white dark:border-slate-900 active:scale-95 transition-transform">
+                <Link href="/cart" id="mobile-cart-icon-container" className="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-white dark:border-slate-900 active:scale-95 transition-transform">
                     <span className="material-icons-round">shopping_basket</span>
                 </Link>
             </div>

@@ -23,7 +23,17 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
     const countRef = useRef(0);
 
     const triggerFly = (srcElement: HTMLElement, image: string, quantity: number = 1) => {
-        const cartIcon = document.getElementById('cart-icon-container');
+        let cartIcon = document.getElementById('cart-icon-container');
+
+        // Check if mobile cart is visible (or just check existence)
+        const mobileCartIcon = document.getElementById('mobile-cart-icon-container');
+        if (mobileCartIcon && window.getComputedStyle(mobileCartIcon).display !== 'none') {
+            cartIcon = mobileCartIcon;
+        }
+
+        if (!cartIcon && !mobileCartIcon) return; // Fallback
+        if (!cartIcon) cartIcon = mobileCartIcon || document.getElementById('cart-icon-container');
+
         if (!cartIcon) return;
 
         const srcRect = srcElement.getBoundingClientRect();

@@ -168,7 +168,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 hidden md:flex">
                     <button
                         className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         onClick={toggleTheme}

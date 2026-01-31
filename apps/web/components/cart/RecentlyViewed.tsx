@@ -36,9 +36,11 @@ export function RecentlyViewed() {
                     <span className="material-icons-round text-sm">arrow_forward</span>
                 </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex overflow-x-auto pb-4 gap-4 px-2 snap-x md:grid md:grid-cols-4 md:gap-6 md:pb-0 md:px-0 scrollbar-hide">
                 {products.map((p) => (
-                    <ProductCard key={p.id} product={p} />
+                    <div key={p.id} className="min-w-[160px] w-[160px] md:min-w-0 md:w-auto snap-center">
+                        <ProductCard product={p} />
+                    </div>
                 ))}
             </div>
         </section>
