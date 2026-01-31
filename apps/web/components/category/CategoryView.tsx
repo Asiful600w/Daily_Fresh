@@ -34,7 +34,9 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const [priceRange, setPriceRange] = useState({ min: globalMinPrice, max: globalMaxPrice });
     // Reset price range if category changes
     useEffect(() => {
-        setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
+        if (priceRange.min !== globalMinPrice || priceRange.max !== globalMaxPrice) {
+            setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
+        }
     }, [globalMinPrice, globalMaxPrice]);
 
     // Loading State
@@ -108,7 +110,9 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
 
     // Reset page when filters change
     useEffect(() => {
-        setCurrentPage(1);
+        if (currentPage !== 1) {
+            setCurrentPage(1);
+        }
     }, [priceRange, currentSort, slug]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
