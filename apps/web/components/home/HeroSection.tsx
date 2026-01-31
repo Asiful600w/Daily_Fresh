@@ -4,39 +4,42 @@ const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-
 
 export function HeroSection({ settings }: { settings?: any }) {
     return (
-        <section className={`relative min-h-[400px] md:min-h-[480px] rounded-3xl overflow-hidden ${bannerGradient} flex items-center py-8 md:py-12`}>
-            <div className="relative z-10 px-6 md:px-0 md:pl-16 max-w-xl space-y-4 md:space-y-6">
-                <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 bg-white/80 dark:bg-black/40 backdrop-blur-sm text-primary text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full shadow-sm">
-                    {settings?.subtitle || 'New Season Freshness'}
+        <section className="relative min-h-[500px] md:min-h-[600px] rounded-3xl overflow-hidden flex items-center py-12 md:py-20 group">
+            {/* Background Image with Zoom Effect */}
+            <div className="absolute inset-0 z-0">
+                <img
+                    alt={settings?.title || "Fresh Vegetables"}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    src={settings?.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop"}
+                />
+                {/* Premium Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
+            </div>
+
+            <div className="relative z-20 px-8 md:px-16 max-w-2xl space-y-6">
+                <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs md:text-sm font-bold uppercase tracking-[0.2em] rounded-full border border-white/10">
+                    {settings?.subtitle || 'Organic & Fresh'}
                 </span>
-                <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold leading-tight text-slate-900 dark:text-white drop-shadow-sm">
-                    {settings?.title || "Quality Food For Your"} <span className="text-primary">{settings?.title ? "" : "Healthy Life"}</span>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight text-white drop-shadow-lg">
+                    {settings?.title || "Nature's Best"} <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-300">
+                        {settings?.title ? "" : "Just for You"}
+                    </span>
                 </h1>
-                <p className="text-base md:text-lg text-slate-700 dark:text-slate-200 max-w-xs md:max-w-md font-medium leading-relaxed drop-shadow-sm">
-                    {settings?.description || 'Get up to 50% OFF on your first order. Fresh produce delivered from farm to your doorstep.'}
+                <p className="text-lg md:text-xl text-gray-200 max-w-md font-medium leading-relaxed drop-shadow-md">
+                    {settings?.description || 'Experience the freshest produce delivered directly from local farms to your table. Taste the difference today.'}
                 </p>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 pt-2">
-                    <button className="px-6 py-3 md:px-8 md:py-4 bg-primary text-white font-bold rounded-xl md:rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all active:scale-95 text-sm md:text-base">
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button className="px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-[0_10px_20px_rgba(34,197,94,0.3)] hover:shadow-[0_15px_30px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all active:scale-95 text-base flex items-center justify-center gap-2">
+                        <span className="material-icons-round">shopping_bag</span>
                         {settings?.button_text || 'Shop Now'}
                     </button>
-                    <a href={settings?.button_link || "#special-offers"} className="px-6 py-3 md:px-8 md:py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-900 dark:text-white font-bold rounded-xl md:rounded-2xl border border-white/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-all text-center text-sm md:text-base shadow-sm">
+                    <a href={settings?.button_link || "#special-offers"} className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-2xl border border-white/20 hover:bg-white hover:text-slate-900 transition-all text-center text-base flex items-center justify-center gap-2">
                         View Offers
                     </a>
                 </div>
             </div>
-
-            {/* Background Image & Overlay */}
-            <div className="absolute right-0 top-0 bottom-0 w-full md:w-2/3 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#DCFCE7] via-[#DCFCE7]/60 to-transparent dark:from-[#064E3B] dark:via-[#064E3B]/60 dark:to-transparent z-10 md:w-2/3"></div>
-                <img
-                    alt={settings?.title || "Fresh Vegetables"}
-                    className="w-full h-full object-cover object-center transform scale-105"
-                    src={settings?.image_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuBX7x1HBOqMMI518qHW17jKGkryeaKonnXGEbdkBR4GvbEVZENLzYW_8cEKLeU3nLCoxfDxvRuzBWc2UMxkRlp8Qix2LgxHKpsToQHO10vMCHMKjOmg6ucwmqOZ7GIMiSBIxBw0qaqFeK63SiQ5EQ4C-LMvZy28P7MaNy4uzcV2DaK1H5zIykFWkZMYBE6Xh8ac9E1nba7cTZ14OBTrDW-wpN-j8lDq-VbvUaLl6OtViD2uWDMpEBWT1yXDZluirbsS6BEgrgXwzyI"}
-                />
-            </div>
-
-
-
         </section>
     );
 }

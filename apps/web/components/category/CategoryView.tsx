@@ -152,7 +152,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     return (
         <div className="flex flex-col lg:flex-row gap-12 relative pb-32 lg:pb-0">
             {/* Mobile Category UX - Unified Sticky Header */}
-            <div className="lg:hidden sticky top-[56px] md:top-[80px] z-30 bg-gray-50 dark:bg-[#0F172A] shadow-sm transition-all duration-300">
+            <div className="lg:hidden sticky top-[56px] md:top-[80px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800 transition-all duration-300 supports-[backdrop-filter]:bg-white/60">
                 <MobileFilterBar
                     totalResults={filteredAndSortedProducts.length}
                     onFilterClick={() => setIsMobileFiltersOpen(true)}
