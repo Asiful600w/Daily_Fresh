@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { formatPrice } from '@/lib/format';
 
 export function ProfileStats({ stats }: { stats: any }) {

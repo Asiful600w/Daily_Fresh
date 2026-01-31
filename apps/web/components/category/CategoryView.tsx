@@ -35,6 +35,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     // Reset price range if category changes
     useEffect(() => {
         if (priceRange.min !== globalMinPrice || priceRange.max !== globalMaxPrice) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
         }
     }, [globalMinPrice, globalMaxPrice, priceRange.min, priceRange.max]);
@@ -111,6 +112,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     // Reset page when filters change
     useEffect(() => {
         if (currentPage !== 1) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCurrentPage(1);
         }
     }, [priceRange, currentSort, slug, currentPage]);

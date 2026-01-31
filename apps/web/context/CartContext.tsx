@@ -43,6 +43,7 @@ const CartContext = createContext<CartContextType>(defaultContext);
 export function CartProvider({ children }: { children: ReactNode }) {
     const { user, loading: authLoading } = useAuth();
     const [items, setItems] = useState<CartItem[]>([]);
+    const [cartError, setCartError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
 

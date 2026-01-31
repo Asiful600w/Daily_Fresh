@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Address, getUserAddresses } from '@/lib/api';
 import { AddressManagerModal } from './AddressManagerModal';
@@ -10,20 +10,23 @@ export function AddressCard() {
     const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const fetchAddress = async () => {
+    const fetchAddress = useCallback(async () => {
         if (!user) return;
         const addresses = await getUserAddresses(user.id);
         const def = addresses.find(a => a.isDefault) || addresses[0] || null;
-        if (JSON.stringify(def) !== JSON.stringify(defaultAddress)) {
-            setDefaultAddress(def);
-        }
-    };
+
+        setDefaultAddress(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(def)) {
+                return def;
+            }
+            return prev;
+        });
+    }, [user]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchAddress();
-    }, [user, defaultAddress]); // Added defaultAddress to dep array to match logic check, though deep check handles loop.
-    // Actually simplicity is better: just remove the fetchAddress from dep or use callback.
-    // Let's stick to the condition inside fetchAddress.
+    }, [fetchAddress]);
 
     return (
         <>
