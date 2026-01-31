@@ -11,6 +11,10 @@ jobs:
     name: Build and Lint
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+      SUPABASE_SERVICE_ROLE_KEY: "placeholder-key"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-key"
     
     steps:
       - name: Check out code
