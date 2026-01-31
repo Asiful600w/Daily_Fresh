@@ -43,7 +43,6 @@ const CartContext = createContext<CartContextType>(defaultContext);
 export function CartProvider({ children }: { children: ReactNode }) {
     const { user, loading: authLoading } = useAuth();
     const [items, setItems] = useState<CartItem[]>([]);
-    const [cartError, setCartError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
 
@@ -212,7 +211,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
                 // Note: unique constraint is (cart_id, product_id, color). 
                 // We trust the constraint but need to find the specific row to update.
-                const { data: existingDbItems, error: searchError } = await query;
+                const { data: existingDbItems } = await query;
 
                 // Manual filtering if needed (to be extra safe against DB weirdness) or just take first
                 const existingDbItem = existingDbItems && existingDbItems.length > 0 ? existingDbItems[0] : null;

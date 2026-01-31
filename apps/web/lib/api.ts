@@ -1359,7 +1359,7 @@ export async function deleteAd(id: number) {
 // -- Storage --
 export async function uploadHeroImage(file: File): Promise<string> {
     const fileName = `${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
         .from('hero-images')
         .upload(fileName, file, {
             cacheControl: '3600',
@@ -1378,7 +1378,7 @@ export async function uploadHeroImage(file: File): Promise<string> {
 
 export async function uploadAdImage(file: File): Promise<string> {
     const fileName = `${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
         .from('ad-images')
         .upload(fileName, file, {
             cacheControl: '3600',
@@ -1399,7 +1399,7 @@ export async function uploadCategoryImage(file: File, categorySlug: string, type
     const fileExt = file.name.split('.').pop();
     const fileName = `${categorySlug}/${type}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
         .from('category-images')
         .upload(fileName, file, {
             cacheControl: '3600',
@@ -1420,7 +1420,7 @@ export async function uploadSpecialOfferImage(file: File, name: string): Promise
     const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const fileName = `${sanitizedName}/${Date.now()}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
         .from('special-offer-images')
         .upload(fileName, file, {
             cacheControl: '3600',

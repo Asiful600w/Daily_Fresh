@@ -38,11 +38,13 @@ export function ShopView({ products, categories }: ShopViewProps) {
     const selectedSubcategoryName = searchParams.get('subcategory') || undefined;
 
     // Reset price range on load if needed
+    const initialized = React.useRef(false);
     useEffect(() => {
-        if (priceRange.min === 0 && priceRange.max === 1000 && (globalMinPrice !== 0 || globalMaxPrice !== 1000)) {
+        if (!initialized.current && (globalMinPrice !== 0 || globalMaxPrice !== 1000)) {
             setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
+            initialized.current = true;
         }
-    }, [globalMinPrice, globalMaxPrice, priceRange.min, priceRange.max]);
+    }, [globalMinPrice, globalMaxPrice]);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
