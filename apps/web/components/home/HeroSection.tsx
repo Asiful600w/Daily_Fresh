@@ -4,22 +4,22 @@ const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-
 
 export function HeroSection({ settings }: { settings?: any }) {
     return (
-        <section className={`relative min-h-[480px] rounded-3xl overflow-hidden ${bannerGradient} flex items-center py-12`}>
-            <div className="relative z-10 pl-16 max-w-xl space-y-6">
-                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest rounded-full">
+        <section className={`relative min-h-[400px] md:min-h-[480px] rounded-3xl overflow-hidden ${bannerGradient} flex items-center py-8 md:py-12`}>
+            <div className="relative z-10 px-6 md:px-0 md:pl-16 max-w-xl space-y-4 md:space-y-6">
+                <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 bg-primary/10 text-primary text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full">
                     {settings?.subtitle || 'New Season Freshness'}
                 </span>
-                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-slate-900 dark:text-white">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-slate-900 dark:text-white">
                     {settings?.title || "Quality Food For Your"} <span className="text-primary">{settings?.title ? "" : "Healthy Life"}</span>
                 </h1>
-                <p className="text-lg text-slate-600 dark:text-slate-300">
+                <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-xs md:max-w-none">
                     {settings?.description || 'Get up to 50% OFF on your first order. Fresh produce delivered from farm to your doorstep.'}
                 </p>
-                <div className="flex items-center gap-4">
-                    <button className="px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all active:scale-95">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
+                    <button className="px-6 py-3 md:px-8 md:py-4 bg-primary text-white font-bold rounded-xl md:rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all active:scale-95 text-sm md:text-base">
                         {settings?.button_text || 'Shop Now'}
                     </button>
-                    <a href={settings?.button_link || "#special-offers"} className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-center">
+                    <a href={settings?.button_link || "#special-offers"} className="px-6 py-3 md:px-8 md:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-xl md:rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-center text-sm md:text-base">
                         View Offers
                     </a>
                 </div>
