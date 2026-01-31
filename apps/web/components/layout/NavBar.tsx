@@ -186,6 +186,14 @@ export function NavBar({ categories }: { categories: Category[] }) {
                             {isDark ? 'light_mode' : 'dark_mode'}
                         </span>
                     </button>
+                    {user && (
+                        <button
+                            className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                            onClick={signOut}
+                        >
+                            <span className="material-icons-round text-xl">logout</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Desktop Actions */}

@@ -31,10 +31,10 @@ export function HeroSection({ settings }: { settings?: any }) {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <button className="px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-[0_10px_20px_rgba(34,197,94,0.3)] hover:shadow-[0_15px_30px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all active:scale-95 text-base flex items-center justify-center gap-2">
+                    <Link href="/shop" className="px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-[0_10px_20px_rgba(34,197,94,0.3)] hover:shadow-[0_15px_30px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all active:scale-95 text-base flex items-center justify-center gap-2">
                         <span className="material-icons-round">shopping_bag</span>
                         {settings?.button_text || 'Shop Now'}
-                    </button>
+                    </Link>
                     <a href={settings?.button_link || "#special-offers"} className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-2xl border border-white/20 hover:bg-white hover:text-slate-900 transition-all text-center text-base flex items-center justify-center gap-2">
                         View Offers
                     </a>
