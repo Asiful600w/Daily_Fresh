@@ -1,0 +1,48 @@
+
+> web@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\package-lock.json
+
+▲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.6s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/99) ...
+  Generating static pages using 11 workers (24/99) 
+  Generating static pages using 11 workers (49/99) 
+  Generating static pages using 11 workers (74/99) 
+✓ Generating static pages using 11 workers (99/99) in 303.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/admin/register
+├ ƒ /api/admin/verify
+├ ƒ /cart
+├ ƒ /category/[slug]
+├ ○ /checkout
+├ ○ /debug-update
+├ ○ /login
+├ ƒ /offers/[slug]
+├ ƒ /orders/[id]
+├ ƒ /product/[id]
+├ ○ /profile
+├ ○ /profile/addresses
+├ ○ /profile/orders
+├ ○ /profile/wishlist
+└ ○ /signup
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
