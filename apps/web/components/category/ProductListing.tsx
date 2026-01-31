@@ -117,6 +117,6 @@ export function ProductListing({
                     </button>
                 </div>
             )}
-        </section>
+        </div>
     );
 }
