@@ -55,7 +55,7 @@ export default function SignupPage() {
                 <div className="relative z-10 w-full max-w-lg">
                     <div className="mb-12 flex items-center gap-3">
                         <div className="size-10 bg-[#26d980] rounded-lg flex items-center justify-center text-white">
-                            <span className="material-symbols-outlined text-2xl">eco</span>
+                            <span className="material-icons-round text-2xl">eco</span>
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight text-[#0f1a14] dark:text-white">Daily Fresh</h1>
                     </div>
@@ -69,11 +69,11 @@ export default function SignupPage() {
                         </p>
                         <div className="grid grid-cols-2 gap-6 pt-8">
                             <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined text-[#26d980]">verified_user</span>
+                                <span className="material-icons-round text-[#26d980]">verified_user</span>
                                 <span className="text-sm font-medium text-[#0f1a14] dark:text-white">Quality Guaranteed</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined text-[#26d980]">schedule</span>
+                                <span className="material-icons-round text-[#26d980]">schedule</span>
                                 <span className="text-sm font-medium text-[#0f1a14] dark:text-white">60-Min Delivery</span>
                             </div>
                         </div>
@@ -91,7 +91,7 @@ export default function SignupPage() {
                     <div className="mb-10">
                         <div className="lg:hidden flex items-center gap-2 mb-8">
                             <div className="size-8 bg-[#26d980] rounded flex items-center justify-center text-white">
-                                <span className="material-symbols-outlined text-xl">eco</span>
+                                <span className="material-icons-round text-xl">eco</span>
                             </div>
                             <h2 className="text-xl font-bold text-[#0f1a14] dark:text-white">Daily Fresh</h2>
                         </div>
@@ -111,7 +111,7 @@ export default function SignupPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Full Name</label>
                             <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">person</span>
+                                <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">person</span>
                                 <input
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
@@ -126,7 +126,7 @@ export default function SignupPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Email Address</label>
                             <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">mail</span>
+                                <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">email</span>
                                 <input
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -141,7 +141,7 @@ export default function SignupPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Phone Number</label>
                             <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">call</span>
+                                <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">call</span>
                                 <input
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
@@ -156,7 +156,7 @@ export default function SignupPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Password</label>
                                 <div className="relative group">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">lock</span>
+                                    <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">lock</span>
                                     <input
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -170,7 +170,7 @@ export default function SignupPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-[#0f1a14] dark:text-white ml-1">Confirm</label>
                                 <div className="relative group">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">shield</span>
+                                    <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#26d980] transition-colors text-xl">security</span>
                                     <input
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
