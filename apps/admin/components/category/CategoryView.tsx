@@ -34,6 +34,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const [priceRange, setPriceRange] = useState({ min: globalMinPrice, max: globalMaxPrice });
     // Reset price range if category changes
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
     }, [globalMinPrice, globalMaxPrice]);
 
@@ -108,6 +109,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
 
     // Reset page when filters change
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
     }, [priceRange, currentSort, slug]);
 

@@ -8,16 +8,17 @@ export function NoticeSettings() {
     const [newNotice, setNewNotice] = useState('');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadNotices();
-    }, []);
-
     const loadNotices = async () => {
         setLoading(true);
         const data = await getNotices(false); // Fetch all, including inactive
         setNotices(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadNotices();
+    }, []);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();

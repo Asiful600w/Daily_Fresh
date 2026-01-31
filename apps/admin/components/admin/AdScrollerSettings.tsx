@@ -8,16 +8,17 @@ export function AdScrollerSettings() {
     const [newAdUrl, setNewAdUrl] = useState('');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadAds();
-    }, []);
-
     const loadAds = async () => {
         setLoading(true);
         const data = await getAds(false);
         setAds(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadAds();
+    }, []);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();

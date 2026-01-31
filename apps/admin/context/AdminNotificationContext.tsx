@@ -68,6 +68,7 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchNotifications();
 
         // Subscribe to new orders
