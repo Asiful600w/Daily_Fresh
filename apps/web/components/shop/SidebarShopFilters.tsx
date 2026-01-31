@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { Category } from '@/lib/api';
 import { CURRENCY_SYMBOL } from '@/lib/format';
 

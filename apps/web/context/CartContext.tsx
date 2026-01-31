@@ -56,11 +56,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 // Load from Supabase
                 try {
                     // Get cart_id for user, or create if not exists
-                    let { data: cart, error: cartError } = await supabase
+                    const { data: initialCart, error: cartError } = await supabase
                         .from('carts')
                         .select('id')
                         .eq('user_id', user.id)
                         .single();
+
+                    let cart = initialCart;
 
                     if (cartError && cartError.code === 'PGRST116') {
                         // Cart doesn't exist, create it

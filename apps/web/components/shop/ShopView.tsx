@@ -30,21 +30,13 @@ export function ShopView({ products, categories }: ShopViewProps) {
 
     // -- State --
     const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'newest');
+    // Initialize price range directly from computed globals
     const [priceRange, setPriceRange] = useState({ min: globalMinPrice, max: globalMaxPrice });
 
     // Category State (URL Sync)
     // We treat URL as source of truth for Category/Subcategory to allow sharing links
     const selectedCategorySlug = searchParams.get('category') || undefined;
     const selectedSubcategoryName = searchParams.get('subcategory') || undefined;
-
-    // Reset price range on load if needed
-    const initialized = React.useRef(false);
-    useEffect(() => {
-        if (!initialized.current && (globalMinPrice !== 0 || globalMaxPrice !== 1000)) {
-            setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
-            initialized.current = true;
-        }
-    }, [globalMinPrice, globalMaxPrice]);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);

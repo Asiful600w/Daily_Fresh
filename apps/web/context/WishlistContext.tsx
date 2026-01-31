@@ -19,15 +19,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     const [wishlistIds, setWishlistIds] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (user) {
-            fetchWishlistIds();
-        } else {
-            setWishlistIds([]);
-        }
-    }, [user]);
-
-    const fetchWishlistIds = async () => {
+    const fetchWishlistIds = React.useCallback(async () => {
         try {
             setLoading(true);
             const { data, error } = await supabase
@@ -42,7 +34,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            fetchWishlistIds();
+        } else {
+            setWishlistIds([]);
+        }
+    }, [user, fetchWishlistIds]);
 
     const addToWishlist = async (productId: number) => {
         if (!user) return;
