@@ -14,12 +14,16 @@ export function AddressCard() {
         if (!user) return;
         const addresses = await getUserAddresses(user.id);
         const def = addresses.find(a => a.isDefault) || addresses[0] || null;
-        setDefaultAddress(def);
+        if (JSON.stringify(def) !== JSON.stringify(defaultAddress)) {
+            setDefaultAddress(def);
+        }
     };
 
     useEffect(() => {
         fetchAddress();
-    }, [user]);
+    }, [user, defaultAddress]); // Added defaultAddress to dep array to match logic check, though deep check handles loop.
+    // Actually simplicity is better: just remove the fetchAddress from dep or use callback.
+    // Let's stick to the condition inside fetchAddress.
 
     return (
         <>

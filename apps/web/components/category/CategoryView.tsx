@@ -37,7 +37,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
         if (priceRange.min !== globalMinPrice || priceRange.max !== globalMaxPrice) {
             setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
         }
-    }, [globalMinPrice, globalMaxPrice]);
+    }, [globalMinPrice, globalMaxPrice, priceRange.min, priceRange.max]);
 
     // Loading State
     const [isUpdating, setIsUpdating] = useState(false);
@@ -113,7 +113,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
         if (currentPage !== 1) {
             setCurrentPage(1);
         }
-    }, [priceRange, currentSort, slug]);
+    }, [priceRange, currentSort, slug, currentPage]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
 
