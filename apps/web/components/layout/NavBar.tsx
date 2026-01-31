@@ -153,14 +153,14 @@ export function NavBar({ categories }: { categories: Category[] }) {
             {/* Top Bar */}
             <div className={`max-w-7xl mx-auto px-4 w-full flex items-center justify-between gap-4 transition-all duration-300 ${isScrolled ? 'h-14' : 'h-20'}`}>
                 {/* Logo */}
-                <a href="/" className={`flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-500 origin-left ${isScrolled ? 'scale-75' : 'scale-100'}`}>
+                <Link href="/" className={`flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-500 origin-left ${isScrolled ? 'scale-75' : 'scale-100'}`}>
                     <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                         <span className="material-icons-round text-white">eco</span>
                     </div>
                     <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                         Daily<span className="text-primary">Fresh</span>
                     </span>
-                </a>
+                </Link>
 
                 {/* Search Bar - Hidden on Mobile */}
                 <div className="hidden md:flex flex-1 max-w-lg mx-8 z-50">
