@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Category, searchProducts, Product } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/format';
+import { useUI } from '@/context/UIContext';
 
 function SearchBar() {
     const router = useRouter();
@@ -148,6 +149,8 @@ export function NavBar({ categories }: { categories: Category[] }) {
         });
     };
 
+    const { openSearch } = useUI();
+
     return (
         <header className={`sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300`}>
             {/* Top Bar */}
@@ -167,7 +170,25 @@ export function NavBar({ categories }: { categories: Category[] }) {
                     <SearchBar />
                 </div>
 
-                {/* Actions */}
+                {/* Mobile Actions (Search & DarkMode) */}
+                <div className="flex items-center gap-2 md:hidden">
+                    <button
+                        className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        onClick={openSearch}
+                    >
+                        <span className="material-icons-round text-xl">search</span>
+                    </button>
+                    <button
+                        className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        onClick={toggleTheme}
+                    >
+                        <span className="material-icons-round text-xl">
+                            {isDark ? 'light_mode' : 'dark_mode'}
+                        </span>
+                    </button>
+                </div>
+
+                {/* Desktop Actions */}
                 <div className="flex items-center gap-4 hidden md:flex">
                     <button
                         className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"

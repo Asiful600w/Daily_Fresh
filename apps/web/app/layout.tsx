@@ -9,6 +9,8 @@ import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
 import { MobileNav } from "@/components/layout/MobileNav";
 import { getCategories } from "@/lib/api";
+import { UIProvider } from "@/context/UIContext";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -43,8 +45,11 @@ export default async function RootLayout({
             <CartProvider>
               <FlyToCartProvider>
                 <NextTopLoader color="#22C55E" showSpinner={false} />
-                {children}
-                <MobileNav categories={categories} />
+                <UIProvider>
+                  <GlobalSearch />
+                  {children}
+                  <MobileNav categories={categories} />
+                </UIProvider>
               </FlyToCartProvider>
             </CartProvider>
           </WishlistProvider>

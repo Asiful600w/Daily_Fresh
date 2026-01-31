@@ -10,7 +10,7 @@ interface MobileFilterBarProps {
 
 export function MobileFilterBar({ totalResults, onFilterClick, currentSort, onSortChange }: MobileFilterBarProps) {
     return (
-        <div className="lg:hidden sticky top-[60px] z-30 bg-gray-50 dark:bg-[#0F172A] py-3 -mx-4 px-4 flex items-center justify-between border-b border-transparent">
+        <div className="lg:hidden py-3 -mx-4 px-4 flex items-center justify-between border-b border-transparent">
             {/* Sort Dropdown (Simplified) */}
             <div className="relative">
                 <select
@@ -28,8 +28,7 @@ export function MobileFilterBar({ totalResults, onFilterClick, currentSort, onSo
                 </span>
             </div>
 
-            <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-400">{totalResults} Results</span>
+            <div className="flex items-center gap-3 ml-auto">
                 <button
                     onClick={onFilterClick}
                     className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-bold shadow-lg shadow-slate-900/10 active:scale-95 transition-transform"

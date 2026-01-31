@@ -150,19 +150,21 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const currentSub = searchParams.get('subcategory');
 
     return (
-        <div className="flex flex-col lg:flex-row gap-12 relative">
-            {/* Mobile Category UX */}
-            <MobileFilterBar
-                totalResults={filteredAndSortedProducts.length}
-                onFilterClick={() => setIsMobileFiltersOpen(true)}
-                currentSort={currentSort}
-                onSortChange={handleSortChange}
-            />
-            <MobileSubcategoryBar
-                subcategories={categoryData.subcategories}
-                currentCategorySlug={slug}
-                currentSubcategory={currentSub}
-            />
+        <div className="flex flex-col lg:flex-row gap-12 relative pb-32 lg:pb-0">
+            {/* Mobile Category UX - Unified Sticky Header */}
+            <div className="lg:hidden sticky top-[56px] md:top-[80px] z-30 bg-gray-50 dark:bg-[#0F172A] shadow-sm transition-all duration-300">
+                <MobileFilterBar
+                    totalResults={filteredAndSortedProducts.length}
+                    onFilterClick={() => setIsMobileFiltersOpen(true)}
+                    currentSort={currentSort}
+                    onSortChange={handleSortChange}
+                />
+                <MobileSubcategoryBar
+                    subcategories={categoryData.subcategories}
+                    currentCategorySlug={slug}
+                    currentSubcategory={currentSub}
+                />
+            </div>
 
             <MobileFilterDrawer
                 isOpen={isMobileFiltersOpen}
