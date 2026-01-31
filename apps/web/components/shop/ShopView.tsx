@@ -39,13 +39,10 @@ export function ShopView({ products, categories }: ShopViewProps) {
 
     // Reset price range on load if needed
     useEffect(() => {
-        setPriceRange(prev => {
-            if (prev.min === 0 && prev.max === 1000 && (globalMinPrice !== 0 || globalMaxPrice !== 1000)) {
-                return { min: globalMinPrice, max: globalMaxPrice };
-            }
-            return prev;
-        });
-    }, [globalMinPrice, globalMaxPrice]);
+        if (priceRange.min === 0 && priceRange.max === 1000 && (globalMinPrice !== 0 || globalMaxPrice !== 1000)) {
+            setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
+        }
+    }, [globalMinPrice, globalMaxPrice, priceRange.min, priceRange.max]);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
