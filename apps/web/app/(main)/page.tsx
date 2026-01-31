@@ -43,7 +43,7 @@ export default async function Home() {
         <PromotionalBanners offers={offers} />
         <FeaturesSection />
       </main>
-      <Footer />
+      <Footer categories={categories} />
     </>
   );
 }

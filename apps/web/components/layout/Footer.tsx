@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { Category } from '@/lib/api';
 
-export function Footer() {
+interface FooterProps {
+    categories?: Category[];
+}
+
+export function Footer({ categories = [] }: FooterProps) {
     return (
         <footer className="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -37,8 +42,12 @@ export function Footer() {
                 <div>
                     <h4 className="font-bold mb-6 text-slate-900 dark:text-white">Categories</h4>
                     <ul className="space-y-4 text-sm text-slate-500">
-                        {['Fruits & Vegetables', 'Meat & Seafood', 'Dairy & Eggs', 'Bakery Products'].map(item => (
-                            <li key={item}><Link className="hover:text-primary transition-colors" href="#">{item}</Link></li>
+                        {categories.slice(0, 6).map(category => (
+                            <li key={category.id}>
+                                <Link className="hover:text-primary transition-colors" href={`/category/${category.slug}`}>
+                                    {category.name}
+                                </Link>
+                            </li>
                         ))}
                     </ul>
                 </div>
@@ -59,3 +68,4 @@ export function Footer() {
         </footer>
     );
 }
+

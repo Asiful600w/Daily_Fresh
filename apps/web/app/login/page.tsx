@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -27,157 +26,155 @@ export default function LoginPage() {
             setError(error.message);
             setLoading(false);
         } else {
-            router.push('/'); // Redirect to home on success
-            router.refresh(); // Refresh to update auth state in UI
+            router.push('/');
+            router.refresh();
         }
     };
 
     const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-        // Placeholder for social login logic
+        // Placeholder for social login logic (to be implemented with Supabase Auth)
         console.log(`Login with ${provider}`);
-        alert(`${provider} login is not yet configured.`);
+        alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon.`);
     }
 
     return (
-        <div className="split-screen overflow-hidden min-h-screen grid grid-cols-1 lg:grid-cols-2">
-            {/* Left Panel: Hero Visuals */}
-            <div className="hero-panel relative flex flex-col justify-end p-16 text-white overflow-hidden hidden lg:flex">
-                <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAXh5dFBHFjkE9K8rO_LVdeBxfMpWFtv0jbLgrhxPVmJ_VAEL1fztm8wX2HJ4bC6lMEm5ijEPMwuseWYHkZlCrxSIgEszEe0LY4uCDlJv6SLhd1r15c0FtV7ob-j6tyBkGWgtla3p63caEItmGF8bmAb9uVVMRIPPFFkkNjnlKLalzbQtMPCoDOvgPF4GzdzcL540C6dk2vXf3B0OG4D7yFZtVHMeCSDNf1KEKYnxQ6va3WgkHuExAiHS8sZq_jMDmfJh1FvZNXgW4')" }}
-                >
-                </div>
-                {/* Gradient Overlay for readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                <div className="relative z-10 max-w-lg">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="size-10 bg-[#26d980] rounded-xl flex items-center justify-center text-[#1f2e24]">
-                            <svg className="size-6" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor"></path>
-                            </svg>
+        <div className="flex min-h-screen w-full flex-col lg:flex-row bg-[#fafafa] dark:bg-[#111827]">
+            {/* Left Panel: Hero Visuals (Hidden on Mobile) */}
+            <div className="hidden lg:flex w-full lg:w-1/2 bg-[#26d980]/5 items-center justify-center p-12 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center opacity-90 transition-transform duration-[20s] hover:scale-105"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+
+                <div className="relative z-10 max-w-lg text-white space-y-8 p-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="size-12 bg-[#26d980] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#26d980]/30 backdrop-blur-md">
+                            <span className="material-icons-round text-3xl">eco</span>
                         </div>
-                        <span className="text-2xl font-bold tracking-tight">Daily Fresh</span>
+                        <span className="text-3xl font-bold tracking-tight">Daily Fresh</span>
                     </div>
-                    <h1 className="text-5xl font-extrabold leading-[1.1] mb-6 tracking-tight">
-                        Freshness delivered to your doorstep.
+                    <h1 className="text-6xl font-extrabold leading-tight tracking-tight drop-shadow-lg">
+                        Fresh groceries,<br />
+                        <span className="text-[#26d980]">delivered daily.</span>
                     </h1>
-                    <p className="text-xl font-medium text-white/90">
-                        Join our community of 50,000+ healthy eaters and transform your kitchen today.
+                    <p className="text-xl font-medium text-white/90 leading-relaxed max-w-md drop-shadow-md">
+                        Experience the convenience of farm-fresh produce delivered securely to your doorstep within minutes.
                     </p>
-                </div>
-                {/* Floating badge */}
-                <div className="absolute top-10 right-10 z-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                        <img className="size-8 rounded-full border-2 border-white" alt="User avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGWkt1hHuvx9HLISxNiGIqRqA_DwHee1q-h0E5twAyFoEV7Y5aGv0MHQiyj7yBGJhSQge74RrR4Go0bd2Pcc_fA7sYiaEzxBE8EPVNlzoGRN8ZXIyXQz7dJtixQlHTPI3yajx4J67jKnTGxPuFcFQ6q7aa3_Z9yZqlk93uaqKuKA66VbvzxC2fGdOpK11nSWd1sKAH0SYJLWNQqofloAGUQG9dh5O0TcrgXSsguiP5-E_RIia6I0ejGUDPCvf0dddBEBRDH58CkGM" />
-                        <img className="size-8 rounded-full border-2 border-white" alt="User avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3-O_o2RRQXuIUuZvlnmhibyo4krkYcJJOeiGgBcVKCi68TptH3KVZ1lteCLTitDIsBHXQARiiH3wdqVkzKUcOOyHfFLttfJ4igu3WUk7msY2KHfVjBR8syVIr62czUC-fk5orc9MA3SFPgdfGZwavp6boLXrVv3nZYudHsIUVcJirgiIlAYNK7bxItOD-VVWbNeLWaTIrbuU_z_IWtq2Hv5Esmj5XaoltePbYww2vRgyrH2EFLwI1Und7i3BNV0bJkYkGMXw6nVo" />
-                        <img className="size-8 rounded-full border-2 border-white" alt="User avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbImqKj-8RE8k2l9OdeV-dc1OYFCdSPdt7KCqbbvd0YcgVa4F722m5tFx-g07y7rktVTEJL2CbeGn9KrRMOMg3EkOiREj95Kc0BgYCcw4dsnfP-ZJ08825d4yquTZDn2QPl5T7jouDLdjyTJ2LhwPqpR65uX1RklsVdzsYTHsjhdcsKzdC7_h5cF3u3vRGRyBsTwca6Y9LuGR5T3ZH95pA3yLZZnfpqXJkOeu6fPQ7Qo6G_7cIZBYJlRz3OxJiCqQ3C2ylz345TT0" />
+
+                    {/* Trust Badge */}
+                    <div className="flex items-center gap-4 pt-4">
+                        <div className="flex -space-x-3">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className={`size-10 rounded-full border-2 border-[#1f2e24] bg-gray-200 bg-[url('https://i.pravatar.cc/100?img=${i + 10}')] bg-cover`}></div>
+                            ))}
+                        </div>
+                        <div className="text-sm font-semibold">
+                            <span className="text-[#26d980]">50k+</span> happy customers
+                        </div>
                     </div>
-                    <p className="text-xs font-semibold uppercase tracking-wider">Trusted by 50k+ daily</p>
                 </div>
             </div>
 
             {/* Right Panel: Login Form */}
-            <div className="flex flex-col justify-center items-center px-6 py-12 lg:px-24 bg-white dark:bg-[#1f2e24]">
-                <div className="w-full max-w-[440px] space-y-8">
-                    {/* Header */}
-                    <div className="text-left">
-                        <h2 className="text-3xl font-bold text-[#0f1a14] dark:text-white mb-2">Welcome Back</h2>
-                        <p className="text-[#539373] dark:text-gray-400 font-medium">Log in to your account to start shopping.</p>
+            <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 lg:px-24">
+                <div className="w-full max-w-[460px] space-y-8 animate-fade-in-up">
+                    <div className="text-center lg:text-left space-y-2">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome back</h2>
+                        <p className="text-slate-500 dark:text-slate-400 text-base">Please enter your details to sign in.</p>
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 text-red-500 text-sm p-4 rounded-xl border border-red-100">
+                        <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm font-medium p-4 rounded-xl border border-red-100 dark:border-red-900/20 flex items-center gap-2">
+                            <span className="material-icons-round text-lg">error_outline</span>
                             {error}
                         </div>
                     )}
 
-                    {/* Social Login Grid */}
+                    {/* Social Login Buttons - Professional */}
                     <div className="grid grid-cols-2 gap-4">
-                        <button onClick={() => handleSocialLogin('google')} className="flex items-center justify-center gap-2 h-14 border border-[#d1e5db] dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                            <img className="size-5" alt="Google logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtCTxdFkhvTSu1BeADho-cnOKPsJ2oeoM2nOFxl5TMc8V3F1dSCDePHxfz2_rhalZSea33u5EU0rmR8_nXKvOFgOgS5UuMojOuuOpSLpKxajfmL13pUVMBCEI4-hMK83C5o5Dm4LIxxxlFhN3G0t6-JKeegK1-kdFfitd2gJNpUYbn1JbEEM8Y5XlzH7h9h5m5aGMR1Q6ZQSiFIXUek8KvBlN6JeAH1eiCDrxwsQUy0jccsc3fcqkSkJyOy7XpuqttOiHrCSCLYdg" />
-                            <span className="text-sm font-bold text-[#0f1a14] dark:text-white">Google</span>
+                        <button
+                            onClick={() => handleSocialLogin('google')}
+                            className="flex items-center justify-center gap-3 h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all group"
+                        >
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-6 transition-transform group-hover:scale-110" alt="Google" />
+                            <span className="font-bold text-slate-700 dark:text-slate-200">Google</span>
                         </button>
-                        <button onClick={() => handleSocialLogin('facebook')} className="flex items-center justify-center gap-2 h-14 border border-[#d1e5db] dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                            <img className="size-5" alt="Facebook logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMlbbYWAvn7JkM___wllDcnqRsVnwVfdtURAnSJo5c3Ws4uSXbEsBwvGkYoTqdAwh6z-fuKYSsWdfNuzm6cWlXJkwnYn4svvMJRg7SsBcxqZ_te4bsiMWwXeMZPZsNHAINiLtAMfOwgqYDhoXlNwReVVEySbf8eEXj1FLFAmTPcetnTHguQB355Ap4lcAqmHeyOsHfRC1BZXEcK0IoZm57Jjj1TulJvc7w3FlcNi4kJ-hFmdK9ggFY5985PC_Sm7tqnPQAKaKe294" />
-                            <span className="text-sm font-bold text-[#0f1a14] dark:text-white">Facebook</span>
+                        <button
+                            onClick={() => handleSocialLogin('facebook')}
+                            className="flex items-center justify-center gap-3 h-14 bg-[#1877F2] border border-[#1877F2] rounded-xl hover:bg-[#166fe5] hover:shadow-lg hover:shadow-blue-500/20 transition-all group"
+                        >
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-6 brightness-0 invert transition-transform group-hover:scale-110" alt="Facebook" />
+                            <span className="font-bold text-white">Facebook</span>
                         </button>
                     </div>
 
-                    <div className="relative flex items-center py-4">
-                        <div className="flex-grow border-t border-[#e8f2ed] dark:border-gray-800"></div>
-                        <span className="flex-shrink mx-4 text-xs font-bold text-[#539373] uppercase tracking-widest">Or login with email</span>
-                        <div className="flex-grow border-t border-[#e8f2ed] dark:border-gray-800"></div>
+                    <div className="relative flex items-center py-2">
+                        <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                        <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or continue with email</span>
+                        <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
                     </div>
 
-                    {/* Form */}
-                    <form className="space-y-5" onSubmit={handleLogin}>
-                        {/* Email Field */}
-                        <div className="flex flex-col w-full">
-                            <label className="text-[#0f1a14] dark:text-white text-sm font-bold mb-2 ml-1">Email Address</label>
-                            <input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="form-input w-full rounded-xl text-[#0f1a14] dark:text-white focus:ring-[#26d980] focus:border-[#26d980] border border-[#d1e5db] dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-[#539373]/50 px-5 transition-all"
-                                placeholder="e.g., alex@email.com"
-                                type="email"
-                                required
-                            />
-                        </div>
-                        {/* Password Field */}
-                        <div className="flex flex-col w-full">
-                            <div className="flex justify-between items-center mb-2 ml-1">
-                                <label className="text-[#0f1a14] dark:text-white text-sm font-bold">Password</label>
-                                <a className="text-[#26A7D9] hover:underline text-sm font-bold" href="#">Forgot Password?</a>
+                    <form className="space-y-6" onSubmit={handleLogin}>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-900 dark:text-white ml-1">Email Address</label>
+                                <input
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full h-14 px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="name@example.com"
+                                    type="email"
+                                    required
+                                />
                             </div>
-                            <div className="relative">
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-sm font-bold text-slate-900 dark:text-white">Password</label>
+                                    <a className="text-primary hover:text-primary-dark text-sm font-bold hover:underline" href="#">Forgot Password?</a>
+                                </div>
                                 <input
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="form-input w-full rounded-xl text-[#0f1a14] dark:text-white focus:ring-[#26d980] focus:border-[#26d980] border border-[#d1e5db] dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-[#539373]/50 px-5 pr-12 transition-all"
+                                    className="w-full h-14 px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
                                     placeholder="••••••••"
                                     type="password"
                                     required
                                 />
-                                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-[#539373] hover:text-[#26d980] transition-colors" type="button">
-                                    <span className="material-symbols-outlined">visibility</span>
-                                </button>
                             </div>
                         </div>
-                        {/* Remember Me */}
-                        <div className="flex items-center gap-2 px-1">
-                            <input className="size-5 rounded border-[#d1e5db] text-[#26d980] focus:ring-[#26d980]" id="remember" type="checkbox" />
-                            <label className="text-sm font-medium text-[#539373] cursor-pointer" htmlFor="remember">Keep me signed in</label>
+
+                        <div className="flex items-center gap-3 px-1">
+                            <div className="relative flex items-center">
+                                <input
+                                    className="peer size-5 cursor-pointer appearance-none rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 checked:bg-primary checked:border-primary focus:ring-4 focus:ring-primary/20 transition-all"
+                                    id="remember"
+                                    type="checkbox"
+                                />
+                                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transform scale-50 peer-checked:scale-100 transition-all material-icons-round text-sm font-bold">check</span>
+                            </div>
+                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none" htmlFor="remember">Remember me for 30 days</label>
                         </div>
-                        {/* Sign In Button */}
+
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-14 bg-[#26d980] hover:bg-[#26d980]/90 text-[#0f1a14] font-bold text-lg rounded-xl shadow-lg shadow-[#26d980]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full h-14 bg-primary hover:bg-primary-dark text-white font-bold text-lg rounded-xl shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                         >
                             {loading ? (
-                                <span>Signing In...</span>
-                            ) : (
                                 <>
-                                    <span>Sign In</span>
-                                    <span className="material-symbols-outlined">arrow_forward</span>
+                                    <span className="size-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                    <span>Signing In...</span>
                                 </>
+                            ) : (
+                                <span>Sign In to Account</span>
                             )}
                         </button>
                     </form>
 
-                    {/* Footer Link */}
-                    <div className="pt-6 text-center">
-                        <p className="text-[#539373] dark:text-gray-400 font-medium">
+                    <div className="text-center pt-2">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">
                             Don&apos;t have an account?
-                            <Link className="text-[#26d980] font-bold hover:underline ml-1" href="/signup">Sign Up for free</Link>
+                            <Link className="text-primary font-bold hover:text-primary-dark hover:underline ml-1 transition-colors" href="/signup">Sign up for free</Link>
                         </p>
                     </div>
-                </div>
-                {/* Footer Small Print */}
-                <div className="mt-auto pt-10 text-xs text-[#539373]/60 dark:text-gray-500 flex gap-4">
-                    <a className="hover:text-[#26d980] transition-colors" href="#">Terms of Service</a>
-                    <a className="hover:text-[#26d980] transition-colors" href="#">Privacy Policy</a>
-                    <span>© 2024 Daily Fresh Inc.</span>
                 </div>
             </div>
         </div>
