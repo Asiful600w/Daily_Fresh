@@ -6,11 +6,12 @@ import React from 'react';
 
 interface ProductListingProps {
     title: string;
-    products?: Product[];
-    totalProducts?: number;
-    currentPage?: number;
-    totalPages?: number;
-    onPageChange?: (page: number) => void;
+    subtitle?: string;
+    products: Product[];
+    totalProducts: number;
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
     currentSort: string;
     onSortChange: (sort: string) => void;
     isUpdating: boolean;
@@ -18,10 +19,11 @@ interface ProductListingProps {
 
 export function ProductListing({
     title,
-    products = [],
-    totalProducts = 0,
-    currentPage = 1,
-    totalPages = 1,
+    subtitle,
+    products,
+    totalProducts,
+    currentPage,
+    totalPages,
     onPageChange,
     currentSort,
     onSortChange,
@@ -33,14 +35,12 @@ export function ProductListing({
     };
 
     return (
-        <section className="flex-1 relative">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <p className="text-slate-500 font-medium">
-                    Showing <span className="text-slate-900 dark:text-white font-bold">
-                        {products.length > 0 ? (currentPage - 1) * 12 + 1 : 0} - {(currentPage - 1) * 12 + products.length}
-                    </span> of <span className="text-slate-900 dark:text-white font-bold">{totalProducts}</span> results
-                </p>
-
+        <div className={`transition-opacity duration-300 ${isUpdating ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white leading-tight">{title}</h1>
+                    {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>}
+                </div>
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-500 hidden sm:block">Sort by:</span>
                     <select
