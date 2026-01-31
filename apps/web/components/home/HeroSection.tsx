@@ -4,16 +4,16 @@ const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-
 
 export function HeroSection({ settings }: { settings?: any }) {
     return (
-        <section className="relative min-h-[500px] md:min-h-[600px] rounded-3xl overflow-hidden flex items-center py-12 md:py-20 group">
+        <section className="relative min-h-[500px] md:min-h-[600px] rounded-3xl overflow-hidden flex items-center py-12 md:py-20 group border border-transparent dark:border-white/10 transition-colors">
             {/* Background Image with Zoom Effect */}
             <div className="absolute inset-0 z-0">
                 <img
                     alt={settings?.title || "Fresh Vegetables"}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 dark:brightness-[0.85]"
                     src={settings?.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop"}
                 />
                 {/* Premium Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 dark:from-black/90 dark:via-black/70"></div>
             </div>
 
             <div className="relative z-20 px-8 md:px-16 max-w-2xl space-y-6">

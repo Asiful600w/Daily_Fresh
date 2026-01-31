@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { MobileCategoryDrawer } from '@/components/category/MobileCategoryDrawer';
 import { Category } from '@/lib/api';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 interface MobileNavProps {
     categories: Category[];
@@ -12,6 +13,7 @@ interface MobileNavProps {
 export function MobileNav({ categories }: MobileNavProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const pathname = usePathname();
+    const { totalItems } = useCart();
 
     const isActive = (path: string) => {
         if (path === '/') return pathname === '/';
@@ -34,9 +36,15 @@ export function MobileNav({ categories }: MobileNavProps) {
                     <span className="text-[10px] font-bold">Categories</span>
                 </button>
 
-                <div className="-mt-8">
-                    <Link href="/cart" id="mobile-cart-icon-container" className="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-white dark:border-slate-900 active:scale-95 transition-transform">
+                {/* Cart Icon with Badge */}
+                <div className="-mt-8 relative">
+                    <Link href="/cart" id="mobile-cart-icon-container" className="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-white dark:border-slate-900 active:scale-95 transition-transform overflow-visible">
                         <span className="material-icons-round text-2xl">shopping_basket</span>
+                        {totalItems > 0 && (
+                            <span className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm animate-bounce-in">
+                                {totalItems > 99 ? '99+' : totalItems}
+                            </span>
+                        )}
                     </Link>
                 </div>
 
