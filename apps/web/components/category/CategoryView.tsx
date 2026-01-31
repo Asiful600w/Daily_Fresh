@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Product, Category } from '@/lib/api';
 import { SidebarFilters } from './SidebarFilters';
 import { ProductListing } from './ProductListing';
+import { MobileSubcategoryBar } from './MobileSubcategoryBar';
+import { MobileFilterBar } from './MobileFilterBar';
+import { MobileFilterDrawer } from './MobileFilterDrawer';
 
 interface CategoryViewProps {
     products: Product[];
@@ -142,12 +145,28 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
         window.history.pushState(null, '', `?${params.toString()}`);
     };
 
+    // Mobile Filter Drawer State
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+    const currentSub = searchParams.get('subcategory');
+
     return (
-        <div className="flex flex-col lg:flex-row gap-12">
-            {/* Sidebar Filters */}
-            <SidebarFilters
+        <div className="flex flex-col lg:flex-row gap-12 relative">
+            {/* Mobile Category UX */}
+            <MobileFilterBar
+                totalResults={filteredAndSortedProducts.length}
+                onFilterClick={() => setIsMobileFiltersOpen(true)}
+                currentSort={currentSort}
+                onSortChange={handleSortChange}
+            />
+            <MobileSubcategoryBar
                 subcategories={categoryData.subcategories}
-                currentCategory={slug}
+                currentCategorySlug={slug}
+                currentSubcategory={currentSub}
+            />
+
+            <MobileFilterDrawer
+                isOpen={isMobileFiltersOpen}
+                onClose={() => setIsMobileFiltersOpen(false)}
                 minPrice={globalMinPrice}
                 maxPrice={globalMaxPrice}
                 currentMin={priceRange.min}
@@ -155,18 +174,33 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
                 onPriceChange={handlePriceChange}
             />
 
+            {/* Sidebar Filters - Desktop Only */}
+            <div className="hidden lg:block w-72 flex-shrink-0">
+                <SidebarFilters
+                    subcategories={categoryData.subcategories}
+                    currentCategory={slug}
+                    minPrice={globalMinPrice}
+                    maxPrice={globalMaxPrice}
+                    currentMin={priceRange.min}
+                    currentMax={priceRange.max}
+                    onPriceChange={handlePriceChange}
+                />
+            </div>
+
             {/* Product Grid Area */}
-            <ProductListing
-                title={categoryData.name}
-                products={paginatedProducts}
-                totalProducts={filteredAndSortedProducts.length}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                currentSort={currentSort}
-                onSortChange={handleSortChange}
-                isUpdating={isUpdating}
-            />
+            <div className="flex-1">
+                <ProductListing
+                    title={categoryData.name}
+                    products={paginatedProducts}
+                    totalProducts={filteredAndSortedProducts.length}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    currentSort={currentSort}
+                    onSortChange={handleSortChange}
+                    isUpdating={isUpdating}
+                />
+            </div>
         </div>
     );
 }

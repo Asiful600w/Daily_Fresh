@@ -8,6 +8,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
 import { MobileNav } from "@/components/layout/MobileNav";
+import { getCategories } from "@/lib/api";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -20,15 +21,18 @@ export const metadata: Metadata = {
   description: "Fresh produce delivered from farm to your doorstep.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await getCategories();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
       <body
         suppressHydrationWarning={true}
@@ -40,7 +44,7 @@ export default function RootLayout({
               <FlyToCartProvider>
                 <NextTopLoader color="#22C55E" showSpinner={false} />
                 {children}
-                <MobileNav />
+                <MobileNav categories={categories} />
               </FlyToCartProvider>
             </CartProvider>
           </WishlistProvider>

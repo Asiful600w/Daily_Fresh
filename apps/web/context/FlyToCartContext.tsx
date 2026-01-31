@@ -23,16 +23,25 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
     const countRef = useRef(0);
 
     const triggerFly = (srcElement: HTMLElement, image: string, quantity: number = 1) => {
-        let cartIcon = document.getElementById('cart-icon-container');
+        let cartIcon: HTMLElement | null = null;
 
-        // Check if mobile cart is visible (or just check existence)
-        const mobileCartIcon = document.getElementById('mobile-cart-icon-container');
-        if (mobileCartIcon && window.getComputedStyle(mobileCartIcon).display !== 'none') {
-            cartIcon = mobileCartIcon;
+        // Try to find both icons
+        const desktopIcon = document.getElementById('cart-icon-container');
+        const mobileIcon = document.getElementById('mobile-cart-icon-container');
+
+        // Determine which one is visible
+        if (desktopIcon && desktopIcon.getBoundingClientRect().width > 0) {
+            cartIcon = desktopIcon;
+        } else if (mobileIcon && mobileIcon.getBoundingClientRect().width > 0) {
+            cartIcon = mobileIcon;
         }
 
-        if (!cartIcon && !mobileCartIcon) return; // Fallback
-        if (!cartIcon) cartIcon = mobileCartIcon || document.getElementById('cart-icon-container');
+        // Fallback checks if getBoundingClientRect().width is 0 for some reason but element exists (unlikely if strictly hidden, but good for safety)
+        if (!cartIcon) {
+            const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+            if (isDesktop) cartIcon = desktopIcon;
+            else cartIcon = mobileIcon;
+        }
 
         if (!cartIcon) return;
 
