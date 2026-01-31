@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getAllOrders, updateOrderStatus, getLowStockProducts, getSalesAnalytics, getCategoryStats, getBestSellingProducts } from '@/lib/api';
+import { getAdminOrders, updateAdminOrderStatus, getLowStockProducts, getSalesAnalytics, getCategoryStats, getBestSellingProducts } from '@/lib/adminApi';
 import { formatPrice } from '@/lib/format';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     const fetchData = async () => {
         try {
             const [ordersData, lowStockData, analyticsData, catStats, topProdData] = await Promise.all([
-                getAllOrders(),
+                getAdminOrders(),
                 getLowStockProducts(),
                 getSalesAnalytics(),
                 getCategoryStats(),
@@ -61,6 +61,15 @@ export default function AdminDashboard() {
             case 'delivered': return 'bg-green-600';
             case 'cancelled': return 'bg-red-600';
             default: return 'bg-gray-600';
+        }
+    };
+
+    const handleStatusUpdate = async (id: string, newStatus: string) => {
+        try {
+            await updateAdminOrderStatus(id, newStatus);
+            setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        } catch (error) {
+            console.error('Failed to update status', error);
         }
     };
 

@@ -94,3 +94,117 @@ export async function getAdminOrder(id: string) {
         }
     };
 }
+
+export async function getLowStockProducts() {
+    const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('id, name, stock_quantity')
+        .lte('stock_quantity', 5)
+        .eq('is_deleted', false);
+
+    if (error) {
+        console.error('Error fetching low stock products:', error);
+        return [];
+    }
+    return data;
+}
+
+export async function getBestSellingProducts(limit: number = 8) {
+    const { data, error } = await supabaseAdmin
+        .from('products')
+        .select(`
+            *,
+            categories (name),
+            special_categories (name)
+        `)
+        .eq('is_deleted', false)
+        .order('sold_count', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching best selling products:', error);
+        return [];
+    }
+    return data;
+}
+
+export async function getSalesAnalytics() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const { data: orders, error } = await supabaseAdmin
+        .from('orders')
+        .select('created_at, total_amount')
+        .eq('status', 'delivered')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching sales analytics:', error);
+        return [];
+    }
+
+    const salesMap = new Map<string, number>();
+    for (let i = 0; i < 30; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        salesMap.set(d.toLocaleDateString('en-US'), 0);
+    }
+
+    orders.forEach(order => {
+        const date = new Date(order.created_at).toLocaleDateString('en-US');
+        const current = salesMap.get(date) || 0;
+        salesMap.set(date, current + order.total_amount);
+    });
+
+    return Array.from(salesMap.entries())
+        .map(([date, sales]) => ({ name: date.split('/')[0] + '/' + date.split('/')[1], sales, fullDate: date }))
+        .sort((a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime());
+}
+
+export async function getCategoryStats() {
+    try {
+        const { data: viewData, error: viewError } = await supabaseAdmin
+            .from('category_stats')
+            .select('*')
+            .order('total_items_sold', { ascending: false });
+
+        if (!viewError && viewData) {
+            const total = viewData.reduce((sum, item) => sum + item.total_items_sold, 0);
+            return viewData.map((item: any) => ({
+                name: item.category,
+                count: item.total_items_sold,
+                percentage: total > 0 ? Math.round((item.total_items_sold / total) * 100) : 0
+            }));
+        }
+
+        const { data, error } = await supabaseAdmin
+            .from('order_items')
+            .select('category, quantity');
+
+        if (error) throw error;
+
+        const stats = new Map<string, number>();
+        let totalItems = 0;
+
+        data.forEach((item: any) => {
+            if (item.category) {
+                const current = stats.get(item.category) || 0;
+                stats.set(item.category, current + item.quantity);
+                totalItems += item.quantity;
+            }
+        });
+
+        return Array.from(stats.entries())
+            .map(([name, count]) => ({
+                name,
+                count,
+                percentage: totalItems > 0 ? Math.round((count / totalItems) * 100) : 0
+            }))
+            .sort((a, b) => b.count - a.count);
+
+    } catch (error) {
+        console.error('Error fetching category stats:', error);
+        return [];
+    }
+}

@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
+import NextTopLoader from 'nextjs-toploader';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
           <WishlistProvider>
             <CartProvider>
               <FlyToCartProvider>
+                <NextTopLoader color="#22C55E" showSpinner={false} />
                 {children}
               </FlyToCartProvider>
             </CartProvider>
