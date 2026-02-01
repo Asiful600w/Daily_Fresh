@@ -30,12 +30,10 @@ export default function ProfilePage() {
     });
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-        } else if (user) {
+        if (user) {
             fetchDashboardData();
         }
-    }, [user, authLoading]);
+    }, [user]);
 
     // Update stats when wishlistIds changes
     useEffect(() => {
@@ -77,7 +75,39 @@ export default function ProfilePage() {
         }
     };
 
-    if (authLoading || loading) {
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0d1b17] p-4 text-center">
+                <div className="bg-white dark:bg-[#10221c] p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-100 dark:border-[#1e3a31]">
+                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="material-icons-round text-4xl text-primary">person</span>
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Login Required</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mb-8">
+                        Please login to view your profile and manage your orders.
+                    </p>
+                    <Link href="/login" replace className="block w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                        Login / Signup
+                    </Link>
+                    <div className="mt-4">
+                        <Link href="/" className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
+                            Back to Shopping
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>

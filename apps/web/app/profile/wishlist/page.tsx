@@ -86,7 +86,7 @@ export default function WishlistPage() {
                     <p className="text-slate-500 dark:text-slate-400 mb-8">
                         Please login to access your wishlist and save your favorite items for later.
                     </p>
-                    <Link href="/login" className="block w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                    <Link href="/login" replace className="block w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
                         Login / Signup
                     </Link>
                     <div className="mt-4">

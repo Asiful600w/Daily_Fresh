@@ -21,6 +21,32 @@ export function MobileCategoryDrawer({ isOpen, onClose, categories }: MobileCate
         }
     }, [isOpen]);
 
+    // Handle Back Button to Close Drawer
+    const isClosingViaBack = React.useRef(false);
+
+    React.useEffect(() => {
+        if (isOpen) {
+            isClosingViaBack.current = false;
+            // Push a new state to history when drawer opens
+            window.history.pushState({ drawerOpen: true }, '', window.location.href);
+
+            const handlePopState = () => {
+                isClosingViaBack.current = true;
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+                // If not closed via back button (i.e. closed via UI), remove the history item
+                if (!isClosingViaBack.current) {
+                    window.history.back();
+                }
+            };
+        }
+    }, [isOpen, onClose]);
+
     return (
         <div className={`fixed inset-0 z-[100] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
             {/* Backdrop */}
