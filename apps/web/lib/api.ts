@@ -32,6 +32,7 @@ export interface Product {
     shipping_outside_dhaka?: number;
     vendor_name?: string;
     sold_count?: number;
+    shop_name?: string;
 }
 
 // Helper to map DB result to app interface
@@ -80,7 +81,8 @@ function mapProduct(row: any): Product {
         shipping_inside_dhaka: row.shipping_inside_dhaka,
         shipping_outside_dhaka: row.shipping_outside_dhaka,
         vendor_name: row.vendor_name,
-        sold_count: row.sold_count || 0
+        sold_count: row.sold_count || 0,
+        shop_name: row.shop_name
     };
 }
 
