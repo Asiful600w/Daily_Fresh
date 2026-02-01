@@ -1,26 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// Initialize Supabase with Service Role Key
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('Critical: Missing Supabase Env Vars in Dashboard Stats Route');
-}
-
-const supabaseService = createClient(supabaseUrl, supabaseKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
+import { getSupabaseService } from '@/lib/supabaseService';
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const role = searchParams.get('role');
         const userId = searchParams.get('userId'); // Merchant ID if role is merchant
+
+        const supabaseService = getSupabaseService();
 
         // --- SUPER ADMIN STATS ---
         if (role !== 'merchant') {
@@ -45,9 +32,6 @@ export async function GET(request: Request) {
             return NextResponse.json({
                 merchantCount: merchantCount || 0,
                 lowStockCount: lowStockCount || 0
-                // Other stats like orders/sales are currently fetched on client side via 'adminApi', 
-                // but those might work fine if RLS allows public read or if using existing client logic.
-                // For consistency, we *could* move everything here, but let's fix the broken part first.
             });
         }
 
@@ -75,12 +59,13 @@ export async function GET(request: Request) {
             }
 
             // 3. Stats from Order Items
-            // We need to fetch order items to calculate earnings
             let totalEarnings = 0;
             let totalOrders = 0;
             let recentOrders: any[] = [];
+            let salesChartData: any[] = []; // Data for chart
 
             if (productIds.length > 0) {
+                // Fetch order items with order details
                 const { data: orderItems, error: itemsError } = await supabaseService
                     .from('order_items')
                     .select(`
@@ -88,29 +73,53 @@ export async function GET(request: Request) {
                         quantity, 
                         order_id,
                         name,
-                        orders (status, created_at)
+                        orders!inner (status, created_at)
                     `)
                     .in('product_id', productIds)
-                    .order('created_at', { ascending: false }); // Note: created_at is on orders... wait
+                    .neq('orders.status', 'cancelled')
+                    .neq('orders.status', 'pending'); // Only count processed/delivered for earnings
 
-                // Correction: order_items doesn't have created_at usually, orders does.
-                // PostgREST sorting by nested relation: .order('created_at', { foreignTable: 'orders', ascending: false })
-                // But order_items itself might not support that easily.
-                // Let's fetch and sort in memory for now or just fetch simpler.
 
                 if (!itemsError && orderItems) {
-                    const validItems = orderItems.filter((i: any) => i.orders?.status !== 'cancelled' && i.orders?.status !== 'pending');
-                    // Usually earnings count only delivered or processing? Or all valid confirmed?
-                    // Let's count all non-cancelled for now.
+                    const validItems = orderItems;
 
                     totalEarnings = validItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
                     totalOrders = new Set(validItems.map((i: any) => i.order_id)).size;
 
-                    // Recent orders
+                    // --- GENERATE CHART DATA (Last 30 Days) ---
+                    const salesMap = new Map<string, number>();
+
+                    // Initialize last 30 days
+                    for (let i = 29; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        salesMap.set(d.toLocaleDateString('en-US'), 0);
+                    }
+
+                    // Aggregate Valid Sales
+                    validItems.forEach((item: any) => {
+                        if (item.orders?.created_at) {
+                            const date = new Date(item.orders.created_at).toLocaleDateString('en-US');
+                            if (salesMap.has(date)) {
+                                salesMap.set(date, salesMap.get(date)! + (item.price * item.quantity));
+                            }
+                        }
+                    });
+
+                    // Sort by date manually to ensure order (Map iteration order is usually insertion order but better safe)
+                    salesChartData = Array.from(salesMap.entries())
+                        .map(([date, sales]) => ({
+                            name: date.split('/')[0] + '/' + date.split('/')[1], // MM/DD format
+                            sales: sales,
+                            fullDate: date
+                        }))
+                        .sort((a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime());
+
+
+                    // --- RECENT ORDERS ---
                     const processedOrderIds = new Set();
-                    recentOrders = orderItems
-                        .filter((i: any) => i.orders) // ensure order exists
-                        .slice(0, 20) // take recent chunk
+                    recentOrders = [...orderItems]
+                        .sort((a: any, b: any) => new Date(b.orders.created_at).getTime() - new Date(a.orders.created_at).getTime())
                         .map((item: any) => {
                             if (processedOrderIds.has(item.order_id)) return null;
                             processedOrderIds.add(item.order_id);
@@ -132,8 +141,9 @@ export async function GET(request: Request) {
                 totalOrders,
                 totalProducts: products.length,
                 totalReviews,
-                products: products, // Return basic product info
-                recentOrders
+                products: products,
+                recentOrders,
+                salesChartData
             });
         }
 
