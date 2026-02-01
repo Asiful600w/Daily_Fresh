@@ -110,12 +110,12 @@ export default function LoginPage() {
                             <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
                         <button
-                            onClick={() => handleSocialLogin('facebook')}
-                            disabled={loading}
-                            className="flex items-center justify-center gap-2 h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                            onClick={() => alert('Facebook login coming soon')}
+                            className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
-                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5" alt="Facebook" />
-                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">Facebook</span>
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5 grayscale" alt="Facebook" />
+                            <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
+                            <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
                     </div>
 
