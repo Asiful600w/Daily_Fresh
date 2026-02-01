@@ -18,6 +18,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+/*
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -25,6 +26,7 @@ export const viewport: Viewport = {
   userScalable: false,
   themeColor: "#22c55e",
 };
+*/
 
 export const metadata: Metadata = {
   title: "Daily Fresh | Premium Grocery Shopping",
@@ -50,6 +52,8 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <meta name="theme-color" content="#22c55e" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
       </head>
       <body
