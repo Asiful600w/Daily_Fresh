@@ -18,9 +18,9 @@ To make the implemented authentication features work, you need to configure your
 1.  Navigate to **Authentication** > **URL Configuration**.
 2.  Ensure your `Site URL` is set to your production URL (or `http://localhost:3000` for dev).
 3.  Add the following to **Redirect URLs**:
-    *   `http://localhost:3000/auth/callback`
-    *   `http://localhost:3000/update-password` (Required for password reset flow)
-    *   *(Replace `http://localhost:3000` with your production domain when deploying)*
+    *   `https://daily-fresh-web.vercel.app/auth/callback` (Primary)
+    *   `https://daily-fresh-web.vercel.app/update-password`
+    *   `http://localhost:3000/auth/callback` (Optional, for local dev references)
 
 ## 3. Email Verification & Templates
 1.  Navigate to **Authentication** > **Email Templates**.

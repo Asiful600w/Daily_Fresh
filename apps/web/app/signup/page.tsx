@@ -53,7 +53,7 @@ export default function SignupPage() {
                     full_name: fullName,
                     phone: formattedPhone,
                 },
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
+                emailRedirectTo: 'https://daily-fresh-web.vercel.app/auth/callback',
             },
         });
 
