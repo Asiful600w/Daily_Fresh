@@ -1,23 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// Initialize Supabase with Service Role Key
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('Critical: Missing Supabase Env Vars in Merchants Route');
-}
-
-const supabaseService = createClient(supabaseUrl, supabaseKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
+import { getSupabaseService } from '@/lib/supabaseService';
 
 export async function GET(request: Request) {
     try {
+        const supabaseService = getSupabaseService();
         const { data, error } = await supabaseService
             .from('admins')
             .select('*')
@@ -41,6 +27,7 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        const supabaseService = getSupabaseService();
         const { error } = await supabaseService
             .from('admins')
             .update({ status })

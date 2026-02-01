@@ -1,21 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// Initialize Supabase with Service Role Key for Admin privileges
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('Critical: Missing Supabase Env Vars in Verify Route', { url: !!supabaseUrl, key: !!supabaseKey });
-}
-
-// WARNING: If this falls back to ANON key, it will still hit RLS. User MUST set SERVICE KEY.
-const supabaseService = createClient(supabaseUrl, supabaseKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
+import { getSupabaseService } from '@/lib/supabaseService';
 
 export async function POST(request: Request) {
     try {
@@ -26,6 +10,8 @@ export async function POST(request: Request) {
         if (!userId) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
+
+        const supabaseService = getSupabaseService();
 
         // Query admins table using Service Role (bypasses RLS)
         const { data: adminData, error } = await supabaseService

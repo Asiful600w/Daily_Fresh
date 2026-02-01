@@ -1,24 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// We need the SERVICE ROLE KEY to bypass RLS and create users/rows with specific roles.
-// The previous 'supabaseAdmin' used the Anon key, which caused the DB insert to fail silently (or loudly).
-
-const supabaseUrl = 'https://vaohkfonpifdvwarsnac.supabase.co';
-// WARNING: REPLACE THIS WITH YOUR ACTUAL SUPABASE SERVICE ROLE KEY (Found in Project Settings > API)
-// Do NOT expose this key on the client side.
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.');
-}
-
-const supabaseService = createClient(supabaseUrl, SUPABASE_SERVICE_ROLE_KEY || '', {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
+import { getSupabaseService } from '@/lib/supabaseService';
 
 export async function POST(request: Request) {
     try {
@@ -31,6 +12,8 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        const supabaseService = getSupabaseService();
 
         // 1. Create the user in Supabase Auth
         // Using admin.createUser allows us to set metadata trusted
