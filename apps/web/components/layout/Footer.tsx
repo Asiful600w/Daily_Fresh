@@ -32,9 +32,10 @@ export function Footer({ categories = [] }: FooterProps) {
                 <div>
                     <h4 className="font-bold mb-6 text-slate-900 dark:text-white">Quick Links</h4>
                     <ul className="space-y-4 text-sm text-slate-500">
-                        {['About Us', 'Our Farmers', 'Privacy Policy', 'Terms of Service'].map(item => (
-                            <li key={item}><Link className="hover:text-primary transition-colors" href="#">{item}</Link></li>
-                        ))}
+                        <li><Link className="hover:text-primary transition-colors" href="#">About Us</Link></li>
+                        <li><Link className="hover:text-primary transition-colors" href="#">Our Farmers</Link></li>
+                        <li><Link className="hover:text-primary transition-colors" href="/privacy">Privacy Policy</Link></li>
+                        <li><Link className="hover:text-primary transition-colors" href="/terms">Terms of Service</Link></li>
                     </ul>
                 </div>
 

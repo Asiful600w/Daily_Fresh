@@ -34,30 +34,16 @@ export default function SignupPage() {
             return;
         }
 
-        // Phone Validation (Bangladeshi)
-        let formattedPhone = phone.trim();
-        // Remove spaces/dashes
-        formattedPhone = formattedPhone.replace(/[\s-]/g, '');
+        // Phone Validation (Bangladeshi: 11 digits starting with 01)
+        const cleanPhone = phone.replace(/\D/g, ''); // Remove non-digits
 
-        const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
-        const match = formattedPhone.match(bdPhoneRegex);
-
-        if (!match && phone.length > 0) {
-            setError("Please enter a valid Bangladeshi phone number (e.g. 01700000000)");
+        if (cleanPhone.length !== 11 || !cleanPhone.startsWith('01')) {
+            setError("Please enter a valid 11-digit mobile number (e.g. 01712345678)");
             setLoading(false);
             return;
         }
 
-        if (match) {
-            // Ensure +88 prefix
-            if (!formattedPhone.startsWith('+88')) {
-                if (formattedPhone.startsWith('88')) {
-                    formattedPhone = '+' + formattedPhone;
-                } else {
-                    formattedPhone = '+88' + formattedPhone;
-                }
-            }
-        }
+        const formattedPhone = `+88${cleanPhone}`;
 
         const { error } = await supabase.auth.signUp({
             email,
@@ -65,8 +51,9 @@ export default function SignupPage() {
             options: {
                 data: {
                     full_name: fullName,
-                    phone: formattedPhone, // Use formatted phone
+                    phone: formattedPhone,
                 },
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
             },
         });
 
@@ -74,8 +61,25 @@ export default function SignupPage() {
             setError(error.message);
             setLoading(false);
         } else {
-            router.push('/');
-            router.refresh();
+            // Show success message or redirect
+            // For email verification flow, usually we tell them to check email
+            alert('Registration successful! Please check your email to verify your account.');
+            router.push('/login');
+        }
+    };
+
+    const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: provider,
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
         }
     };
 
@@ -130,6 +134,32 @@ export default function SignupPage() {
                         </div>
                     )}
 
+                    {/* Social Login Buttons */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => alert('Google login coming soon')}
+                            className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
+                        >
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-5 grayscale" alt="Google" />
+                            <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
+                            <span className="material-icons-round text-xs text-slate-400">lock</span>
+                        </button>
+                        <button
+                            onClick={() => handleSocialLogin('facebook')}
+                            disabled={loading}
+                            className="flex items-center justify-center gap-2 h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                        >
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5" alt="Facebook" />
+                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">Facebook</span>
+                        </button>
+                    </div>
+
+                    <div className="relative flex items-center py-2">
+                        <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                        <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or sign up with email</span>
+                        <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    </div>
+
                     <form className="space-y-5" onSubmit={handleSignup}>
                         {/* Full Name */}
                         <div className="space-y-2">
@@ -160,13 +190,23 @@ export default function SignupPage() {
                         {/* Phone */}
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-slate-900 dark:text-white ml-1">Phone Number</label>
-                            <input
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full h-14 px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
-                                placeholder="+1 (555) 000-0000"
-                                type="tel"
-                            />
+                            <div className="flex w-full h-14 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all overflow-hidden">
+                                <div className="flex items-center justify-center px-4 bg-slate-50 dark:bg-slate-700/50 border-r border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold select-none">
+                                    <span className="mr-2 text-xl">🇧🇩</span>
+                                    <span>+88</span>
+                                </div>
+                                <input
+                                    value={phone}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        if (val.length <= 11) setPhone(val);
+                                    }}
+                                    className="flex-1 px-5 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 font-medium outline-none"
+                                    placeholder="01712345678"
+                                    type="tel"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {/* Password Grid */}
@@ -207,7 +247,7 @@ export default function SignupPage() {
                                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transform scale-50 peer-checked:scale-100 transition-all material-icons-round text-sm font-bold">check</span>
                             </div>
                             <label className="text-sm leading-relaxed text-slate-500 dark:text-slate-400" htmlFor="terms">
-                                I agree to the <a className="text-primary font-bold hover:underline" href="#">Terms and Conditions</a> and <a className="text-primary font-bold hover:underline" href="#">Privacy Policy</a>.
+                                I agree to the <Link className="text-primary font-bold hover:underline" href="/terms">Terms and Conditions</Link> and <Link className="text-primary font-bold hover:underline" href="/privacy">Privacy Policy</Link>.
                             </label>
                         </div>
 

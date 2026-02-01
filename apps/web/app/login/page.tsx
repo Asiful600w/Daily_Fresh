@@ -34,9 +34,19 @@ export default function LoginPage() {
     };
 
     const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-        // Placeholder for social login logic
-        alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon.`);
-    }
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: provider,
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex min-h-screen w-full flex-col lg:flex-row bg-[#fafafa] dark:bg-[#111827]">
@@ -89,10 +99,10 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    {/* Social Login Buttons - Disabled */}
+                    {/* Social Login Buttons */}
                     <div className="grid grid-cols-2 gap-4">
                         <button
-                            onClick={() => handleSocialLogin('google')}
+                            onClick={() => alert('Google login coming soon')}
                             className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-5 grayscale" alt="Google" />
@@ -101,11 +111,11 @@ export default function LoginPage() {
                         </button>
                         <button
                             onClick={() => handleSocialLogin('facebook')}
-                            className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
+                            disabled={loading}
+                            className="flex items-center justify-center gap-2 h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
                         >
-                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5 grayscale" alt="Facebook" />
-                            <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
-                            <span className="material-icons-round text-xs text-slate-400">lock</span>
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5" alt="Facebook" />
+                            <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">Facebook</span>
                         </button>
                     </div>
 
@@ -131,7 +141,7 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center px-1">
                                     <label className="text-sm font-bold text-slate-900 dark:text-white">Password</label>
-                                    <a className="text-primary hover:text-primary-dark text-sm font-bold hover:underline" href="#">Forgot Password?</a>
+                                    <Link className="text-primary hover:text-primary-dark text-sm font-bold hover:underline" href="/forgot-password">Forgot Password?</Link>
                                 </div>
                                 <input
                                     value={password}
