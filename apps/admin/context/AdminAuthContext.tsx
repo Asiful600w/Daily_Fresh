@@ -18,6 +18,7 @@ type AdminAuthContextType = {
     adminSession: Session | null;
     adminLoading: boolean;
     signOutAdmin: () => Promise<void>;
+    setAdminUser: React.Dispatch<React.SetStateAction<AdminUser | null>>;
 };
 
 const AdminAuthContext = createContext<AdminAuthContextType>({
@@ -25,6 +26,7 @@ const AdminAuthContext = createContext<AdminAuthContextType>({
     adminSession: null,
     adminLoading: true,
     signOutAdmin: async () => { },
+    setAdminUser: () => { },
 });
 
 export const useAdminAuth = () => useContext(AdminAuthContext);
@@ -127,6 +129,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         adminUser, // Now strictly typed as AdminUser (extended)
         adminLoading,
         signOutAdmin,
+        setAdminUser, // Expose setter
     };
 
     return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
