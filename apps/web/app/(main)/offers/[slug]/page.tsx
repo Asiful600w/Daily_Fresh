@@ -4,20 +4,22 @@ import { getProductsBySpecialCategory, getSpecialCategories } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 interface OfferPageProps {
-    params: {
+    params: Promise<{
         slug: string;
-    };
-    searchParams: {
+    }>;
+    searchParams: Promise<{
         sort?: string;
-    }
+    }>;
 }
 
 // Generate static params if we want, or just dynamic
 // For dynamic offers, usually dynamic rendering is fine.
 
-export default async function OfferPage({ params, searchParams }: OfferPageProps) {
-    const { slug } = await params;
-    const { sort } = await searchParams;
+export default async function OfferPage(props: OfferPageProps) {
+    const params = await props.params;
+    const searchParams = await props.searchParams;
+    const { slug } = params;
+    const { sort } = searchParams;
     const offerName = decodeURIComponent(slug);
 
     // Check if offer exists (optional, or just handle empty products)

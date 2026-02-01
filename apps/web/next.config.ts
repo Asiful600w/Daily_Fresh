@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -11,7 +18,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Keep existing if needed or add for safety
+        hostname: 'lh3.googleusercontent.com',
         port: '',
         pathname: '/**',
       }
@@ -19,4 +26,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

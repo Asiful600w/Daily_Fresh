@@ -6,6 +6,16 @@ import { Reviews } from '@/components/product/Reviews';
 import { getProduct, getProducts } from '@/lib/api';
 import { ScrollReset } from '@/components/ScrollReset';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+
+interface ProductPageProps {
+    params: Promise<{
+        id: string;
+    }>;
+    searchParams: Promise<{
+        sort?: string;
+    }>;
+}
 
 export async function generateStaticParams() {
     // Ideally we fetch a subset or use caching, for now fetch all to generate paths
@@ -15,8 +25,29 @@ export async function generateStaticParams() {
     }));
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
+    const params = await props.params;
+    const { id } = params;
+    const product = await getProduct(id);
+
+    if (!product) {
+        return {
+            title: 'Product Not Found',
+        };
+    }
+
+    return {
+        title: `${product.name} | Daily Fresh`,
+        description: product.description || `Buy ${product.name} at the best price.`,
+    };
+}
+
+export default async function ProductPage(props: ProductPageProps) {
+    const params = await props.params;
+    const searchParams = await props.searchParams;
+    const { id } = params;
+    // const { sort } = searchParams; // Unused for now but good to have
+
     const product = await getProduct(id);
 
     if (!product) {

@@ -10,8 +10,9 @@ interface CategoryPageProps {
     searchParams: Promise<{ subcategory?: string, sort?: string }>;
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-    const { slug } = await params;
+export async function generateMetadata(props: CategoryPageProps): Promise<Metadata> {
+    const params = await props.params;
+    const { slug } = params;
     const category = await getCategory(slug);
 
     if (!category) {
@@ -26,9 +27,11 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     };
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
-    const { slug } = await params;
-    const { subcategory, sort } = await searchParams;
+export default async function CategoryPage(props: CategoryPageProps) {
+    const params = await props.params;
+    const searchParams = await props.searchParams;
+    const { slug } = params;
+    const { subcategory, sort } = searchParams;
 
     // Fetch category data
     const categoryData = await getCategory(slug);
