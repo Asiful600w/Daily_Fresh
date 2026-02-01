@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { getAdminOrders, updateAdminOrderStatus } from '@/lib/adminApi';
 import { formatPrice } from '@/lib/format';
 
+import { useAdminAuth } from '@/context/AdminAuthContext';
+
 export default function AdminOrdersPage() {
+    const { adminUser } = useAdminAuth();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
@@ -15,12 +18,14 @@ export default function AdminOrdersPage() {
             fetchOrders();
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchQuery]);
+    }, [searchQuery, adminUser]);
 
     const fetchOrders = async () => {
+        if (!adminUser) return;
         try {
             setLoading(true);
-            const data = await getAdminOrders(searchQuery);
+            const merchantId = adminUser.role === 'merchant' ? adminUser.id : undefined;
+            const data = await getAdminOrders(searchQuery, merchantId);
             setOrders(data);
         } catch (error) {
             console.error('Failed to fetch orders', error);

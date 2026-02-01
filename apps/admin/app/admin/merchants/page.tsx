@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 type AdminUser = {
     id: string;
     email: string;
     full_name: string;
+    shop_name?: string;
     status: 'pending' | 'approved' | 'rejected' | 'suspended';
     role: 'super_admin' | 'merchant' | 'admin';
     created_at: string;
@@ -34,12 +36,9 @@ export default function MerchantsPage() {
 
     const fetchMerchants = async () => {
         try {
-            const { data, error } = await supabaseAdmin
-                .from('admins')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const res = await fetch('/api/admin/merchants');
+            if (!res.ok) throw new Error('Failed to fetch merchants');
+            const data = await res.json();
             setMerchants(data || []);
         } catch (error) {
             console.error('Error fetching merchants:', error);
@@ -50,12 +49,13 @@ export default function MerchantsPage() {
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
-            const { error } = await supabaseAdmin
-                .from('admins')
-                .update({ status: newStatus })
-                .eq('id', id);
+            const res = await fetch('/api/admin/merchants', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: newStatus })
+            });
 
-            if (error) throw error;
+            if (!res.ok) throw new Error('Failed to update status');
 
             // Optimistic update
             setMerchants(merchants.map(m => m.id === id ? { ...m, status: newStatus as any } : m));
@@ -92,8 +92,9 @@ export default function MerchantsPage() {
                                 <tr key={merchant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                     <td className="p-4">
                                         <div>
-                                            <p className="font-medium text-slate-900 dark:text-white">{merchant.full_name || 'No Name'}</p>
+                                            <p className="font-medium text-slate-900 dark:text-white">{merchant.shop_name || merchant.full_name || 'No Name'}</p>
                                             <p className="text-sm text-slate-500">{merchant.email}</p>
+                                            <p className="text-xs text-slate-400">Owner: {merchant.full_name}</p>
                                             {merchant.phone && <p className="text-xs text-slate-400">{merchant.phone}</p>}
                                         </div>
                                     </td>
@@ -118,6 +119,13 @@ export default function MerchantsPage() {
                                     <td className="p-4 text-right">
                                         {merchant.role !== 'super_admin' && (
                                             <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/admin/products?merchant_id=${merchant.id}`}
+                                                    className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors flex items-center gap-1"
+                                                >
+                                                    <span className="material-icons-round text-sm">inventory_2</span>
+                                                    View Products
+                                                </Link>
                                                 {merchant.status === 'pending' && (
                                                     <>
                                                         <button

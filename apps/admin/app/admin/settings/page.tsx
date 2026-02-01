@@ -5,23 +5,32 @@ import { HeroSettings } from '@/components/admin/HeroSettings';
 import { NoticeSettings } from '@/components/admin/NoticeSettings';
 import { AdScrollerSettings } from '@/components/admin/AdScrollerSettings';
 
-type Tab = 'general' | 'notices' | 'ads';
+import { MerchantProfileSettings } from '@/components/admin/MerchantProfileSettings';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+
+type Tab = 'general' | 'notices' | 'ads' | 'profile';
 
 export default function SettingsPage() {
-    const [activeTab, setActiveTab] = useState<Tab>('general');
+    const { adminUser } = useAdminAuth();
+    // Default tab based on role? Or just generic.
+    const [activeTab, setActiveTab] = useState<Tab>(adminUser?.role === 'merchant' ? 'profile' : 'general');
 
-    const menuItems = [
-        { id: 'general', label: 'General & Hero', icon: 'web' },
-        { id: 'notices', label: 'Notice Scroller', icon: 'campaign' },
-        { id: 'ads', label: 'Ad Scroller', icon: 'view_carousel' },
-    ];
+    const menuItems = adminUser?.role === 'merchant'
+        ? [
+            { id: 'profile', label: 'Profile Settings', icon: 'person' }
+        ]
+        : [
+            { id: 'general', label: 'General & Hero', icon: 'web' },
+            { id: 'notices', label: 'Notice Scroller', icon: 'campaign' },
+            { id: 'ads', label: 'Ad Scroller', icon: 'view_carousel' },
+        ];
 
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-[#0b1a15] p-6 lg:p-10">
             <div className="max-w-6xl mx-auto">
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Settings</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Manage your website content and configurations.</p>
+                    <p className="text-slate-500 dark:text-slate-400">Manage your account and configurations.</p>
                 </header>
 
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -49,6 +58,12 @@ export default function SettingsPage() {
                     {/* Content Area */}
                     <main className="flex-1 min-w-0">
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {activeTab === 'profile' && (
+                                <div className="space-y-6">
+                                    <MerchantProfileSettings />
+                                </div>
+                            )}
+
                             {activeTab === 'general' && (
                                 <div className="space-y-6">
                                     <HeroSettings />

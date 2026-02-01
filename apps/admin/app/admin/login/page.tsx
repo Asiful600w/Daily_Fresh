@@ -37,32 +37,54 @@ export default function AdminLogin() {
 
             if (user) {
                 // Check public.admins table for status via Server-Side API (Bypasses RLS issues)
-                const verifyRes = await fetch('/api/admin/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id, email: user.email })
-                });
+                // Use a timeout to prevent infinite loading
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-                const adminData = await verifyRes.json();
+                try {
+                    const verifyRes = await fetch('/api/admin/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: user.id, email: user.email }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
 
-                if (!verifyRes.ok) {
-                    await supabaseAdmin.auth.signOut();
-                    throw new Error(adminData.error || 'Access Denied: You do not have permission to access the admin area.');
+                    if (!verifyRes.ok) {
+                        const errorText = await verifyRes.text(); // Read as text first to avoid JSON parse errors
+                        let errorData;
+                        try {
+                            errorData = JSON.parse(errorText);
+                        } catch (e) {
+                            errorData = { error: errorText || verifyRes.statusText };
+                        }
+
+                        await supabaseAdmin.auth.signOut();
+                        throw new Error(errorData.error || 'Access Denied: You do not have permission to access the admin area.');
+                    }
+
+                    const adminData = await verifyRes.json();
+
+                    if (adminData.status === 'pending') {
+                        await supabaseAdmin.auth.signOut();
+                        throw new Error('Account Pending: Your account is awaiting approval from an administrator.');
+                    }
+
+                    if (adminData.status === 'rejected' || adminData.status === 'suspended') {
+                        await supabaseAdmin.auth.signOut();
+                        throw new Error('Access Denied: Your account has been suspended or rejected.');
+                    }
+
+                    // Success
+                    router.push('/admin');
+                    router.refresh();
+                } catch (fetchErr: any) {
+                    clearTimeout(timeoutId);
+                    if (fetchErr.name === 'AbortError') {
+                        throw new Error('Verification timed out. Please try again.');
+                    }
+                    throw fetchErr;
                 }
-
-                if (adminData.status === 'pending') {
-                    await supabaseAdmin.auth.signOut();
-                    throw new Error('Account Pending: Your account is awaiting approval from an administrator.');
-                }
-
-                if (adminData.status === 'rejected' || adminData.status === 'suspended') {
-                    await supabaseAdmin.auth.signOut();
-                    throw new Error('Access Denied: Your account has been suspended or rejected.');
-                }
-
-                // Success
-                router.push('/admin');
-                router.refresh();
             }
         } catch (err: any) {
             // Generic error message for security and user requirement
@@ -130,7 +152,10 @@ export default function AdminLogin() {
                     </button>
                 </form>
 
-                <div className="mt-6 text-center">
+                <div className="mt-6 flex flex-col items-center gap-4 text-center">
+                    <Link href="/admin/register" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                        Register as Merchant
+                    </Link>
                     <Link href="/" className="text-sm text-slate-400 hover:text-primary transition-colors">
                         ← Back to Store
                     </Link>

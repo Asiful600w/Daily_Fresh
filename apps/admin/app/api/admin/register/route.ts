@@ -7,9 +7,13 @@ import { NextResponse } from 'next/server';
 const supabaseUrl = 'https://vaohkfonpifdvwarsnac.supabase.co';
 // WARNING: REPLACE THIS WITH YOUR ACTUAL SUPABASE SERVICE ROLE KEY (Found in Project Settings > API)
 // Do NOT expose this key on the client side.
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'REPLACE_WITH_YOUR_SERVICE_ROLE_KEY';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabaseService = createClient(supabaseUrl, SUPABASE_SERVICE_ROLE_KEY, {
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.');
+}
+
+const supabaseService = createClient(supabaseUrl, SUPABASE_SERVICE_ROLE_KEY || '', {
     auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
                 full_name: full_name,
                 phone: phone,
                 role: 'merchant',
+                shop_name: body.shop_name,
                 status: 'pending' // Default status
             });
 

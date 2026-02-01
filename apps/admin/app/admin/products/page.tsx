@@ -1,14 +1,20 @@
 'use client';
-import { getProductsPaginated, deleteProduct, getCategories, Category, ProductFilterOptions, PaginatedProducts } from '@/lib/api';
+import { getProductsPaginated, deleteProduct, updateProduct, getCategories, Category, ProductFilterOptions, PaginatedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function AdminProductsPage() {
+    const { adminUser } = useAdminAuth();
     const [products, setProducts] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+
+    const searchParams = useSearchParams();
+    const queryMerchantId = searchParams.get('merchant_id');
 
     // Filter State
     const [categories, setCategories] = useState<Category[]>([]);
@@ -35,7 +41,7 @@ export default function AdminProductsPage() {
             fetchData(1);
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchQuery, selectedCategory, sortBy, minPrice, maxPrice]);
+    }, [searchQuery, selectedCategory, sortBy, minPrice, maxPrice, adminUser, queryMerchantId]); // Added queryMerchantId dependency
 
     // Fetch when page changes
     useEffect(() => {
@@ -43,8 +49,22 @@ export default function AdminProductsPage() {
     }, [currentPage]);
 
     const fetchData = async (pageToFetch: number) => {
+        // Wait for adminUser to check role, or proceed if loaded?
+        // Actually, if adminUser is null but loading is false, it means not logged in?
+        // useAdminAuth handles redirect usually?
+        // Here we just skip fetch if auth loading/missing
+        if (!adminUser) return;
+
         try {
             setLoading(true);
+            // Determine effective Merchant ID
+            let targetMerchantId = undefined;
+            if (adminUser.role === 'merchant') {
+                targetMerchantId = adminUser.id;
+            } else if (adminUser.role === 'super_admin' && queryMerchantId) {
+                targetMerchantId = queryMerchantId;
+            }
+
             const options: ProductFilterOptions = {
                 query: searchQuery,
                 categoryId: selectedCategory || undefined,
@@ -52,7 +72,8 @@ export default function AdminProductsPage() {
                 minPrice: minPrice ? parseFloat(minPrice) : undefined,
                 maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
                 page: pageToFetch,
-                limit: pageSize
+                limit: pageSize,
+                merchantId: targetMerchantId
             };
             const result: PaginatedProducts = await getProductsPaginated(options);
             setProducts(result.data);
@@ -68,6 +89,19 @@ export default function AdminProductsPage() {
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
+        }
+    };
+
+    const toggleApproval = async (product: any) => {
+        if (!confirm(`Are you sure you want to ${product.is_approved ? 'reject' : 'approve'} this product?`)) return;
+
+        try {
+            await updateProduct(product.id, { isApproved: !product.is_approved });
+            // Optimistic update
+            setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_approved: !p.is_approved } : p));
+        } catch (error) {
+            console.error('Error updating approval:', error);
+            alert('Failed to update status');
         }
     };
 
@@ -154,17 +188,19 @@ export default function AdminProductsPage() {
                                 <th className="p-6 font-semibold">Category</th>
                                 <th className="p-6 font-semibold">Price</th>
                                 <th className="p-6 font-semibold">Stock</th>
+                                <th className="p-6 font-semibold">Status</th>
+                                {adminUser?.role === 'super_admin' && <th className="p-6 font-semibold">Merchant</th>}
                                 <th className="p-6 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="p-8 text-center text-slate-500">Loading products...</td>
+                                    <td colSpan={7} className="p-8 text-center text-slate-500">Loading products...</td>
                                 </tr>
                             ) : products.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="p-8 text-center text-slate-500">No products found.</td>
+                                    <td colSpan={7} className="p-8 text-center text-slate-500">No products found.</td>
                                 </tr>
                             ) : (
                                 products.map((product) => (
@@ -206,8 +242,44 @@ export default function AdminProductsPage() {
                                                 </span>
                                             )}
                                         </td>
+                                        <td className="p-6">
+                                            {product.is_approved ? (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-800">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                                                    Approved
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-bold border border-yellow-200 dark:border-yellow-800">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </td>
+
+                                        {adminUser?.role === 'super_admin' && (
+                                            <td className="p-6 text-sm text-slate-600 dark:text-slate-300">
+                                                {product.shop_name || 'Daily Fresh'}
+                                            </td>
+                                        )}
+
                                         <td className="p-6 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                {/* Super Admin Approval Actions */}
+                                                {adminUser?.role === 'super_admin' && (
+                                                    <button
+                                                        onClick={() => toggleApproval(product)}
+                                                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${product.is_approved
+                                                            ? 'hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-slate-400 hover:text-yellow-600'
+                                                            : 'hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-400 hover:text-green-600'
+                                                            }`}
+                                                        title={product.is_approved ? "Reject Product" : "Approve Product"}
+                                                    >
+                                                        <span className="material-icons-round text-lg">
+                                                            {product.is_approved ? 'block' : 'check_circle'}
+                                                        </span>
+                                                    </button>
+                                                )}
+
                                                 <Link
                                                     href={`/admin/products/${product.id}/edit`}
                                                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-primary transition-colors"

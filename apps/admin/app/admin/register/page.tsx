@@ -9,6 +9,7 @@ export default function AdminRegister() {
         email: '',
         password: '',
         full_name: '',
+        shop_name: '',
         phone: ''
     });
     const [loading, setLoading] = useState(false);
@@ -86,6 +87,18 @@ export default function AdminRegister() {
                             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                             placeholder="John Doe"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Shop Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={(formData as any).shop_name}
+                            onChange={(e) => setFormData({ ...formData, shop_name: e.target.value } as any)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            placeholder="My Awesome Store"
                         />
                     </div>
 

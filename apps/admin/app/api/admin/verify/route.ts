@@ -3,11 +3,14 @@ import { NextResponse } from 'next/server';
 
 // Initialize Supabase with Service Role Key for Admin privileges
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// Fallback to placeholder if env not set, but logic handles it
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Critical: Missing Supabase Env Vars in Verify Route', { url: !!supabaseUrl, key: !!supabaseKey });
+}
 
 // WARNING: If this falls back to ANON key, it will still hit RLS. User MUST set SERVICE KEY.
-const supabaseService = createClient(supabaseUrl, supabaseKey, {
+const supabaseService = createClient(supabaseUrl, supabaseKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -41,7 +44,12 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             status: adminData.status,
-            role: adminData.role
+            role: adminData.role,
+            shop_name: adminData.shop_name,
+            full_name: adminData.full_name,
+            phone: adminData.phone,
+            id: adminData.id,
+            email: adminData.email
         }, { status: 200 });
 
     } catch (error: any) {

@@ -226,7 +226,7 @@ export function ProductInfo({ product }: { product: Product }) {
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Sold By</p>
-                                <p className="text-sm font-black text-slate-900 dark:text-white">{product.vendor_name || 'Daily Fresh'}</p>
+                                <p className="text-sm font-black text-slate-900 dark:text-white">{product.shop_name || product.vendor_name || 'Daily Fresh'}</p>
                             </div>
                         </div>
                     </div>

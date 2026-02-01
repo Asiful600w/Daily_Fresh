@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Product, getCategories, getSpecialCategories, Category, createProduct, updateProduct } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export function ProductForm({ initialData }: { initialData?: Partial<Product> }) {
+    const { adminUser } = useAdminAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [categoriesList, setCategoriesList] = useState<Category[]>([]);
@@ -256,7 +258,10 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
             const payload = {
                 ...formData,
                 id: Number(productId),
-                images: finalImages
+                images: finalImages,
+                // Attach Merchant Info if applicable
+                merchantId: adminUser?.role === 'merchant' ? adminUser.id : undefined,
+                shopName: adminUser?.role === 'merchant' ? (adminUser.shop_name || adminUser.full_name) : undefined
             };
 
             // 5. Save
@@ -348,7 +353,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                                 min="0"
                                 max="100"
                                 className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                value={formData.discountPercent}
+                                value={formData.discountPercent ?? ''}
                                 onChange={e => handleDiscountChange(e.target.value)}
                             />
                         </div>

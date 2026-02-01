@@ -1,5 +1,5 @@
 
-import { supabase } from './supabase';
+import { supabaseAdmin as supabase } from './supabaseAdmin';
 
 export interface Category {
     id: string;
@@ -32,6 +32,9 @@ export interface Product {
     shipping_outside_dhaka?: number;
     vendor_name?: string;
     sold_count?: number;
+    merchant_id?: string;
+    is_approved?: boolean;
+    shop_name?: string;
 }
 
 // Helper to map DB result to app interface
@@ -80,7 +83,10 @@ function mapProduct(row: any): Product {
         shipping_inside_dhaka: row.shipping_inside_dhaka,
         shipping_outside_dhaka: row.shipping_outside_dhaka,
         vendor_name: row.vendor_name,
-        sold_count: row.sold_count || 0
+        sold_count: row.sold_count || 0,
+        merchant_id: row.merchant_id,
+        is_approved: row.is_approved,
+        shop_name: row.shop_name
     };
 }
 
@@ -429,6 +435,7 @@ export interface ProductFilterOptions {
     maxPrice?: number;
     page?: number;
     limit?: number;
+    merchantId?: string;
 }
 
 export interface PaginatedProducts {
@@ -457,6 +464,10 @@ export async function getProducts(options?: ProductFilterOptions | string): Prom
 
     if (filter.categoryId) {
         query = query.eq('category_id', filter.categoryId);
+    }
+
+    if (filter.merchantId) {
+        query = query.eq('merchant_id', filter.merchantId);
     }
 
     if (filter.minPrice !== undefined) {
@@ -513,6 +524,10 @@ export async function getProductsPaginated(options: ProductFilterOptions): Promi
 
     if (options.categoryId) {
         query = query.eq('category_id', options.categoryId);
+    }
+
+    if (options.merchantId) {
+        query = query.eq('merchant_id', options.merchantId);
     }
 
     if (options.minPrice !== undefined) {
@@ -752,7 +767,7 @@ export async function getRelatedProducts(productId: string | number, limit: numb
     return data.map(mapProduct);
 }
 
-export async function createProduct(product: Partial<Product> & { specialCategoryId?: number }) {
+export async function createProduct(product: Partial<Product> & { specialCategoryId?: number; merchantId?: string; shopName?: string }) {
     // 1. Get Category ID
     const { data: category } = await supabase
         .from('categories')
@@ -792,7 +807,10 @@ export async function createProduct(product: Partial<Product> & { specialCategor
         images: product.images || [], // Use images array
         colors: product.colors,
         sizes: product.sizes,
-        special_category_id: product.specialCategoryId
+        special_category_id: product.specialCategoryId,
+        merchant_id: product.merchantId,
+        shop_name: product.shopName,
+        is_approved: product.merchantId ? false : true // SuperAdmin (no merchantId passed by default?) -> true, Merchant -> false
     };
 
     const { data, error } = await supabase
@@ -808,55 +826,45 @@ export async function createProduct(product: Partial<Product> & { specialCategor
     return mapProduct(data);
 }
 
+export async function updateProduct(id: number, product: Partial<Product> & { specialCategoryId?: number; merchantId?: string; shopName?: string; isApproved?: boolean }) {
+    // 1. Resolve Category/Subcategory IDs if names generated
+    let categoryId = undefined;
+    if (product.category) {
+        const { data: cat } = await supabase.from('categories').select('id').eq('name', product.category).single();
+        if (cat) categoryId = cat.id;
+    }
 
+    let subcategoryId = undefined;
+    if (product.subcategory && categoryId) {
+        const { data: sub } = await supabase.from('subcategories').select('id').eq('name', product.subcategory).eq('category_id', categoryId).single();
+        if (sub) subcategoryId = sub.id;
+    }
 
-
-export async function updateProduct(id: string | number, product: Partial<Product> & { specialCategoryId?: number }) {
+    // 2. Prepare Payload
     const updates: any = {};
     if (product.name) updates.name = product.name;
     if (product.price !== undefined) updates.price = product.price;
     if (product.originalPrice !== undefined) updates.original_price = product.originalPrice;
     if (product.discountPercent !== undefined) updates.discount_percent = product.discountPercent;
     if (product.description) updates.description = product.description;
+
+    // Category updates
+    if (categoryId) updates.category_id = categoryId;
+    if (subcategoryId !== undefined) updates.subcategory_id = subcategoryId;
+
     if (product.quantity) updates.quantity_label = product.quantity;
     if (product.stockQuantity !== undefined) updates.stock_quantity = product.stockQuantity;
-    if (product.images) updates.images = product.images; // Update images array
+    if (product.images) updates.images = product.images;
     if (product.colors) updates.colors = product.colors;
     if (product.sizes) updates.sizes = product.sizes;
     if (product.specialCategoryId !== undefined) updates.special_category_id = product.specialCategoryId;
 
-    if (product.category) {
-        const { data: category } = await supabase.from('categories').select('id').eq('name', product.category).single();
-        if (category) {
-            updates.category_id = category.id;
+    // Merchant fields
+    if (product.merchantId !== undefined) updates.merchant_id = product.merchantId;
+    if (product.shopName !== undefined) updates.shop_name = product.shopName;
+    if (product.isApproved !== undefined) updates.is_approved = product.isApproved;
 
-            // If category changes, we must validate/update subcategory too
-            if (product.subcategory) {
-                const { data: sub } = await supabase
-                    .from('subcategories')
-                    .select('id')
-                    .eq('name', product.subcategory)
-                    .eq('category_id', category.id)
-                    .single();
-                updates.subcategory_id = sub ? sub.id : null;
-            } else {
-                updates.subcategory_id = null; // Clear subcategory if not provided on category change? Or keep?
-                // Safer to clear if category changed and no sub provided, but user might not send it.
-                // let's assume if category is sent, subcategory should be sent if it exists.
-            }
-        }
-    } else if (product.subcategory) {
-        // Category didn't change, but subcategory did.
-        // We need the current category_id to find the subcategory_id... 
-        // OR we can just find the subcategory by name (assuming unique names? No, names aren't unique across categories globally usually, but here maybe)
-        // Safer to fetch product first or assuming UI sends correct data.
-        // Let's rely on UI sending category if it changes.
-        // If only subcategory changes, we need to find it.
-        // This is complex without category_id. 
-        // For now, assume Admin UI sends category with subcategory.
-    }
-
-    const { data, error } = await supabase
+    const { data: updatedData, error } = await supabase
         .from('products')
         .update(updates)
         .eq('id', id)
@@ -867,7 +875,7 @@ export async function updateProduct(id: string | number, product: Partial<Produc
         console.error('Error updating product:', error);
         throw error;
     }
-    return mapProduct(data);
+    return mapProduct(updatedData);
 }
 
 // Soft Delete Product

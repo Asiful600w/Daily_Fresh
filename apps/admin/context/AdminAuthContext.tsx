@@ -5,8 +5,16 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useRouter } from 'next/navigation';
 
+export interface AdminUser extends User {
+    id: string; // Explicitly ensure id is string (User has it)
+    email?: string; // User has email optionally
+    role: 'super_admin' | 'admin' | 'merchant';
+    full_name?: string;
+    shop_name?: string;
+}
+
 type AdminAuthContextType = {
-    adminUser: User | null;
+    adminUser: AdminUser | null;
     adminSession: Session | null;
     adminLoading: boolean;
     signOutAdmin: () => Promise<void>;
@@ -22,7 +30,7 @@ const AdminAuthContext = createContext<AdminAuthContextType>({
 export const useAdminAuth = () => useContext(AdminAuthContext);
 
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
-    const [adminUser, setAdminUser] = useState<User | null>(null);
+    const [adminUser, setAdminUser] = useState<AdminUser | null>(null); // Use custom AdminUser type
     const [adminSession, setAdminSession] = useState<Session | null>(null);
     const [adminLoading, setAdminLoading] = useState(true);
     const router = useRouter();
@@ -34,7 +42,39 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
                 const { data: { session }, error } = await supabaseAdmin.auth.getSession();
                 if (error) throw error;
                 setAdminSession(session);
-                setAdminUser(session?.user ?? null);
+
+                if (session?.user) {
+                    // Fetch extended profile via API to bypass RLS
+                    try {
+                        const res = await fetch('/api/admin/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: session.user.id, email: session.user.email })
+                        });
+
+                        if (res.ok) {
+                            const profile = await res.json();
+                            setAdminUser({
+                                ...session.user,
+                                ...profile
+                            } as AdminUser);
+                        } else {
+                            console.error("User in session but verification failed:", res.statusText);
+                            // Do not sign out immediately here to avoid loop if transient error,
+                            // but maybe we should if 404/403.
+                            if (res.status === 404 || res.status === 403) {
+                                console.error("Profile not found or denied. Signing out.");
+                                await supabaseAdmin.auth.signOut();
+                                setAdminUser(null);
+                                setAdminSession(null);
+                            }
+                        }
+                    } catch (apiError) {
+                        console.error("Failed to fetch admin profile:", apiError);
+                    }
+                } else {
+                    setAdminUser(null);
+                }
             } catch (error) {
                 console.error("Admin Auth initialization error:", error);
                 setAdminSession(null);
@@ -44,9 +84,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             }
         };
 
-        const { data: listener } = supabaseAdmin.auth.onAuthStateChange((_event, session) => {
+        const { data: listener } = supabaseAdmin.auth.onAuthStateChange(async (_event, session) => {
             setAdminSession(session);
-            setAdminUser(session?.user ?? null);
+            if (session?.user) {
+                try {
+                    const res = await fetch('/api/admin/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: session.user.id, email: session.user.email })
+                    });
+
+                    if (res.ok) {
+                        const profile = await res.json();
+                        setAdminUser({ ...session.user, ...profile } as AdminUser);
+                    } else {
+                        setAdminUser(null);
+                    }
+                } catch {
+                    setAdminUser(null);
+                }
+            } else {
+                setAdminUser(null);
+            }
             setAdminLoading(false);
         });
 
@@ -59,14 +118,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOutAdmin = async () => {
         await supabaseAdmin.auth.signOut();
-        // No need to clear 'cart' here as this is admin side
         router.push('/admin/login');
         router.refresh();
     };
 
     const value = {
         adminSession,
-        adminUser,
+        adminUser, // Now strictly typed as AdminUser (extended)
         adminLoading,
         signOutAdmin,
     };
