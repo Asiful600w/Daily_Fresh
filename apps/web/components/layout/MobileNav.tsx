@@ -20,6 +20,11 @@ export function MobileNav({ categories }: MobileNavProps) {
         return pathname?.startsWith(path);
     };
 
+    // Hide on login/signup pages
+    if (pathname === '/login' || pathname === '/signup') {
+        return null;
+    }
+
     return (
         <>
             <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 md:hidden z-[90] flex items-center justify-around py-4 pb-safe safe-area-inset-bottom shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
