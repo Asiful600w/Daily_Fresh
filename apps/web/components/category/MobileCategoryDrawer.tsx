@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface MobileCategoryDrawerProps {
     isOpen: boolean;
@@ -47,6 +48,19 @@ export function MobileCategoryDrawer({ isOpen, onClose, categories }: MobileCate
         }
     }, [isOpen, onClose]);
 
+    const router = useRouter();
+
+    const handleNavigation = (e: React.MouseEvent, path: string) => {
+        e.preventDefault();
+        isClosingViaBack.current = true; // Prevent cleanup hook from double-popping
+        window.history.back(); // Remove the drawer state
+        onClose(); // Update UI state
+        // Small delay to ensure drawer closing validation doesn't interfere with navigation
+        setTimeout(() => {
+            router.push(path);
+        }, 50);
+    };
+
     return (
         <div className={`fixed inset-0 z-[100] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
             {/* Backdrop */}
@@ -89,25 +103,25 @@ export function MobileCategoryDrawer({ isOpen, onClose, categories }: MobileCate
                         <div className="space-y-2 animate-in slide-in-from-right-10 fade-in duration-200">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 px-2">{selectedCategory.name}</h3>
 
-                            <Link
+                            <a
                                 href={`/category/${selectedCategory.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
                                 className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl hover:bg-primary/10 transition-colors group"
-                                onClick={onClose}
+                                onClick={(e) => handleNavigation(e, `/category/${selectedCategory.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`)}
                             >
                                 <span className="font-bold text-primary">Shop All {selectedCategory.name}</span>
                                 <span className="material-icons-round text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </Link>
+                            </a>
 
                             <div className="grid grid-cols-2 gap-3 mt-4">
                                 {selectedCategory.subcategories.map((sub) => (
-                                    <Link
+                                    <a
                                         key={sub.name}
                                         href={`/category/${selectedCategory.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}?subcategory=${encodeURIComponent(sub.name)}`}
                                         className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all text-center gap-2"
-                                        onClick={onClose}
+                                        onClick={(e) => handleNavigation(e, `/category/${selectedCategory.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}?subcategory=${encodeURIComponent(sub.name)}`)}
                                     >
                                         <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{sub.name}</span>
-                                    </Link>
+                                    </a>
                                 ))}
                             </div>
                         </div>
