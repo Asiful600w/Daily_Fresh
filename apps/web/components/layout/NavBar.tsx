@@ -250,26 +250,26 @@ export function NavBar({ categories }: { categories: Category[] }) {
 
             {/* Secondary Nav */}
             <nav className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 hidden md:block">
-                <div className="max-w-7xl mx-auto px-4 relative flex items-center justify-center">
+                <div className="max-w-7xl mx-auto px-4 relative flex flex-wrap items-center justify-center gap-x-1 lg:gap-x-4">
                     {categories.map((category) => {
                         const slug = category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
                         return (
                             <div key={category.name} className="group relative">
                                 <Link
                                     href={`/category/${slug}`}
-                                    className="px-6 py-3 block text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors border-b-2 border-transparent hover:border-primary"
+                                    className="px-3 lg:px-5 py-3 block text-xs lg:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors border-b-2 border-transparent hover:border-primary whitespace-nowrap"
                                 >
                                     {category.name}
                                 </Link>
 
                                 {/* Dropdown Menu */}
-                                <div className="absolute top-full left-0 w-64 bg-white dark:bg-slate-900 shadow-xl rounded-b-2xl border-x border-b border-slate-100 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+                                <div className="absolute top-full left-0 w-56 bg-white dark:bg-slate-900 shadow-xl rounded-b-2xl border-x border-b border-slate-100 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
                                     <div className="p-2 space-y-1">
                                         {category.subcategories.map((sub) => (
                                             <Link
                                                 key={sub.name}
                                                 href={`/category/${slug}?subcategory=${encodeURIComponent(sub.name)}`}
-                                                className="block px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary rounded-xl transition-colors"
+                                                className="block px-4 py-2.5 text-xs lg:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary rounded-xl transition-colors"
                                             >
                                                 {sub.name}
                                             </Link>
