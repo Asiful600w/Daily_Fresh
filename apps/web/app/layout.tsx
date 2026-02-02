@@ -77,6 +77,7 @@ export default async function RootLayout({
                     {children}
                     <MobileNav categories={categories} />
                   </UIProvider>
+                </FlyToCartProvider>
               </CartProvider>
             </WishlistProvider>
           </AuthProvider>

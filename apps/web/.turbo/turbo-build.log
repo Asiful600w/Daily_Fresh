@@ -19,14 +19,14 @@
  ○ (pwa) Service worker: F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\public\sw.js
  ○ (pwa)   URL: /sw.js
  ○ (pwa)   Scope: /
-✓ Compiled successfully in 8.1s
+✓ Compiled successfully in 7.2s
   Running TypeScript ...
   Collecting page data using 11 workers ...
   Generating static pages using 11 workers (0/105) ...
   Generating static pages using 11 workers (26/105) 
   Generating static pages using 11 workers (52/105) 
   Generating static pages using 11 workers (78/105) 
-✓ Generating static pages using 11 workers (105/105) in 908.9ms
+✓ Generating static pages using 11 workers (105/105) in 612.8ms
   Finalizing page optimization ...
   Collecting build traces ...
 
