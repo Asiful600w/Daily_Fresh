@@ -6,8 +6,7 @@ import { z } from "zod"
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import { authenticator } from "@otplib/preset-default"
-
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma"
 
 async function getUserByEmail(email: string) {
     try {

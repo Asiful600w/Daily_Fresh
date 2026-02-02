@@ -5,8 +5,7 @@ import * as z from "zod"
 import bcrypt from "bcryptjs"
 import { PrismaClient } from "@prisma/client"
 import { RegisterSchema } from "@/schemas"
-
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma"
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const validatedFields = RegisterSchema.safeParse(values)
