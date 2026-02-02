@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react"
 
 type AuthContextType = {
     user: User | null;
@@ -27,71 +27,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    // Use NextAuth session instead of Supabase client
+    const { data: nextAuthSession, status } = useSession();
+
     useEffect(() => {
-        const setData = async () => {
-            try {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) throw error;
-                setSession(session);
-                setUser(session?.user ?? null);
-            } catch (error) {
-                console.error("Auth initialization error:", error);
-                // Ensure we don't block the app even on error
-                setSession(null);
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
+        if (status === 'loading') {
+            setLoading(true);
+        } else {
+            setSession(nextAuthSession as unknown as Session);
+            // Map NextAuth user to similar structure if needed, or just use it
+            // Adjusting type to match what app expects (Supabase User vs NextAuth User)
+            // For now casting, but ideally we unify types.
+            setUser(nextAuthSession?.user as unknown as User | null);
             setLoading(false);
-        });
-
-        setData();
-
-        return () => {
-            listener.subscription.unsubscribe();
-        };
-    }, []);
+        }
+    }, [nextAuthSession, status]);
 
     const [isSigningOut, setIsSigningOut] = useState(false);
 
     const signOut = async () => {
         setIsSigningOut(true);
         try {
-            // Artificial delay for smooth UX
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                const msg = error.message || '';
-                // Ignore session missing error
-                if (!msg.includes('Auth session missing') && !msg.includes('AuthSessionMissingError')) {
-                    console.error('SignOut error:', error);
-                }
-            }
-
-            // CRITICAL: Force clear local state immediately to ensure UI updates
-            setSession(null);
-            setUser(null);
-            localStorage.removeItem('cart');
-
-            router.push('/');
-            router.refresh();
-        } catch (err: any) {
-            const msg = err?.message || '';
-            if (!msg.includes('Auth session missing') && !msg.includes('AuthSessionMissingError')) {
-                console.error('Logout Exception:', err);
-            }
-            // Ensure state is cleared on error
-            setSession(null);
-            setUser(null);
-            localStorage.removeItem('cart');
-
-            router.push('/');
+            await nextAuthSignOut({ callbackUrl: '/' });
+            // State clear handled by page reload/redirect
+        } catch (err) {
+            console.error('Logout error:', err);
         } finally {
             setIsSigningOut(false);
         }
