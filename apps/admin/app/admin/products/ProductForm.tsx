@@ -251,7 +251,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
 
         try {
             // 1. Determine Product ID
-            let productId = initialData?.id ? String(initialData.id) : String(Math.floor(Math.random() * 90000000) + 10000000);
+            const productId = initialData?.id ? String(initialData.id) : String(Math.floor(Math.random() * 90000000) + 10000000);
 
             // 2. Upload Images
             let newImageUrls: string[] = [];

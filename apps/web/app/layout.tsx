@@ -50,7 +50,7 @@ export default async function RootLayout({
   const categories = await getCategories();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
         <meta name="theme-color" content="#22c55e" />
@@ -58,7 +58,7 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning={true}
-        className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-24 md:pb-0`}
+        className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-24 md:pb-0 overflow-x-hidden`}
       >
         <AuthProvider>
           <WishlistProvider>
