@@ -35,6 +35,13 @@ export interface Product {
     merchant_id?: string;
     is_approved?: boolean;
     shop_name?: string;
+    // SEO Fields
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    keywords?: string[];
+    ogImage?: string;
+    noIndex?: boolean;
 }
 
 // Helper to map DB result to app interface
@@ -86,7 +93,14 @@ function mapProduct(row: any): Product {
         sold_count: row.sold_count || 0,
         merchant_id: row.merchant_id,
         is_approved: row.is_approved,
-        shop_name: row.shop_name
+        shop_name: row.shop_name,
+        // Map SEO fields
+        metaTitle: row.meta_title,
+        metaDescription: row.meta_description,
+        canonicalUrl: row.canonical_url,
+        keywords: row.keywords || [],
+        ogImage: row.og_image,
+        noIndex: row.no_index || false
     };
 }
 

@@ -33,6 +33,13 @@ export interface Product {
     vendor_name?: string;
     sold_count?: number;
     shop_name?: string;
+    // SEO Fields
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    keywords?: string[];
+    ogImage?: string;
+    noIndex?: boolean;
 }
 
 // Helper to map DB result to app interface
@@ -82,7 +89,14 @@ function mapProduct(row: any): Product {
         shipping_outside_dhaka: row.shipping_outside_dhaka,
         vendor_name: row.vendor_name,
         sold_count: row.sold_count || 0,
-        shop_name: row.shop_name
+        shop_name: row.shop_name,
+        // Map SEO fields
+        metaTitle: row.meta_title,
+        metaDescription: row.meta_description,
+        canonicalUrl: row.canonical_url,
+        keywords: row.keywords || [],
+        ogImage: row.og_image,
+        noIndex: row.no_index || false
     };
 }
 

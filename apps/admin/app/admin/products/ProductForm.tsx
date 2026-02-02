@@ -32,6 +32,8 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
     // Helper to get ID from label if needed, or we just pass the ID if we update the API to take ID.
     // For now, let's store standard fields.
 
+    const [activeTab, setActiveTab] = useState<'details' | 'seo'>('details');
+
     const [formData, setFormData] = useState<Partial<Product> & { specialCategoryId?: number }>({
         id: initialData?.id, // Keep ID if editing
         name: initialData?.name || '',
@@ -46,7 +48,13 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
         quantity: initialData?.quantity || '',
         discountPercent: initialData?.discountPercent || 0,
         specialCategoryId: undefined,
-        images: initialData?.images || []
+        images: initialData?.images || [],
+        metaTitle: initialData?.metaTitle || '',
+        metaDescription: initialData?.metaDescription || '',
+        canonicalUrl: initialData?.canonicalUrl || '',
+        keywords: initialData?.keywords || [],
+        noIndex: initialData?.noIndex || false,
+        ogImage: initialData?.ogImage || ''
     });
 
     useEffect(() => {
@@ -318,253 +326,420 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
         }));
     };
 
+    const [activeTab, setActiveTab] = useState<'details' | 'seo'>('details');
+
+    const [formData, setFormData] = useState<Partial<Product> & { specialCategoryId?: number }>({
+        id: initialData?.id,
+        name: initialData?.name || '',
+        price: initialData?.price || 0,
+        originalPrice: initialData?.originalPrice || 0,
+        category: initialData?.category || '',
+        subcategory: initialData?.subcategory || '',
+        description: initialData?.description || '',
+        stockQuantity: initialData?.stockQuantity || 0,
+        colors: initialData?.colors || [],
+        sizes: initialData?.sizes || [],
+        quantity: initialData?.quantity || '',
+        discountPercent: initialData?.discountPercent || 0,
+        specialCategoryId: undefined,
+        images: initialData?.images || [],
+        // SEO Fields
+        metaTitle: initialData?.metaTitle || '',
+        metaDescription: initialData?.metaDescription || '',
+        canonicalUrl: initialData?.canonicalUrl || '',
+        keywords: initialData?.keywords || [],
+        noIndex: initialData?.noIndex || false,
+        ogImage: initialData?.ogImage || ''
+    });
+
+    // ... (rest of the state logic) ... 
+    // I need to be careful not to delete existing logic accidentally.
+    // I will use replace_file_content on specific blocks.
+
+    // BUT since I need to restructure the whole form to support tabs, I might need a larger replace.
+    // Let's rewrite the return statement mainly.
+
+    // First updates to state logic was needed, but I can do that via smaller edits or just one big one if I am careful.
+    // The previous tool call was too big, let's break it down.
+
+    // WAIT, I am generating the replacement content here. 
+    // I should provide the COMPLETE content for the areas I am changing.
+
+    // ...
+    // Let's execute the logic changes first.
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
+            <div className="flex items-center gap-4 mb-6 border-b border-slate-200 dark:border-slate-700">
+                <button
+                    type="button"
+                    onClick={() => setActiveTab('details')}
+                    className={`px-4 py-2 font-bold text-sm transition-colors border-b-2 ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                >
+                    Product Details
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setActiveTab('seo')}
+                    className={`px-4 py-2 font-bold text-sm transition-colors border-b-2 ${activeTab === 'seo' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                >
+                    SEO Settings
+                </button>
+            </div>
 
-                {/* Header */}
-                <div className="border-b border-slate-100 dark:border-slate-700 pb-4 mb-4">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Product Details</h2>
-                    <p className="text-sm text-slate-500">Manage product information and special offers.</p>
-                </div>
+            <div className={activeTab === 'details' ? 'block space-y-8' : 'hidden'}>
+                <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
 
-                {/* Special Offers Section */}
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 space-y-4">
-                    <h3 className="font-bold text-primary flex items-center gap-2">
-                        <span className="material-icons-round">local_offer</span>
-                        Special Offers & Pricing
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Original Price ({'\u09F3'})</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                value={formData.originalPrice}
-                                onChange={e => handleOriginalPriceChange(e.target.value)}
-                                placeholder="Base Price"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Discount (%)</label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                value={formData.discountPercent ?? ''}
-                                onChange={e => handleDiscountChange(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Special Tag</label>
-                            <select
-                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                value={formData.specialCategoryId || ''}
-                                onChange={e => setFormData({ ...formData, specialCategoryId: parseInt(e.target.value) })}
-                            >
-                                <option value="">None</option>
-                                {specialCategoriesList.map(sc => (
-                                    <option key={sc.id} value={sc.id}>{sc.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/* Header */}
+                    <div className="border-b border-slate-100 dark:border-slate-700 pb-4 mb-4">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Product Information</h2>
+                        <p className="text-sm text-slate-500">Manage basic product details, pricing, and inventory.</p>
                     </div>
-                </div>
 
-                {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Product Name</label>
-                        <input
-                            type="text"
-                            required
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            value={formData.name}
-                            onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Category</label>
-                            <select
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                value={formData.category}
-                                onChange={handleCategoryChange}
-                            >
-                                <option value="">Select Category</option>
-                                {categoriesList.map(c => (
-                                    <option key={c.id} value={c.name}>{c.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {availableSubcategories.length > 0 && (
+                    {/* Special Offers Section */}
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 space-y-4">
+                        <h3 className="font-bold text-primary flex items-center gap-2">
+                            <span className="material-icons-round">local_offer</span>
+                            Special Offers & Pricing
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Subcategory</label>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Original Price ({'\u09F3'})</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.originalPrice}
+                                    onChange={e => handleOriginalPriceChange(e.target.value)}
+                                    placeholder="Base Price"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Discount (%)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.discountPercent ?? ''}
+                                    onChange={e => handleDiscountChange(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Special Tag</label>
                                 <select
-                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                    value={formData.subcategory}
-                                    onChange={e => setFormData({ ...formData, subcategory: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.specialCategoryId || ''}
+                                    onChange={e => setFormData({ ...formData, specialCategoryId: parseInt(e.target.value) })}
                                 >
-                                    <option value="">Select Subcategory</option>
-                                    {availableSubcategories.map(sub => (
-                                        <option key={sub} value={sub}>{sub}</option>
+                                    <option value="">None</option>
+                                    {specialCategoriesList.map(sc => (
+                                        <option key={sc.id} value={sc.id}>{sc.name}</option>
                                     ))}
                                 </select>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
 
-                {/* Final Price & Stock */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Final Price ({'\u09F3'})</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            required
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-primary"
-                            value={formData.price}
-                            readOnly
-                            title="Auto-calculated from Original Price - Discount"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Stock Quantity</label>
-                        <input
-                            type="number"
-                            required
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            value={formData.stockQuantity}
-                            onChange={e => setFormData({ ...formData, stockQuantity: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Unit Label</label>
-                        <input
-                            type="text"
-                            placeholder="e.g. 1kg, 500g, Pack"
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            value={formData.quantity}
-                            onChange={e => setFormData({ ...formData, quantity: e.target.value })}
-                        />
-                    </div>
-                </div>
-
-                {/* Description */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Description</label>
-                    <textarea
-                        rows={4}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                        value={formData.description}
-                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    />
-                </div>
-
-                {/* Colors */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Available Colors</label>
-                    <div className="flex gap-2 mb-2">
-                        <input
-                            type="text"
-                            placeholder="Add a color (e.g. Red, Blue)"
-                            className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            value={colorInput}
-                            onChange={e => setColorInput(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddColor())}
-                        />
-                        <button
-                            type="button"
-                            onClick={handleAddColor}
-                            className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                            Add
-                        </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {formData.colors?.map((color) => (
-                            <span key={color} className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300">
-                                {color}
-                                <button type="button" onClick={() => removeColor(color)} className="hover:text-red-500">
-                                    <span className="material-icons-round text-base">close</span>
-                                </button>
-                            </span>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Sizes */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Available Sizes</label>
-                    <div className="flex gap-2 mb-2">
-                        <input
-                            type="text"
-                            placeholder="Add a size (e.g. S, M, XL, 42)"
-                            className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            value={sizeInput}
-                            onChange={e => setSizeInput(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSize())}
-                        />
-                        <button
-                            type="button"
-                            onClick={handleAddSize}
-                            className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                            Add
-                        </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {formData.sizes?.map((size) => (
-                            <span key={size} className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300">
-                                {size}
-                                <button type="button" onClick={() => removeSize(size)} className="hover:text-red-500">
-                                    <span className="material-icons-round text-base">close</span>
-                                </button>
-                            </span>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Product Images */}
-                <div className="space-y-4">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Product Images (Max 6)</label>
-
-                    {/* Image Grid */}
-                    <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                        {previewUrls.map((url, idx) => (
-                            <div key={idx} className="relative aspect-square bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 group">
-                                <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
-                                <button
-                                    type="button"
-                                    onClick={() => removeImage(idx)}
-                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    {/* Basic Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Product Name</label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                value={formData.name}
+                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Category</label>
+                                <select
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.category}
+                                    onChange={handleCategoryChange}
                                 >
-                                    <span className="material-icons-round text-xs">close</span>
-                                </button>
+                                    <option value="">Select Category</option>
+                                    {categoriesList.map(c => (
+                                        <option key={c.id} value={c.name}>{c.name}</option>
+                                    ))}
+                                </select>
                             </div>
-                        ))}
-
-                        {/* Upload Button */}
-                        {previewUrls.length < 6 && (
-                            <label className="aspect-square bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleFileSelect}
-                                />
-                                <span className="material-icons-round text-slate-400 mb-1">add_photo_alternate</span>
-                                <span className="text-xs font-bold text-slate-500">Add Image</span>
-                            </label>
-                        )}
+                            {availableSubcategories.length > 0 && (
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Subcategory</label>
+                                    <select
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                        value={formData.subcategory}
+                                        onChange={e => setFormData({ ...formData, subcategory: e.target.value })}
+                                    >
+                                        <option value="">Select Subcategory</option>
+                                        {availableSubcategories.map(sub => (
+                                            <option key={sub} value={sub}>{sub}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <p className="text-xs text-slate-500">First image will be the primary display image.</p>
-                </div>
 
+                    {/* Final Price & Stock */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Final Price ({'\u09F3'})</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                required
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-primary"
+                                value={formData.price}
+                                readOnly
+                                title="Auto-calculated from Original Price - Discount"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Stock Quantity</label>
+                            <input
+                                type="number"
+                                required
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                value={formData.stockQuantity}
+                                onChange={e => setFormData({ ...formData, stockQuantity: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Unit Label</label>
+                            <input
+                                type="text"
+                                placeholder="e.g. 1kg, 500g, Pack"
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                value={formData.quantity}
+                                onChange={e => setFormData({ ...formData, quantity: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Description</label>
+                        <textarea
+                            rows={4}
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                            value={formData.description}
+                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Colors */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Available Colors</label>
+                        <div className="flex gap-2 mb-2">
+                            <input
+                                type="text"
+                                placeholder="Add a color (e.g. Red, Blue)"
+                                className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                value={colorInput}
+                                onChange={e => setColorInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddColor())}
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddColor}
+                                className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {formData.colors?.map((color) => (
+                                <span key={color} className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {color}
+                                    <button type="button" onClick={() => removeColor(color)} className="hover:text-red-500">
+                                        <span className="material-icons-round text-base">close</span>
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Sizes */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Available Sizes</label>
+                        <div className="flex gap-2 mb-2">
+                            <input
+                                type="text"
+                                placeholder="Add a size (e.g. S, M, XL, 42)"
+                                className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                value={sizeInput}
+                                onChange={e => setSizeInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSize())}
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddSize}
+                                className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {formData.sizes?.map((size) => (
+                                <span key={size} className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {size}
+                                    <button type="button" onClick={() => removeSize(size)} className="hover:text-red-500">
+                                        <span className="material-icons-round text-base">close</span>
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Product Images */}
+                    <div className="space-y-4">
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Product Images (Max 6)</label>
+
+                        {/* Image Grid */}
+                        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                            {previewUrls.map((url, idx) => (
+                                <div key={idx} className="relative aspect-square bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 group">
+                                    <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(idx)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <span className="material-icons-round text-xs">close</span>
+                                    </button>
+                                </div>
+                            ))}
+
+                            {/* Upload Button */}
+                            {previewUrls.length < 6 && (
+                                <label className="aspect-square bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFileSelect}
+                                    />
+                                    <span className="material-icons-round text-slate-400 mb-1">add_photo_alternate</span>
+                                    <span className="text-xs font-bold text-slate-500">Add Image</span>
+                                </label>
+                            )}
+                        </div>
+                        <p className="text-xs text-slate-500">First image will be the primary display image.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* SEO Section */}
+            <div className={activeTab === 'seo' ? 'block' : 'hidden'}>
+                <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-8">
+                    <div className="border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Search Engine Optimization</h2>
+                        <p className="text-sm text-slate-500">Optimize how your product appears in search results.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* SEO Fields */}
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Meta Title</label>
+                                    <span className={`text-xs ${(formData.metaTitle?.length || 0) > 60 ? 'text-red-500' : 'text-slate-400'}`}>
+                                        {formData.metaTitle?.length || 0} / 60
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.metaTitle}
+                                    placeholder={formData.name || "Product Name"}
+                                    onChange={e => setFormData({ ...formData, metaTitle: e.target.value })}
+                                />
+                                <p className="text-xs text-slate-500">Leave blank to use Product Name.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Meta Description</label>
+                                    <span className={`text-xs ${(formData.metaDescription?.length || 0) > 160 ? 'text-red-500' : 'text-slate-400'}`}>
+                                        {formData.metaDescription?.length || 0} / 160
+                                    </span>
+                                </div>
+                                <textarea
+                                    rows={4}
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.metaDescription}
+                                    placeholder={formData.description?.slice(0, 160) || "Short description of the product..."}
+                                    onChange={e => setFormData({ ...formData, metaDescription: e.target.value })}
+                                />
+                                <p className="text-xs text-slate-500">Leave blank to use Product Description.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keywords</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.keywords?.join(', ')}
+                                    placeholder="Comma separated keywords (e.g. fresh, organic, vegetables)"
+                                    onChange={e => setFormData({ ...formData, keywords: e.target.value.split(',').map(k => k.trim()) })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Canonical URL</label>
+                                <input
+                                    type="url"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={formData.canonicalUrl}
+                                    onChange={e => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <input
+                                    type="checkbox"
+                                    id="noIndex"
+                                    checked={formData.noIndex}
+                                    onChange={e => setFormData({ ...formData, noIndex: e.target.checked })}
+                                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                                <label htmlFor="noIndex" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    No Index (Hide from Search Engines)
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Google Search Preview */}
+                        <div>
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 block">Google Search Preview</label>
+                            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 max-w-xl">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-[10px] text-slate-500">Logo</div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm text-[#202124]">Daily Fresh</span>
+                                        <span className="text-xs text-[#5f6368]">https://dailyfresh.com/product/{formData.name?.toLowerCase().replace(/\s+/g, '-')}</span>
+                                    </div>
+                                    <span className="material-icons-round text-lg text-[#5f6368] ml-auto">more_vert</span>
+                                </div>
+                                <h3 className="text-xl text-[#1a0dab] hover:underline cursor-pointer truncate mb-1">
+                                    {formData.metaTitle || formData.name || "Product Name"}
+                                </h3>
+                                <p className="text-sm text-[#4d5156] line-clamp-2">
+                                    {formData.metaDescription || formData.description || "Product description will appear here..."}
+                                </p>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-4">
+                                * This is a simulation. Actual appearance on Google may vary.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="flex justify-end gap-4">

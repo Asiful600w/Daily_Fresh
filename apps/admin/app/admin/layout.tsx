@@ -67,6 +67,7 @@ function AdminProtectedLayout({
         ] : []),
 
         { name: 'Settings', href: '/admin/settings', icon: 'settings' },
+        { name: 'Documentation', href: '/admin/documentation', icon: 'menu_book' },
     ];
 
     const activeItem = navItems.find(item => item.href === pathname) || navItems[0];
@@ -149,9 +150,9 @@ function AdminProtectedLayout({
                         </div>
                         <div className="flex items-center gap-4">
                             <NotificationDropdown />
-                            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/10 text-text-main transition-colors">
+                            <Link href="/admin/documentation" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/10 text-text-main transition-colors" title="Documentation">
                                 <span className="material-symbols-outlined">help_outline</span>
-                            </button>
+                            </Link>
                             <div className="h-6 w-px bg-border-subtle mx-2"></div>
                             <div className="flex items-center gap-2 px-2 py-1 rounded-lg">
                                 <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">

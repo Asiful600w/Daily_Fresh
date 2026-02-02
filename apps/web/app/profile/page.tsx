@@ -1,6 +1,5 @@
 'use client';
 
-
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -12,13 +11,16 @@ import { RecentOrders } from '@/components/profile/RecentOrders';
 import { QuickActions } from '@/components/profile/QuickActions';
 import { AddressCard } from '@/components/profile/AddressCard';
 import { MembershipCard } from '@/components/profile/MembershipCard';
+import { ProfileEditModal } from '@/components/profile/ProfileEditModal';
 
 export default function ProfilePage() {
     const { user, loading: authLoading } = useAuth();
     const { wishlistIds } = useWishlist();
-    // const user = { id: 'test-user-id', user_metadata: { full_name: "John Doe", avatar_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuD65BJL0r1X8Npp05j0dH01w9PaEy72vCm25F5Z2k81SlsKaQVDxR8ABDXhMG5tP7Sm97zkv_vrjAesoljrTKYml1nXRoYwUhalbeSfNM_jqtkRaM3eVgco6gfUHXzySrs_PNb7razmQFqVIeZterdllROAFGSMNiKmMfAPtICJ4t8C_T8jD4TZAjuplMArHQ86DMi6CPHndHuC0FLC6f_Fxlex_EyV14aUlbash-rxbZc0GCGcs7y_R-gGSX7lBiPHSEwzARMRUTo" }, email: 'john@example.com' }; const authLoading = false;
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState<any[]>([]);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    // Stats State
     const [stats, setStats] = useState({
         pendingOrders: 0,
         savedItems: 0,
@@ -50,7 +52,7 @@ export default function ProfilePage() {
                     pendingOrders: allOrders
                         ? allOrders.filter((o: any) => o.status === 'pending').length
                         : 0,
-                    completedOrders: allOrders ? allOrders.filter((o: any) => o.status === 'delivered').length : 0, // Replaces Total Saved count context
+                    completedOrders: allOrders ? allOrders.filter((o: any) => o.status === 'delivered').length : 0,
                     totalSpent: allOrders
                         ? allOrders
                             .filter((o: any) => o.status === 'delivered')
@@ -114,15 +116,40 @@ export default function ProfilePage() {
 
     return (
         <div className="flex justify-center bg-background-light dark:bg-background-dark min-h-screen">
-            <div className="flex w-full max-w-[1280px]">
-                <ProfileSidebar activeTab="overview" />
+            <div className="flex w-full max-w-7xl">
+                <ProfileSidebar activeTab="overview" onEditProfile={() => setIsEditModalOpen(true)} />
 
-                <main className="flex flex-col flex-1 p-4 md:p-8">
+                <main className="flex flex-col flex-1 p-4 md:p-8 w-full">
+                    {/* Mobile Header (Hidden on Desktop) */}
+                    <div className="lg:hidden flex items-center gap-4 mb-8 bg-white dark:bg-[#10221c] p-4 rounded-2xl border border-slate-100 dark:border-[#1e3a31] shadow-sm">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary">
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <span className="material-icons-round text-slate-400 text-2xl">person</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
+                                {user?.user_metadata?.full_name || 'User'}
+                            </h2>
+                            <p className="text-primary text-xs font-semibold uppercase tracking-wider">Prime Member</p>
+                        </div>
+                        <button
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-colors"
+                        >
+                            <span className="material-icons-round">edit</span>
+                        </button>
+                    </div>
+
                     {/* PageHeading */}
                     <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
                         <div className="flex flex-col gap-2">
 
-                            <p className="text-[#0d1b17] dark:text-white text-4xl font-black tracking-tight">Profile Overview</p>
+                            <p className="text-[#0d1b17] dark:text-white text-3xl md:text-4xl font-black tracking-tight">Profile Overview</p>
                             <p className="text-[#4c9a80] text-base font-normal">
                                 Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'User'}! Here's what's happening with your groceries today.
                             </p>
@@ -136,7 +163,7 @@ export default function ProfilePage() {
 
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                         {/* Left Column */}
-                        <div className="xl:col-span-2">
+                        <div className="xl:col-span-2 space-y-8">
                             <RecentOrders orders={orders} />
                             <QuickActions />
                         </div>
@@ -149,6 +176,9 @@ export default function ProfilePage() {
                     </div>
                 </main>
             </div>
+
+            <ProfileEditModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
         </div>
     );
 }
+

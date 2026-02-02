@@ -36,9 +36,33 @@ export async function generateMetadata(props: ProductPageProps): Promise<Metadat
         };
     }
 
+    const title = product.metaTitle || `${product.name} | Daily Fresh`;
+    const description = product.metaDescription || product.description || `Buy ${product.name} at the best price from Daily Fresh.`;
+
     return {
-        title: `${product.name} | Daily Fresh`,
-        description: product.description || `Buy ${product.name} at the best price.`,
+        title,
+        description,
+        keywords: product.keywords,
+        openGraph: {
+            title,
+            description,
+            images: product.ogImage || (product.images && product.images.length > 0 ? [product.images[0]] : []),
+            type: 'website',
+            url: product.canonicalUrl || `https://dailyfresh.com/product/${id}`, // ideally slug
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: product.ogImage || (product.images && product.images.length > 0 ? [product.images[0]] : []),
+        },
+        alternates: {
+            canonical: product.canonicalUrl,
+        },
+        robots: {
+            index: !product.noIndex,
+            follow: !product.noIndex,
+        }
     };
 }
 
@@ -75,6 +99,26 @@ export default async function ProductPage(props: ProductPageProps) {
             <Reviews productId={product.id} />
 
             <RelatedProducts productId={product.id} />
+            {/* Structured Data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'Product',
+                        name: product.name,
+                        description: product.metaDescription || product.description,
+                        image: product.images,
+                        offers: {
+                            '@type': 'Offer',
+                            price: product.price,
+                            priceCurrency: 'BDT',
+                            availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                        },
+                        // Add brand, sku, etc if available
+                    })
+                }}
+            />
         </main>
     );
 }
