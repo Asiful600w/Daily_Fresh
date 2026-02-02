@@ -326,47 +326,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
         }));
     };
 
-    const [activeTab, setActiveTab] = useState<'details' | 'seo'>('details');
 
-    const [formData, setFormData] = useState<Partial<Product> & { specialCategoryId?: number }>({
-        id: initialData?.id,
-        name: initialData?.name || '',
-        price: initialData?.price || 0,
-        originalPrice: initialData?.originalPrice || 0,
-        category: initialData?.category || '',
-        subcategory: initialData?.subcategory || '',
-        description: initialData?.description || '',
-        stockQuantity: initialData?.stockQuantity || 0,
-        colors: initialData?.colors || [],
-        sizes: initialData?.sizes || [],
-        quantity: initialData?.quantity || '',
-        discountPercent: initialData?.discountPercent || 0,
-        specialCategoryId: undefined,
-        images: initialData?.images || [],
-        // SEO Fields
-        metaTitle: initialData?.metaTitle || '',
-        metaDescription: initialData?.metaDescription || '',
-        canonicalUrl: initialData?.canonicalUrl || '',
-        keywords: initialData?.keywords || [],
-        noIndex: initialData?.noIndex || false,
-        ogImage: initialData?.ogImage || ''
-    });
-
-    // ... (rest of the state logic) ... 
-    // I need to be careful not to delete existing logic accidentally.
-    // I will use replace_file_content on specific blocks.
-
-    // BUT since I need to restructure the whole form to support tabs, I might need a larger replace.
-    // Let's rewrite the return statement mainly.
-
-    // First updates to state logic was needed, but I can do that via smaller edits or just one big one if I am careful.
-    // The previous tool call was too big, let's break it down.
-
-    // WAIT, I am generating the replacement content here. 
-    // I should provide the COMPLETE content for the areas I am changing.
-
-    // ...
-    // Let's execute the logic changes first.
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">

@@ -16,11 +16,11 @@
 ✓ Compiled successfully in 5.2s
   Running TypeScript ...
   Collecting page data using 11 workers ...
-  Generating static pages using 11 workers (0/20) ...
-  Generating static pages using 11 workers (5/20) 
-  Generating static pages using 11 workers (10/20) 
-  Generating static pages using 11 workers (15/20) 
-✓ Generating static pages using 11 workers (20/20) in 395.2ms
+  Generating static pages using 11 workers (0/23) ...
+  Generating static pages using 11 workers (5/23) 
+  Generating static pages using 11 workers (11/23) 
+  Generating static pages using 11 workers (17/23) 
+✓ Generating static pages using 11 workers (23/23) in 494.8ms
   Finalizing page optimization ...
 
 Route (app)
@@ -32,6 +32,7 @@ Route (app)
 ├ ○ /admin/categories/new
 ├ ○ /admin/customers
 ├ ƒ /admin/customers/[id]
+├ ○ /admin/documentation
 ├ ○ /admin/login
 ├ ○ /admin/low-stock
 ├ ○ /admin/merchants
@@ -44,6 +45,8 @@ Route (app)
 ├ ○ /admin/reviews
 ├ ○ /admin/settings
 ├ ○ /admin/special-categories
+├ ƒ /api/admin/dashboard-stats
+├ ƒ /api/admin/merchants
 ├ ƒ /api/admin/register
 └ ƒ /api/admin/verify
 
