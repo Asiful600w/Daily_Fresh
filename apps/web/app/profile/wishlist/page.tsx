@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import { ProductCard } from '@/components/product/ProductCard';
@@ -12,60 +11,59 @@ import { ProductCard } from '@/components/product/ProductCard';
 export default function WishlistPage() {
     const { user, loading: authLoading } = useAuth();
     const { wishlistIds } = useWishlist();
-    const router = useRouter();
     const [wishlistItems, setWishlistItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchWishlist = async () => {
+            try {
+                setLoading(true);
+
+                // Step 1: Fetch Wishlist IDs
+                const { data: fullWishlistData, error: fullError } = await supabase
+                    .from('wishlists')
+                    .select('id, product_id, created_at')
+                    .eq('user_id', user?.id)
+                    .order('created_at', { ascending: false });
+
+                if (fullError) throw fullError;
+
+                if (fullWishlistData.length === 0) {
+                    setWishlistItems([]);
+                    setLoading(false);
+                    return;
+                }
+
+                const ids = fullWishlistData.map((w: any) => w.product_id);
+
+                // Step 2: Fetch Products details
+                const { data: productsDetails, error: pError } = await supabase
+                    .from('products')
+                    .select('*')
+                    .in('id', ids);
+
+                if (pError) throw pError;
+
+                const items = fullWishlistData.map((w: any) => {
+                    const product = productsDetails?.find((p: any) => p.id === w.product_id);
+                    return {
+                        id: w.id, // Wishlist Record ID
+                        product: product ? { ...product, image: product.image_url } : null
+                    };
+                }).filter((item: any) => item.product);
+
+                setWishlistItems(items);
+            } catch (error) {
+                console.error('Error loading wishlist!', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (user) {
             fetchWishlist();
         }
     }, [user]);
-
-    const fetchWishlist = async () => {
-        try {
-            setLoading(true);
-
-            // Step 1: Fetch Wishlist IDs
-            const { data: fullWishlistData, error: fullError } = await supabase
-                .from('wishlists')
-                .select('id, product_id, created_at')
-                .eq('user_id', user?.id)
-                .order('created_at', { ascending: false });
-
-            if (fullError) throw fullError;
-
-            if (fullWishlistData.length === 0) {
-                setWishlistItems([]);
-                setLoading(false);
-                return;
-            }
-
-            const ids = fullWishlistData.map((w: any) => w.product_id);
-
-            // Step 2: Fetch Products details
-            const { data: productsDetails, error: pError } = await supabase
-                .from('products')
-                .select('*')
-                .in('id', ids);
-
-            if (pError) throw pError;
-
-            const items = fullWishlistData.map((w: any) => {
-                const product = productsDetails?.find((p: any) => p.id === w.product_id);
-                return {
-                    id: w.id, // Wishlist Record ID
-                    product: product ? { ...product, image: product.image_url } : null
-                };
-            }).filter((item: any) => item.product);
-
-            setWishlistItems(items);
-        } catch (error) {
-            console.error('Error loading wishlist!', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (authLoading) {
         return (

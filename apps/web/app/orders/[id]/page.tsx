@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { getOrder } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
@@ -18,27 +19,27 @@ export default function OrderDetailsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                const data = await getOrder(id as string);
+                if (data && data.user_id === user?.id) {
+                    setOrder(data);
+                } else {
+                    router.push('/404');
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (!authLoading && !user) {
             router.push('/login');
         } else if (user && id) {
             fetchOrder();
         }
-    }, [user, authLoading, id]);
-
-    const fetchOrder = async () => {
-        try {
-            const data = await getOrder(id as string);
-            if (data && data.user_id === user?.id) {
-                setOrder(data);
-            } else {
-                router.push('/404');
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [user, authLoading, id, router]);
 
     if (loading || !order) {
         return (
@@ -92,9 +93,11 @@ export default function OrderDetailsPage() {
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0">
                                     {/* Prioritize current product image (index 0), then snapshot image */}
                                     {(item.products?.images && item.products.images.length > 0) || item.image ? (
-                                        <img
+                                        <Image
                                             src={item.products?.images?.[0] || item.image}
                                             alt={item.name}
+                                            width={64}
+                                            height={64}
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (

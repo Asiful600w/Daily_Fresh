@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { Address, getUserAddresses, createOrder, saveAddress } from '@/lib/api';
@@ -41,26 +42,26 @@ export default function CheckoutPage() {
     }, [user]);
 
     useEffect(() => {
+        const fetchAddresses = async () => {
+            if (!user) return;
+            try {
+                const data = await getUserAddresses(user.id);
+                setAddresses(data);
+                // Auto-select default
+                const defaultAddr = data.find(a => a.isDefault) || data[0];
+                if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+                else setIsNewAddress(true); // No addresses, force new
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         if (!authLoading && !user) {
             router.push('/login?redirect=/checkout');
         } else if (user) {
             fetchAddresses();
         }
-    }, [user, authLoading]);
-
-    const fetchAddresses = async () => {
-        if (!user) return;
-        try {
-            const data = await getUserAddresses(user.id);
-            setAddresses(data);
-            // Auto-select default
-            const defaultAddr = data.find(a => a.isDefault) || data[0];
-            if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-            else setIsNewAddress(true); // No addresses, force new
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    }, [user, authLoading, router]);
 
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
@@ -279,7 +280,13 @@ export default function CheckoutPage() {
                                 {cart.map(item => (
                                     <div key={item.id} className="flex gap-3">
                                         <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-lg shrink-0 overflow-hidden">
-                                            <img src={item.images && item.images.length > 0 ? item.images[0] : ''} alt={item.name} className="w-full h-full object-cover" />
+                                            <Image
+                                                src={item.images && item.images.length > 0 ? item.images[0] : '/placeholder.png'}
+                                                alt={item.name}
+                                                width={64}
+                                                height={64}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-sm text-[#0d1b17] dark:text-white line-clamp-1">{item.name}</h4>

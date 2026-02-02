@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Address, getUserAddresses, deleteAddress, setDefaultAddress } from '@/lib/api';
@@ -15,13 +15,7 @@ export default function AddressesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
 
-    useEffect(() => {
-        if (user) {
-            fetchAddresses();
-        }
-    }, [user]);
-
-    const fetchAddresses = async () => {
+    const fetchAddresses = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         try {
@@ -32,7 +26,13 @@ export default function AddressesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            fetchAddresses();
+        }
+    }, [user, fetchAddresses]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this address?')) return;

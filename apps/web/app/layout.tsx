@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
@@ -58,7 +58,7 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning={true}
-        className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-24 md:pb-0`}
+        className={`${plusJakartaSans.variable} font - sans antialiased bg - gray - 50 dark: bg - [#0F172A] text - slate - 900 dark: text - slate - 100 transition - colors duration - 300 pb - 24 md: pb - 0`}
       >
         <AuthProvider>
           <WishlistProvider>

@@ -44,9 +44,7 @@ export async function generateMetadata(props: ProductPageProps): Promise<Metadat
 
 export default async function ProductPage(props: ProductPageProps) {
     const params = await props.params;
-    const searchParams = await props.searchParams;
     const { id } = params;
-    // const { sort } = searchParams; // Unused for now but good to have
 
     const product = await getProduct(id);
 

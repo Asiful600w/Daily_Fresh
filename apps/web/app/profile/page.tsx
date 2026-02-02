@@ -5,9 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { supabase } from '@/lib/supabase';
 import { getUserOrders } from '@/lib/api';
-import { useRouter } from 'next/navigation';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { RecentOrders } from '@/components/profile/RecentOrders';
@@ -19,7 +17,6 @@ export default function ProfilePage() {
     const { user, loading: authLoading } = useAuth();
     const { wishlistIds } = useWishlist();
     // const user = { id: 'test-user-id', user_metadata: { full_name: "John Doe", avatar_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuD65BJL0r1X8Npp05j0dH01w9PaEy72vCm25F5Z2k81SlsKaQVDxR8ABDXhMG5tP7Sm97zkv_vrjAesoljrTKYml1nXRoYwUhalbeSfNM_jqtkRaM3eVgco6gfUHXzySrs_PNb7razmQFqVIeZterdllROAFGSMNiKmMfAPtICJ4t8C_T8jD4TZAjuplMArHQ86DMi6CPHndHuC0FLC6f_Fxlex_EyV14aUlbash-rxbZc0GCGcs7y_R-gGSX7lBiPHSEwzARMRUTo" }, email: 'john@example.com' }; const authLoading = false;
-    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState<any[]>([]);
     const [stats, setStats] = useState({
@@ -29,12 +26,6 @@ export default function ProfilePage() {
         totalSpent: 0
     });
 
-    useEffect(() => {
-        if (user) {
-            fetchDashboardData();
-        }
-    }, [user]);
-
     // Update stats when wishlistIds changes
     useEffect(() => {
         setStats(prev => ({
@@ -43,37 +34,43 @@ export default function ProfilePage() {
         }));
     }, [wishlistIds]);
 
-    const fetchDashboardData = async () => {
-        try {
-            setLoading(true);
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
 
-            // Fetch Orders
-            const allOrders = await getUserOrders(user!.id);
-            const recentOrders = allOrders.slice(0, 5);
+                // Fetch Orders
+                const allOrders = await getUserOrders(user!.id);
+                const recentOrders = allOrders.slice(0, 5);
 
-            setStats(prev => ({
-                ...prev,
-                // savedItems is handled by effect above
-                activeOrders: allOrders ? allOrders.filter((o: any) => o.status !== 'delivered').length : 0,
-                pendingOrders: allOrders
-                    ? allOrders.filter((o: any) => o.status === 'pending').length
-                    : 0,
-                completedOrders: allOrders ? allOrders.filter((o: any) => o.status === 'delivered').length : 0, // Replaces Total Saved count context
-                totalSpent: allOrders
-                    ? allOrders
-                        .filter((o: any) => o.status === 'delivered')
-                        .reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0)
-                    : 0
-            }));
+                setStats(prev => ({
+                    ...prev,
+                    // savedItems is handled by effect above
+                    activeOrders: allOrders ? allOrders.filter((o: any) => o.status !== 'delivered').length : 0,
+                    pendingOrders: allOrders
+                        ? allOrders.filter((o: any) => o.status === 'pending').length
+                        : 0,
+                    completedOrders: allOrders ? allOrders.filter((o: any) => o.status === 'delivered').length : 0, // Replaces Total Saved count context
+                    totalSpent: allOrders
+                        ? allOrders
+                            .filter((o: any) => o.status === 'delivered')
+                            .reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0)
+                        : 0
+                }));
 
-            setOrders(recentOrders);
+                setOrders(recentOrders);
 
-        } catch (error) {
-            console.error('Error loading dashboard data!', error);
-        } finally {
-            setLoading(false);
+            } catch (error) {
+                console.error('Error loading dashboard data!', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (user) {
+            fetchDashboardData();
         }
-    };
+    }, [user]);
 
     if (authLoading) {
         return (

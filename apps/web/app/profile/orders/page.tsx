@@ -15,26 +15,26 @@ export default function MyOrdersPage() {
     const [orders, setOrders] = useState<any[]>([]);
 
     useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setLoading(true);
+                const data = await getUserOrders(user!.id);
+                if (data) {
+                    setOrders(data);
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (!authLoading && !user) {
             router.push('/login');
         } else if (user) {
             fetchOrders();
         }
-    }, [user, authLoading]);
-
-    const fetchOrders = async () => {
-        try {
-            setLoading(true);
-            const data = await getUserOrders(user!.id);
-            if (data) {
-                setOrders(data);
-            }
-        } catch (error) {
-            console.error('Error loading orders:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [user, authLoading, router]);
 
     if (authLoading || loading) {
         return (

@@ -13,11 +13,22 @@ export default function AuthCallbackPage() {
         // We just need to wait a moment or check session state, then redirect.
 
         const handleAuth = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) {
-                console.error('Auth error:', error);
-                // Optionally show error
+            // Extract the 'code' parameter from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                const { error } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) {
+                    console.error('Auth error:', error);
+                    // Optionally show error
+                }
+            } else {
+                // If no code, perhaps it's a different auth flow or an error
+                console.warn('No code found in URL for exchangeCodeForSession.');
+                // Optionally handle this case, e.g., redirect to an error page or login
             }
+
             // Whether session exists or not (maybe just verified email), redirect to login
             // Using window.location to properly clear url params
             window.location.href = '/login';

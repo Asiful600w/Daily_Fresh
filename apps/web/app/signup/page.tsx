@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function SignupPage() {
     const router = useRouter();
+    // ...
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -68,6 +70,7 @@ export default function SignupPage() {
         }
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleSocialLogin = async (provider: 'google' | 'facebook') => {
         setLoading(true);
         const { error } = await supabase.auth.signInWithOAuth({
@@ -140,7 +143,7 @@ export default function SignupPage() {
                             onClick={() => alert('Google login coming soon')}
                             className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="size-5 grayscale" alt="Google" />
+                            <Image src="https://www.svgrepo.com/show/475656/google-color.svg" width={20} height={20} className="grayscale" alt="Google" />
                             <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
                             <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
@@ -148,7 +151,7 @@ export default function SignupPage() {
                             onClick={() => alert('Facebook login coming soon')}
                             className="flex items-center justify-center gap-2 h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl opacity-60 cursor-not-allowed transition-all"
                         >
-                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="size-5 grayscale" alt="Facebook" />
+                            <Image src="https://www.svgrepo.com/show/475647/facebook-color.svg" width={20} height={20} className="grayscale" alt="Facebook" />
                             <span className="font-bold text-slate-500 text-sm">Coming Soon</span>
                             <span className="material-icons-round text-xs text-slate-400">lock</span>
                         </button>
