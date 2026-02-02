@@ -4,7 +4,11 @@ import { PrismaClient } from "@prisma/client"
 const prismaClientSingleton = () => {
     return new PrismaClient({
         // @ts-ignore
-        datasourceUrl: process.env.DATABASE_URL,
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
     })
 }
 
