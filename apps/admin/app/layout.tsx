@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
+import { ThemeProvider } from "@/context/ThemeProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -32,15 +33,22 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
       >
-        <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <FlyToCartProvider>
-                {children}
-              </FlyToCartProvider>
-            </CartProvider>
-          </WishlistProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <FlyToCartProvider>
+                  {children}
+                </FlyToCartProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { Category, searchProducts, Product } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/format';
 import { useUI } from '@/context/UIContext';
+import { useTheme } from 'next-themes';
 
 function SearchBar() {
     const router = useRouter();
@@ -94,12 +95,11 @@ export function NavBar({ categories }: { categories: Category[] }) {
     const { user, signOut } = useAuth();
     // const user = { user_metadata: { full_name: "Test User", avatar_url: null } }; const signOut = async () => { };
 
+    const { setTheme, theme } = useTheme();
+
     const [isScrolled, setIsScrolled] = React.useState(false);
-    const [isDark, setIsDark] = React.useState(false);
 
     React.useEffect(() => {
-        setIsDark(document.documentElement.classList.contains('dark'));
-
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
         };
@@ -107,46 +107,8 @@ export function NavBar({ categories }: { categories: Category[] }) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
-        const x = e.clientX;
-        const y = e.clientY;
-        const endRadius = Math.hypot(
-            Math.max(x, innerWidth - x),
-            Math.max(y, innerHeight - y)
-        );
-
-        // @ts-ignore
-        if (!document.startViewTransition) {
-            document.documentElement.classList.toggle('dark');
-            setIsDark(!isDark);
-            return;
-        }
-
-        // @ts-ignore
-        const transition = document.startViewTransition(() => {
-            document.documentElement.classList.toggle('dark');
-            setIsDark(!isDark);
-        });
-
-        transition.ready.then(() => {
-            const clipPath = [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${endRadius}px at ${x}px ${y}px)`,
-            ];
-
-            document.documentElement.animate(
-                {
-                    clipPath: isDark ? [...clipPath].reverse() : clipPath,
-                },
-                {
-                    duration: 500,
-                    easing: "ease-in",
-                    pseudoElement: isDark
-                        ? "::view-transition-old(root)"
-                        : "::view-transition-new(root)",
-                }
-            );
-        });
+    const toggleTheme = () => {
+        setTheme(theme === "dark" ? "light" : "dark");
     };
 
     const { openSearch } = useUI();
@@ -183,7 +145,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
                         onClick={toggleTheme}
                     >
                         <span className="material-icons-round text-xl">
-                            {isDark ? 'light_mode' : 'dark_mode'}
+                            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
                         </span>
                     </button>
                     {user ? (
@@ -207,7 +169,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
                         onClick={toggleTheme}
                     >
                         <span className="material-icons-round text-xl">
-                            {isDark ? 'light_mode' : 'dark_mode'}
+                            {theme === 'dark' ? 'light_mode' : 'dark_mode'}
                         </span>
                     </button>
 

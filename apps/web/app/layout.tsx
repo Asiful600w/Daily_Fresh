@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { ThemeProvider } from "@/context/ThemeProvider";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
@@ -60,20 +61,26 @@ export default async function RootLayout({
         suppressHydrationWarning={true}
         className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-24 md:pb-0 overflow-x-hidden`}
       >
-        <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <FlyToCartProvider>
-                <NextTopLoader color="#22C55E" showSpinner={false} />
-                <UIProvider>
-                  <GlobalSearch />
-                  {children}
-                  <MobileNav categories={categories} />
-                </UIProvider>
-              </FlyToCartProvider>
-            </CartProvider>
-          </WishlistProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <FlyToCartProvider>
+                  <NextTopLoader color="#22C55E" showSpinner={false} />
+                  <UIProvider>
+                    <GlobalSearch />
+                    {children}
+                    <MobileNav categories={categories} />
+                  </UIProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

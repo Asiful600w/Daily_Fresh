@@ -5,6 +5,25 @@ import { AdminNotificationProvider } from '@/context/AdminNotificationContext';
 import { NotificationDropdown } from '@/components/admin/NotificationDropdown';
 import { AdminAuthProvider, useAdminAuth } from '@/context/AdminAuthContext';
 import { useEffect } from 'react';
+import { useTheme } from 'next-themes';
+
+function ThemeToggle() {
+    const { theme, setTheme } = useTheme();
+
+    return (
+        <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-text-main hover:bg-white dark:hover:bg-slate-700 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 transition-all group"
+        >
+            <span className="material-symbols-outlined !text-[20px] text-text-muted group-hover:text-primary transition-colors">
+                {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
+            <span className="text-sm font-medium">
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+        </button>
+    );
+}
 
 function AdminProtectedLayout({
     children,
@@ -123,7 +142,8 @@ function AdminProtectedLayout({
                         })}
                     </nav>
                     <div className="p-4 border-t border-border-subtle bg-slate-50/50 dark:bg-slate-800/50">
-                        <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 shadow-sm">
+                        <ThemeToggle />
+                        <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 shadow-sm mt-3">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                                 <span className="material-symbols-outlined text-primary">person</span>
                             </div>
