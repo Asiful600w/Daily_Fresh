@@ -24,11 +24,25 @@ export default function LoginPage() {
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        startTransition(() => {
-            // Import login action dynamically or assume file import
-            // I need to add import { login } from "@/actions/login"
-            // Since I can't easily add import with replace_file_content mid-file without breaking, 
-            // I will use replace_file_content for the whole file logic or upper section.
+        startTransition(async () => {
+            try {
+                // Call server action
+                const result = await login({ email, password }, "127.0.0.1");
+
+                if (result.error) {
+                    setError(result.error);
+                } else if (result.success) {
+                    // Redirect logic handled by action or manually here?
+                    // Action usually does redirect or returns success.
+                    // If action did not redirect (e.g. no server-side redirect), we do it client-side.
+                    const redirectUrl = searchParams.get('redirect') || '/';
+                    router.push(redirectUrl);
+                    router.refresh();
+                }
+            } catch (err) {
+                console.error(err)
+                setError("Something went wrong");
+            }
         });
     }
 
