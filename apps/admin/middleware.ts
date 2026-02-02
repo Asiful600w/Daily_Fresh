@@ -59,13 +59,7 @@ export default auth((req) => {
 
     // 5. Add Security Headers
     // We can attach headers to the response
-    const response = NextResponse.next()
-    response.headers.set("X-Content-Type-Options", "nosniff")
-    response.headers.set("X-Frame-Options", "DENY")
-    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-    response.headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://*.supabase.in; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';")
-
-    return response
+    return NextResponse.next()
 })
 
 export const config = {
