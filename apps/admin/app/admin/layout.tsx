@@ -1,11 +1,12 @@
+
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AdminNotificationProvider } from '@/context/AdminNotificationContext';
 import { NotificationDropdown } from '@/components/admin/NotificationDropdown';
-import { AdminAuthProvider, useAdminAuth } from '@/context/AdminAuthContext';
 import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { useSession, signOut } from "next-auth/react"
 
 function ThemeToggle() {
     const { theme, setTheme } = useTheme();
@@ -32,22 +33,24 @@ function AdminProtectedLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { adminUser, adminLoading, signOutAdmin } = useAdminAuth();
+    const { data: session, status } = useSession()
+    const loading = status === "loading"
+    const adminUser = session?.user
 
     const isPublicAdminPage = pathname === '/admin/login' || pathname === '/admin/register';
 
     useEffect(() => {
-        if (!isPublicAdminPage && !adminLoading && !adminUser) {
+        if (!isPublicAdminPage && !loading && !session) {
             router.push('/admin/login');
         }
-    }, [adminUser, adminLoading, router, isPublicAdminPage]);
+    }, [session, loading, router, isPublicAdminPage]);
 
     // Allow access to login and register page without auth check or dashboard layout
     if (isPublicAdminPage) {
         return <>{children}</>;
     }
 
-    if (adminLoading) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
                 <div className="flex flex-col items-center gap-4">
@@ -58,30 +61,21 @@ function AdminProtectedLayout({
         );
     }
 
-    if (!adminUser) return null;
+    if (!session) return null;
 
     const navItems = [
         { name: 'Dashboard', href: '/admin', icon: 'dashboard' },
-
-        // Orders: Visible to everyone, but filtered inside implementation
         { name: 'Orders', href: '/admin/orders', icon: 'shopping_bag' },
-
-        // Products: Visible to everyone, but filtered inside implementation
         { name: 'Products', href: '/admin/products', icon: 'inventory_2' },
 
-        // Super Admin Only Items
-        ...(adminUser?.role === 'super_admin' ? [
+        ...(adminUser?.role === 'ADMIN' ? [ // Changed from super_admin to ADMIN as per new schema
             { name: 'Special Offers', href: '/admin/special-categories', icon: 'local_offer' },
             { name: 'Customers', href: '/admin/customers', icon: 'group' },
             { name: 'Merchants', href: '/admin/merchants', icon: 'admin_panel_settings' },
             { name: 'Categories', href: '/admin/categories', icon: 'category' }
         ] : []),
 
-        // Reviews: Visible to everyone? Maybe restrict to super_admin for now if no specific merchant review logic exists yet
-        // Task says "statistics... of their uploaded products" - implies reviews might be relevant but requires heavy filtering.
-        // Let's hide for now to be safe or keep it if we implement filtering.
-        // Plan didn't specify, but safer to hide complex things not yet implemented.
-        ...(adminUser?.role === 'super_admin' ? [
+        ...(adminUser?.role === 'ADMIN' ? [
             { name: 'Reviews', href: '/admin/reviews', icon: 'reviews' },
         ] : []),
 
@@ -152,7 +146,7 @@ function AdminProtectedLayout({
                                 <span className="text-[10px] text-text-muted truncate">Administrator</span>
                             </div>
                             <button
-                                onClick={() => signOutAdmin()}
+                                onClick={() => signOut()}
                                 className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
                             >
                                 <span className="material-symbols-outlined !text-[18px]">logout</span>
@@ -196,9 +190,9 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
+    // Removed AdminAuthProvider wrapper as we use SessionProvider from RootLayout
+    // and useSession hook directly in AdminProtectedLayout.
     return (
-        <AdminAuthProvider>
-            <AdminProtectedLayout>{children}</AdminProtectedLayout>
-        </AdminAuthProvider>
+        <AdminProtectedLayout>{children}</AdminProtectedLayout>
     );
 }

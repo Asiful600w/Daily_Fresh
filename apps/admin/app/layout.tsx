@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   description: "Fresh produce delivered from farm to your doorstep.",
 };
 
+import { NextAuthSessionProvider } from '@/context/SessionProvider';
+
+// ... (imports)
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,22 +37,24 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <FlyToCartProvider>
-                  {children}
-                </FlyToCartProvider>
-              </CartProvider>
-            </WishlistProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <NextAuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  <FlyToCartProvider>
+                    {children}
+                  </FlyToCartProvider>
+                </CartProvider>
+              </WishlistProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );
