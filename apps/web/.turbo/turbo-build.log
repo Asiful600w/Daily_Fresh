@@ -2,17 +2,69 @@
 > web@0.1.0 build
 > prisma generate && next build --webpack
 
-Loaded Prisma config from prisma.config.ts.
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
 
-Prisma schema loaded from prisma\schema.prisma.
-Error: 
-EBUSY: resource busy or locked, copyfile 'F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\node_modules\@prisma\client\runtime\query_compiler_fast_bg.postgresql.js' -> 'F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\node_modules\.prisma\client\query_compiler_fast_bg.js'
+✔ Installed the @prisma/client and prisma packages in your project
+
+✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 62ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+
+▲ Next.js 16.1.4 (webpack)
+- Environments: .env.local, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for client (static)...
+ ○ (pwa) Service worker: F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\public\sw.js
+ ○ (pwa)   URL: /sw.js
+ ○ (pwa)   Scope: /
+✓ Compiled successfully in 8.9s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+prisma:warn In production, we recommend using `prisma generate --no-engine` (See: `prisma generate --help`)
+  Generating static pages using 11 workers (0/105) ...
+  Generating static pages using 11 workers (26/105) 
+  Generating static pages using 11 workers (52/105) 
+  Generating static pages using 11 workers (78/105) 
+✓ Generating static pages using 11 workers (105/105) in 715.2ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/auth/[...nextauth]
+├ ○ /auth/callback
+├ ƒ /cart
+├ ƒ /category/[slug]
+├ ○ /checkout
+├ ○ /data-deletion
+├ ○ /debug-update
+├ ○ /forgot-password
+├ ○ /icon.png
+├ ○ /login
+├ ƒ /offers/[slug]
+├ ƒ /orders/[id]
+├ ○ /privacy
+├ ƒ /product/[id]
+├ ○ /profile
+├ ○ /profile/addresses
+├ ○ /profile/orders
+├ ○ /profile/wishlist
+├ ƒ /shop
+├ ○ /signup
+├ ○ /terms
+└ ○ /update-password
 
 
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web
-npm error workspace web@0.1.0
-npm error location F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web
-npm error command failed
-npm error command C:\Windows\system32\cmd.exe /d /s /c prisma generate && next build --webpack
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
