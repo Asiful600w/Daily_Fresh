@@ -1,53 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+// Remove supabase import
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { login } from '@/actions/login';
 
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false); // Removed in favor of isPending
     const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const [isPending, startTransition] = React.useTransition();
+
+    // Import action (add import at top manually if needed, but tool handles it best if I include it)
+    // I will replace imports separately or in one go if I rewrite the file.
+    // Let's rewrite the handleLogin logic.
+
+    const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setError(null);
-
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
+        startTransition(() => {
+            // Import login action dynamically or assume file import
+            // I need to add import { login } from "@/actions/login"
+            // Since I can't easily add import with replace_file_content mid-file without breaking, 
+            // I will use replace_file_content for the whole file logic or upper section.
         });
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        } else {
-            const redirectUrl = searchParams.get('redirect') || '/';
-            router.push(redirectUrl);
-            router.refresh();
-        }
-    };
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-        setLoading(true);
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: provider,
-            options: {
-                redirectTo: 'https://daily-fresh-web.vercel.app/auth/callback',
-            },
-        });
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        }
+        // setLoading(true); // Removed
+        // Redirect to NextAuth social login endpoint if implemented later
+        alert(`${provider} login coming soon`);
     };
 
     return (
@@ -170,10 +159,10 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isPending}
                             className="w-full h-14 bg-primary hover:bg-primary-dark text-white font-bold text-lg rounded-xl shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            {loading ? (
+                            {isPending ? (
                                 <>
                                     <span className="size-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
                                     <span>Signing In...</span>
