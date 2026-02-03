@@ -3,9 +3,8 @@
 
 import * as z from "zod"
 import bcrypt from "bcryptjs"
-import { PrismaClient } from "@prisma/client"
 import { RegisterSchema } from "@/schemas"
-import prisma from "@/lib/prisma"
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const validatedFields = RegisterSchema.safeParse(values)
@@ -17,26 +16,28 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const { email, password, name } = validatedFields.data
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const existingUser = await prisma.user.findUnique({
-        where: {
-            email,
-        },
-    })
+    const { data: existingUser } = await supabaseAdmin
+        .from('User')
+        .select('email')
+        .eq('email', email)
+        .single()
 
     if (existingUser) {
         return { error: "Email already in use!" }
     }
 
-    await prisma.user.create({
-        data: {
-            name,
-            email,
-            passwordHash: hashedPassword,
-            role: "MERCHANT", // Default to Merchant for signup
-        },
+    const { error } = await supabaseAdmin.from('User').insert({
+        name,
+        email,
+        passwordHash: hashedPassword,
+        role: "MERCHANT",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
     })
 
-    // TODO: Send verification email
+    if (error) {
+        return { error: "Failed to create user" }
+    }
 
     return { success: "User created!" }
 }

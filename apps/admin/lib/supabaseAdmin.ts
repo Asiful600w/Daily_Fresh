@@ -1,14 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://vaohkfonpifdvwarsnac.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhb2hrZm9ucGlmZHZ3YXJzbmFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4OTAwNjcsImV4cCI6MjA4NDQ2NjA2N30.uqCcZflkUESMQVGfMnkK5fsf3pEiksKJImnnPtaZ3iQ';
+import { createClient } from '@supabase/supabase-js'
 
-// separate client for admin with its own storage key to allow dual-login
-export const supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase URL or Service Role Key')
+}
+
+// Service Role Client (Bypasses RLS - use carefully on server only)
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: false, // Don't steal auth from URL intended for main site if possible, or irrelevant
-        storageKey: 'sb-admin-token' // <--- CRITICAL: Different storage key
+        autoRefreshToken: false,
+        persistSession: false
     }
-});
+})
