@@ -30,13 +30,19 @@ export function CartItem({ item }: CartItemProps) {
 
             <div className="flex items-center gap-4 w-full md:w-auto">
                 {/* Image */}
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-slate-50 dark:bg-slate-700 overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-600">
-                    <Link href={`/product/${item.id}`}>
-                        <img
-                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                            alt={item.name}
-                            src={item.images && item.images.length > 0 ? item.images[0] : ''}
-                        />
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-slate-50 dark:bg-slate-700 overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
+                    <Link href={`/product/${item.id}`} className="w-full h-full block relative">
+                        {item.images && item.images.length > 0 ? (
+                            <img
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                alt={item.name}
+                                src={item.images[0]}
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-300">
+                                <span className="material-icons-round text-3xl">image_not_supported</span>
+                            </div>
+                        )}
                     </Link>
                 </div>
 
