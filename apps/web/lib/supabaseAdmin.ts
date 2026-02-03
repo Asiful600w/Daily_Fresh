@@ -1,4 +1,5 @@
-import 'server-only'
+// Note: Do not add 'server-only' here - webpack bundler doesn't handle it well with Server Actions
+// The 'use server' directive in actions files provides the necessary protection
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
