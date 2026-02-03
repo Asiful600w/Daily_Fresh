@@ -24,7 +24,7 @@ export default function AdminOrdersPage() {
         if (!adminUser) return;
         try {
             setLoading(true);
-            const merchantId = adminUser.role === 'merchant' ? adminUser.id : undefined;
+            const merchantId = adminUser.role === 'MERCHANT' ? adminUser.id : undefined;
             const data = await getAdminOrders(searchQuery, merchantId);
             setOrders(data);
         } catch (error) {

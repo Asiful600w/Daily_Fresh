@@ -40,7 +40,7 @@ export default function AdminDashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            if (adminUser?.role === 'merchant') {
+            if (adminUser?.role === 'MERCHANT') {
                 // Fetch from secure API
                 const res = await fetch(`/api/admin/dashboard-stats?role=merchant&userId=${adminUser.id}`);
                 const stats = await res.json();
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
         return <div className="p-8 text-center">Loading Dashboard...</div>;
     }
 
-    if (adminUser?.role === 'merchant') {
+    if (adminUser?.role === 'MERCHANT') {
         const { totalEarnings, totalOrders, totalProducts, recentOrders, products, totalReviews, salesChartData } = merchantStats || {};
 
         return (

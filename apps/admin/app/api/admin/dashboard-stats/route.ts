@@ -10,7 +10,7 @@ export async function GET(request: Request) {
         const supabaseService = getSupabaseService();
 
         // --- SUPER ADMIN STATS ---
-        if (role !== 'merchant') {
+        if (role !== 'MERCHANT') {
             // 1. Total Merchants
             const { count: merchantCount, error: merchantError } = await supabaseService
                 .from('admins')
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         }
 
         // --- MERCHANT STATS ---
-        if (role === 'merchant' && userId) {
+        if (role === 'MERCHANT' && userId) {
             // 1. Get Merchant Products
             const { data: products, error: prodError } = await supabaseService
                 .from('products')

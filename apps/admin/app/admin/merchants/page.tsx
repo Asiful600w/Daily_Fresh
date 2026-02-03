@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -11,7 +11,7 @@ type AdminUser = {
     full_name: string;
     shop_name?: string;
     status: 'pending' | 'approved' | 'rejected' | 'suspended';
-    role: 'super_admin' | 'merchant' | 'admin';
+    role: 'ADMIN' | 'MERCHANT' | 'CUSTOMER';
     created_at: string;
     phone?: string;
 };
@@ -26,7 +26,7 @@ export default function MerchantsPage() {
         if (!adminLoading) {
             if (!adminUser) {
                 router.push('/admin/login');
-            } else if (adminUser.role !== 'super_admin') {
+            } else if (adminUser.role !== 'ADMIN') {
                 router.push('/admin'); // Redirect non-super-admins
             } else {
                 fetchMerchants();
@@ -69,7 +69,7 @@ export default function MerchantsPage() {
         return <div className="p-8 text-center">Loading...</div>;
     }
 
-    if (adminUser?.role !== 'super_admin') return null;
+    if (adminUser?.role !== 'ADMIN') return null;
 
     return (
         <div className="p-6 md:p-10">
@@ -99,7 +99,7 @@ export default function MerchantsPage() {
                                         </div>
                                     </td>
                                     <td className="p-4">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded uppercase ${merchant.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}`}>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded uppercase ${merchant.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}`}>
                                             {merchant.role}
                                         </span>
                                     </td>
@@ -117,7 +117,7 @@ export default function MerchantsPage() {
                                         {new Date(merchant.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="p-4 text-right">
-                                        {merchant.role !== 'super_admin' && (
+                                        {merchant.role !== 'ADMIN' && (
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
                                                     href={`/admin/products?merchant_id=${merchant.id}`}

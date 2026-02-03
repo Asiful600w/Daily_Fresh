@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
 
 export function MerchantProfileSettings() {
     const { adminUser, setAdminUser } = useAdminAuth();

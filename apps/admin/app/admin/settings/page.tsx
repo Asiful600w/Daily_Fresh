@@ -13,9 +13,9 @@ type Tab = 'general' | 'notices' | 'ads' | 'profile';
 export default function SettingsPage() {
     const { adminUser } = useAdminAuth();
     // Default tab based on role? Or just generic.
-    const [activeTab, setActiveTab] = useState<Tab>(adminUser?.role === 'merchant' ? 'profile' : 'general');
+    const [activeTab, setActiveTab] = useState<Tab>(adminUser?.role === 'MERCHANT' ? 'profile' : 'general');
 
-    const menuItems = adminUser?.role === 'merchant'
+    const menuItems = adminUser?.role === 'MERCHANT'
         ? [
             { id: 'profile', label: 'Profile Settings', icon: 'person' }
         ]

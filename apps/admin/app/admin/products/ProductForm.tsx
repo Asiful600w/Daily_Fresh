@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Product, getCategories, getSpecialCategories, Category, createProduct, updateProduct } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { supabaseClient as supabase } from '@/lib/supabaseClient';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export function ProductForm({ initialData }: { initialData?: Partial<Product> }) {
@@ -271,8 +271,8 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                 id: Number(productId),
                 images: finalImages,
                 // Attach Merchant Info if applicable
-                merchantId: adminUser?.role === 'merchant' ? adminUser.id : undefined,
-                shopName: adminUser?.role === 'merchant' ? (adminUser.shop_name || adminUser.full_name) : undefined
+                merchantId: adminUser?.role === 'MERCHANT' ? adminUser.id : undefined,
+                shopName: adminUser?.role === 'MERCHANT' ? (adminUser.shop_name || adminUser.full_name) : undefined
             };
 
             // 5. Save using Server Action

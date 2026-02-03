@@ -59,9 +59,9 @@ export default function AdminProductsPage() {
             setLoading(true);
             // Determine effective Merchant ID
             let targetMerchantId = undefined;
-            if (adminUser.role === 'merchant') {
+            if (adminUser.role === 'MERCHANT') {
                 targetMerchantId = adminUser.id;
-            } else if (adminUser.role === 'super_admin' && queryMerchantId) {
+            } else if (adminUser.role === 'ADMIN' && queryMerchantId) {
                 targetMerchantId = queryMerchantId;
             }
 
@@ -189,7 +189,7 @@ export default function AdminProductsPage() {
                                 <th className="p-6 font-semibold">Price</th>
                                 <th className="p-6 font-semibold">Stock</th>
                                 <th className="p-6 font-semibold">Status</th>
-                                {adminUser?.role === 'super_admin' && <th className="p-6 font-semibold">Merchant</th>}
+                                {adminUser?.role === 'ADMIN' && <th className="p-6 font-semibold">Merchant</th>}
                                 <th className="p-6 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
@@ -256,7 +256,7 @@ export default function AdminProductsPage() {
                                             )}
                                         </td>
 
-                                        {adminUser?.role === 'super_admin' && (
+                                        {adminUser?.role === 'ADMIN' && (
                                             <td className="p-6 text-sm text-slate-600 dark:text-slate-300">
                                                 {product.shop_name || 'Daily Fresh'}
                                             </td>
@@ -265,7 +265,7 @@ export default function AdminProductsPage() {
                                         <td className="p-6 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 {/* Super Admin Approval Actions */}
-                                                {adminUser?.role === 'super_admin' && (
+                                                {adminUser?.role === 'ADMIN' && (
                                                     <button
                                                         onClick={() => toggleApproval(product)}
                                                         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${product.is_approved
