@@ -1,3 +1,5 @@
+'use server'
+
 import { supabaseAdmin } from './supabaseAdmin';
 
 export async function getAdminOrders(searchQuery?: string, merchantId?: string) {

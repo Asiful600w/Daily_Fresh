@@ -1,4 +1,6 @@
 
+'use server'
+
 import { supabaseAdmin as supabase } from './supabaseAdmin';
 
 export interface Category {
