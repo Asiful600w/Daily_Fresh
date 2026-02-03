@@ -31,8 +31,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
         email,
         passwordHash: hashedPassword,
         role: "MERCHANT",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     })
 
     if (error) {

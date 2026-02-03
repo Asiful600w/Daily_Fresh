@@ -8,6 +8,7 @@ import * as z from "zod"
 import { LoginSchema } from "@/schemas"
 import { login } from "@/actions/login"
 import { useTheme } from "next-themes"
+import Link from "next/link"
 
 export default function LoginPage() {
     const { theme } = useTheme()
@@ -125,6 +126,15 @@ export default function LoginPage() {
                         {isPending ? "Authenticating..." : showTwoFactor ? "Confirm" : "Sign In"}
                     </button>
                 </form>
+
+                <div className="text-center pt-4 border-t border-gray-100 dark:border-slate-700">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Want to become a merchant?{' '}
+                        <Link href="/admin/register" className="text-primary hover:underline font-medium">
+                            Register here
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     )
