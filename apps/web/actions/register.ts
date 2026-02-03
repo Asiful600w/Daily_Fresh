@@ -1,11 +1,7 @@
-
-"use server"
-
 import * as z from "zod"
 import bcrypt from "bcryptjs"
-import { PrismaClient } from "@prisma/client"
 import { RegisterSchema } from "@/schemas"
-import prisma from "@/lib/prisma"
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const validatedFields = RegisterSchema.safeParse(values)
@@ -19,24 +15,31 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email,
-            },
-        })
+        // Check for existing user
+        const { data: existingUser } = await supabaseAdmin
+            .from('User')
+            .select('email')
+            .eq('email', email)
+            .single()
 
         if (existingUser) {
             return { error: "Email already in use!" }
         }
 
-        await prisma.user.create({
-            data: {
+        // Create new user (Using public.User table as before)
+        const { error: createError } = await supabaseAdmin
+            .from('User')
+            .insert({
                 name,
                 email,
                 passwordHash: hashedPassword,
                 role: "CUSTOMER",
-            },
-        })
+                updatedAt: new Date().toISOString()
+            })
+
+        if (createError) {
+            throw new Error(createError.message)
+        }
 
         return { success: "User created!" }
     } catch (error: any) {
