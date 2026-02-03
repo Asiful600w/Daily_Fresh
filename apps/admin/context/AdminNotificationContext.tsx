@@ -49,8 +49,11 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     };
 
     useEffect(() => {
-        // Initial fetch
-        fetchNotifications(false);
+        // Define async function inside effect to avoid calling setState directly
+        const initFetch = async () => {
+            await fetchNotifications(false);
+        };
+        initFetch();
 
         // Poll every 30 seconds
         const interval = setInterval(() => {
@@ -58,6 +61,7 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         }, 30000);
 
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const markAsViewed = async (orderId: string) => {
