@@ -251,9 +251,12 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
 
         try {
             // 1. Determine Product ID
+            // If editing, use existing. If new, generate one to allow Image Upload path construction.
+            // Ideally we'd upload images after creation, but we need ID for path.
             const productId = initialData?.id ? String(initialData.id) : String(Math.floor(Math.random() * 90000000) + 10000000);
 
-            // 2. Upload Images
+            // 2. Upload Images (Client-side upload to Storage is still allowed if Storage RLS permits authenticated users)
+            // If Storage RLS is strict, we might need a Server Action for this too, but usually Storage allows Auth users to upload.
             let newImageUrls: string[] = [];
             if (selectedFiles.length > 0) {
                 newImageUrls = await uploadImages(productId);
@@ -272,19 +275,20 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                 shopName: adminUser?.role === 'merchant' ? (adminUser.shop_name || adminUser.full_name) : undefined
             };
 
-            // 5. Save
-            if (initialData?.id) {
-                await updateProduct(Number(initialData.id), payload);
-            } else {
-                await createProduct(payload);
+            // 5. Save using Server Action
+            const { upsertProductAction } = await import('@/actions/products');
+            const result = await upsertProductAction(payload as any); // Cast to catch-all or define exact type match
+
+            if (!result.success) {
+                throw new Error(result.error);
             }
 
             router.push('/admin/products');
             router.refresh();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to save product:', error);
-            alert('Failed to save product.');
+            alert(`Failed to save product: ${error.message}`);
         } finally {
             setLoading(false);
             setUploading(false);

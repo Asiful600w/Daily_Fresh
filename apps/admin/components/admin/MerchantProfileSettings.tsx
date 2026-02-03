@@ -26,16 +26,18 @@ export function MerchantProfileSettings() {
 
         setLoading(true);
         try {
-            const { error } = await supabaseAdmin
-                .from('admins')
-                .update({
-                    full_name: formData.full_name,
-                    shop_name: formData.shop_name,
-                    phone: formData.phone
-                })
-                .eq('id', adminUser.id);
+            const { updateMerchantProfileAction } = await import('@/actions/merchant');
 
-            if (error) throw error;
+            const result = await updateMerchantProfileAction({
+                id: adminUser.id,
+                full_name: formData.full_name,
+                shop_name: formData.shop_name,
+                phone: formData.phone
+            });
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
 
             // Update local context
             setAdminUser({ ...adminUser, ...formData });
