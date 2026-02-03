@@ -14,6 +14,7 @@ export default auth((req) => {
     const isAdminRoute = nextUrl.pathname.startsWith("/admin")
     const isMerchantRoute = nextUrl.pathname.startsWith("/merchant")
     const isPublicDocRoute = nextUrl.pathname.startsWith("/admin/documentation")
+    const isRegisterRoute = nextUrl.pathname === "/admin/register"
     const isLoginRoute = nextUrl.pathname === "/login" || nextUrl.pathname === "/admin/login"
 
     // 1. Handle API Auth routes (allow them)
@@ -32,15 +33,14 @@ export default auth((req) => {
         return NextResponse.next();
     }
 
-    // 3. Protect Admin Routes
-    if (isAdminRoute && !isPublicDocRoute) {
+    // 3. Protect Admin Routes (except public ones like register)
+    if (isAdminRoute && !isPublicDocRoute && !isRegisterRoute) {
         if (!isLoggedIn) {
             // Redirect to login if not logged in
             return NextResponse.redirect(new URL("/admin/login", nextUrl))
         }
-        if (user?.role !== "ADMIN") {
+        if (user?.role !== "ADMIN" && user?.role !== "MERCHANT") {
             // Redirect to 403 if logged in but wrong role
-            // Assuming /403 page exists or just error
             return NextResponse.rewrite(new URL("/403", nextUrl))
         }
         return NextResponse.next()
