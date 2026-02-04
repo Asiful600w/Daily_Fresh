@@ -1,6 +1,6 @@
 'use client';
 
-import { Address } from '@/lib/api';
+import { Address } from '@/actions/address';
 
 interface AddressListProps {
     addresses: Address[];

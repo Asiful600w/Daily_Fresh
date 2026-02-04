@@ -1,0 +1,252 @@
+[
+    {
+        "schemaname": "public",
+        "tablename": "cart_items",
+        "policyname": "Users can delete own cart items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "DELETE",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM carts\n  WHERE ((carts.id = cart_items.cart_id) AND (carts.user_id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "cart_items",
+        "policyname": "Users can insert own cart items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(EXISTS ( SELECT 1\n   FROM carts\n  WHERE ((carts.id = cart_items.cart_id) AND (carts.user_id = auth.uid()))))"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "cart_items",
+        "policyname": "Users can update own cart items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "UPDATE",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM carts\n  WHERE ((carts.id = cart_items.cart_id) AND (carts.user_id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "cart_items",
+        "policyname": "Users can view own cart items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM carts\n  WHERE ((carts.id = cart_items.cart_id) AND (carts.user_id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "carts",
+        "policyname": "Users can delete own cart",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "DELETE",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "carts",
+        "policyname": "Users can insert own cart",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "carts",
+        "policyname": "Users can update own cart",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "UPDATE",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "carts",
+        "policyname": "Users can view own cart",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "categories",
+        "policyname": "Public Read Categories",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "categories",
+        "policyname": "Public can view categories",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "order_items",
+        "policyname": "Users can insert own order items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(EXISTS ( SELECT 1\n   FROM orders\n  WHERE ((orders.id = order_items.order_id) AND (orders.user_id = auth.uid()))))"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "order_items",
+        "policyname": "Users can view own order items",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "(EXISTS ( SELECT 1\n   FROM orders\n  WHERE ((orders.id = order_items.order_id) AND (orders.user_id = auth.uid()))))",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "orders",
+        "policyname": "Users can insert own orders",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "orders",
+        "policyname": "Users can view own orders",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "orders",
+        "policyname": "Users see own orders",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "ALL",
+        "using_expression": "(auth.uid() = user_id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "products",
+        "policyname": "Public Read Products",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "products",
+        "policyname": "Public can view products",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users can insert own profile",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users can update own profile",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "UPDATE",
+        "using_expression": "(auth.uid() = id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users can view own profile",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "(auth.uid() = id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "Users manage own profile",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "ALL",
+        "using_expression": "(auth.uid() = id)",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "reviews",
+        "policyname": "Public Read Reviews",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "reviews",
+        "policyname": "Users can insert reviews",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "INSERT",
+        "using_expression": null,
+        "check_expression": "(auth.uid() = user_id)"
+    },
+    {
+        "schemaname": "public",
+        "tablename": "special_categories",
+        "policyname": "Public can view special_categories",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    },
+    {
+        "schemaname": "public",
+        "tablename": "subcategories",
+        "policyname": "Public can view subcategories",
+        "permissive": "PERMISSIVE",
+        "roles": "{public}",
+        "action": "SELECT",
+        "using_expression": "true",
+        "check_expression": null
+    }
+]

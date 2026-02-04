@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Address, getUserAddresses, saveAddress, deleteAddress, setDefaultAddress } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { Address, saveAddress, getUserAddresses, deleteAddress, setDefaultAddress } from '@/actions/address';
 
 interface AddressManagerModalProps {
     isOpen: boolean;
@@ -47,7 +47,7 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
         if (!user) return;
         setLoading(true);
         try {
-            const data = await getUserAddresses(user.id);
+            const data = await getUserAddresses();
             setAddresses(data);
         } catch (error) {
             console.error(error);
@@ -94,7 +94,7 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
 
         setLoading(true);
         try {
-            await saveAddress(user.id, {
+            await saveAddress({
                 ...formData,
                 id: editingAddress?.id
             });
@@ -134,7 +134,7 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
         if (!user) return;
         setLoading(true);
         try {
-            await setDefaultAddress(user.id, id);
+            await setDefaultAddress(id);
             await fetchAddresses();
             onUpdate();
         } catch (error) {
@@ -280,3 +280,4 @@ function FormInput({ label, value, onChange, required }: { label: string, value:
         </div>
     );
 }
+
