@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         setIsSigningOut(true);
-        console.log("AUTH DEBUG: SignOut requested");
         try {
             // 1. Try standard NextAuth signout
             await nextAuthSignOut({ callbackUrl: '/', redirect: true });
@@ -60,8 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             document.cookie = `${cookiePrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
             document.cookie = `${legacyPrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-
-            console.log("AUTH DEBUG: Cookies manually cleared");
 
         } catch (err) {
             console.error('Logout error:', err);

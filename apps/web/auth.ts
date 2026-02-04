@@ -27,31 +27,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
         Credentials({
             async authorize(credentials) {
-                console.log("AUTH DEBUG: authorize called with", { email: credentials?.email });
                 const parsedCredentials = z
                     .object({ email: z.string().email(), password: z.string().min(6), code: z.string().optional() })
                     .safeParse(credentials)
 
                 if (parsedCredentials.success) {
                     const { email, password, code } = parsedCredentials.data
-                    console.log("AUTH DEBUG: Credentials parsed successfully");
 
                     const user = await getUserByEmail(email)
-                    console.log("AUTH DEBUG: User lookup result:", user ? "Found" : "Not Found");
 
                     if (!user || !user.passwordHash) {
-                        console.log("AUTH DEBUG: User not found or no password hash");
                         return null // User not found
                     }
 
                     // CHECK LOCKOUT
                     if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) {
-                        console.log("AUTH DEBUG: User locked out");
                         throw new Error("Account locked. Try again later.")
                     }
 
                     const passwordsMatch = await bcrypt.compare(password, user.passwordHash)
-                    console.log("AUTH DEBUG: Password match:", passwordsMatch);
 
                     if (passwordsMatch) {
                         // SUCCESSFUL PASSWORD CHECK
@@ -59,14 +53,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         // 2FA CHECK
                         if (user.isTwoFactorEnabled) {
                             if (!code) {
-                                console.log("AUTH DEBUG: 2FA required but code missing");
                                 throw new Error("2FA_REQUIRED")
                             }
 
                             const isValidToken = authenticator.check(code, user.twoFactorSecret || '')
 
                             if (!isValidToken) {
-                                console.log("AUTH DEBUG: Invalid 2FA code");
                                 throw new Error("Invalid 2FA Code")
                             }
                         }
@@ -88,10 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             console.error("Failed to update user stats", e)
                         }
 
-                        console.log("AUTH DEBUG: Login successful. Returning user.");
                         return user
-                    } else {
-                        console.log("AUTH DEBUG: Password verification failed");
                     }
 
                     // FAILED LOGIN

@@ -190,7 +190,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
 
                             <div className="hidden lg:block text-right">
                                 <p className="text-sm font-bold text-slate-900 dark:text-white">{user.user_metadata?.full_name || 'User'}</p>
-                                <button onClick={signOut} className="text-xs text-slate-500 hover:text-red-500 font-medium">Sign Out</button>
+                                <button onClick={() => signOut()} className="text-xs text-slate-500 hover:text-red-500 font-medium">Sign Out</button>
                             </div>
                             <Link href="/profile" className="flex items-center gap-2 pl-1 pr-1 py-1 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                                 <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
