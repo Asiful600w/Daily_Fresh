@@ -47,8 +47,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         setIsSigningOut(true);
+        console.log("AUTH DEBUG: SignOut requested");
         try {
-            await nextAuthSignOut({ callbackUrl: '/' });
+            await nextAuthSignOut({ callbackUrl: '/', redirect: true });
+            console.log("AUTH DEBUG: NextAuth signOut completed");
             // State clear handled by page reload/redirect
         } catch (err) {
             console.error('Logout error:', err);

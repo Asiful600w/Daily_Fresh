@@ -27,22 +27,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
         Credentials({
             async authorize(credentials) {
+                console.log("AUTH DEBUG: authorize called with", { email: credentials?.email });
                 const parsedCredentials = z
                     .object({ email: z.string().email(), password: z.string().min(6), code: z.string().optional() })
                     .safeParse(credentials)
 
                 if (parsedCredentials.success) {
                     const { email, password, code } = parsedCredentials.data
-                    const user = await getUserByEmail(email)
+                    console.log("AUTH DEBUG: Credentials parsed successfully");
 
-                    if (!user || !user.passwordHash) return null // User not found
+                    const user = await getUserByEmail(email)
+                    console.log("AUTH DEBUG: User lookup result:", user ? "Found" : "Not Found");
+
+                    if (!user || !user.passwordHash) {
+                        console.log("AUTH DEBUG: User not found or no password hash");
+                        return null // User not found
+                    }
 
                     // CHECK LOCKOUT
                     if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) {
+                        console.log("AUTH DEBUG: User locked out");
                         throw new Error("Account locked. Try again later.")
                     }
 
                     const passwordsMatch = await bcrypt.compare(password, user.passwordHash)
+                    console.log("AUTH DEBUG: Password match:", passwordsMatch);
 
                     if (passwordsMatch) {
                         // SUCCESSFUL PASSWORD CHECK
@@ -50,12 +59,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         // 2FA CHECK
                         if (user.isTwoFactorEnabled) {
                             if (!code) {
+                                console.log("AUTH DEBUG: 2FA required but code missing");
                                 throw new Error("2FA_REQUIRED")
                             }
 
                             const isValidToken = authenticator.check(code, user.twoFactorSecret || '')
 
                             if (!isValidToken) {
+                                console.log("AUTH DEBUG: Invalid 2FA code");
                                 throw new Error("Invalid 2FA Code")
                             }
                         }
@@ -77,7 +88,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             console.error("Failed to update user stats", e)
                         }
 
+                        console.log("AUTH DEBUG: Login successful. Returning user.");
                         return user
+                    } else {
+                        console.log("AUTH DEBUG: Password verification failed");
                     }
 
                     // FAILED LOGIN
@@ -101,6 +115,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     })
 
                     return null
+                } else {
+                    console.log("AUTH DEBUG: Invalid credentials schema");
                 }
 
                 return null
@@ -112,6 +128,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.role = user.role
                 token.id = user.id
+                // Store essential user info in token to persist it across sessions
+                token.name = user.name
+                token.email = user.email
+                // Mock user_metadata for compat with existing frontend that expects Supabase User structure
+                token.user_metadata = {
+                    full_name: user.name,
+                    email: user.email,
+                    avatar_url: null, // Add if you have this field
+                    phone: (user as any).phone
+                }
             }
             return token
         },
@@ -119,6 +145,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (token && session.user) {
                 session.user.role = token.role as "ADMIN" | "MERCHANT" | "CUSTOMER"
                 session.user.id = token.id as string
+                session.user.name = token.name
+                session.user.email = token.email
+
+                    // Attach the metadata to the user object so the frontend can use it
+                    // We cast this because NextAuth types don't have user_metadata by default
+                    (session.user as any).user_metadata = token.user_metadata;
+                (session.user as any).phone = (token.user_metadata as any)?.phone;
             }
             return session
         }
