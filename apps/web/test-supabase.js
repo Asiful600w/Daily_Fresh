@@ -25,6 +25,7 @@ async function testUserFetch() {
                 console.log("First User Sample:", {
                     id: data[0].id,
                     email: data[0].email,
+                    name: data[0].name, // Log the name!
                     role: data[0].role,
                     hasPasswordHash: !!data[0].passwordHash,
                     passwordHashPrefix: data[0].passwordHash ? data[0].passwordHash.substring(0, 10) : 'N/A'

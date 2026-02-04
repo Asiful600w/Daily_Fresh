@@ -49,11 +49,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsSigningOut(true);
         console.log("AUTH DEBUG: SignOut requested");
         try {
+            // 1. Try standard NextAuth signout
             await nextAuthSignOut({ callbackUrl: '/', redirect: true });
-            console.log("AUTH DEBUG: NextAuth signOut completed");
-            // State clear handled by page reload/redirect
+
+            // 2. Manual Cookie Cleanup (Fallback)
+            // Determine cookie prefix based on environment (secure for prod, normal for dev)
+            const isSecure = window.location.protocol === 'https:';
+            const cookiePrefix = isSecure ? '__Secure-authjs.session-token' : 'authjs.session-token';
+            const legacyPrefix = isSecure ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+
+            document.cookie = `${cookiePrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+            document.cookie = `${legacyPrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+
+            console.log("AUTH DEBUG: Cookies manually cleared");
+
         } catch (err) {
             console.error('Logout error:', err);
+            // Force clear cookies even if API fails
+            const isSecure = window.location.protocol === 'https:';
+            const cookiePrefix = isSecure ? '__Secure-authjs.session-token' : 'authjs.session-token';
+            const legacyPrefix = isSecure ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+            document.cookie = `${cookiePrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+            document.cookie = `${legacyPrefix}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+            window.location.href = '/';
         } finally {
             setIsSigningOut(false);
         }
