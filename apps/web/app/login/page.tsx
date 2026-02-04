@@ -36,8 +36,8 @@ export default function LoginPage() {
                     // Action usually does redirect or returns success.
                     // If action did not redirect (e.g. no server-side redirect), we do it client-side.
                     const redirectUrl = searchParams.get('redirect') || '/';
-                    router.push(redirectUrl);
-                    router.refresh();
+                    // Force hard redirect to ensure session cookies are picked up immediately
+                    window.location.href = redirectUrl;
                 }
             } catch (err) {
                 console.error(err)

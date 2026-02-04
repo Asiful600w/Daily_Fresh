@@ -49,7 +49,7 @@ export const login = async (values: z.infer<typeof LoginSchema>, ipAddress: stri
             email,
             password,
             code,
-            redirectTo: "/", // Default redirect for Customer
+            redirect: false, // Prevent server-side redirect so client can handle hard navigation
         })
     } catch (error) {
         if (error instanceof AuthError) {
