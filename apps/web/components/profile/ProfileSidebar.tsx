@@ -8,7 +8,7 @@ interface ProfileSidebarProps {
 }
 
 export function ProfileSidebar({ activeTab = 'overview', onEditProfile }: ProfileSidebarProps) {
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
 
     return (
         <aside className="hidden lg:flex w-72 flex-col border-r border-[#cfe7df] dark:border-[#1e3a31] bg-white dark:bg-[#10221c] p-6 h-[calc(100vh-64px)] sticky top-16">
@@ -67,12 +67,20 @@ export function ProfileSidebar({ activeTab = 'overview', onEditProfile }: Profil
                 {onEditProfile && (
                     <button
                         onClick={onEditProfile}
-                        className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 bg-primary text-[#0d1b17] font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                        className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 bg-primary text-[#0d1b17] font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform mb-3"
                     >
                         <span className="material-icons-round mr-2">edit</span>
                         <span>Edit Profile</span>
                     </button>
                 )}
+
+                <button
+                    onClick={() => signOut()}
+                    className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                >
+                    <span className="material-icons-round mr-2">logout</span>
+                    <span>Sign Out</span>
+                </button>
             </div>
         </aside>
     );
