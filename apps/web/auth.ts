@@ -145,12 +145,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (token && session.user) {
                 session.user.role = token.role as "ADMIN" | "MERCHANT" | "CUSTOMER"
                 session.user.id = token.id as string
-                session.user.name = token.name
-                session.user.email = token.email
+                session.user.name = token.name as string
+                session.user.email = token.email as string
 
-                    // Attach the metadata to the user object so the frontend can use it
-                    // We cast this because NextAuth types don't have user_metadata by default
-                    (session.user as any).user_metadata = token.user_metadata;
+                // Attach the metadata to the user object so the frontend can use it
+                // We cast this because NextAuth types don't have user_metadata by default
+                (session.user as any).user_metadata = token.user_metadata;
                 (session.user as any).phone = (token.user_metadata as any)?.phone;
             }
             return session
