@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Address, getUserAddresses } from '@/lib/api';
+import { Address, getUserAddresses } from '@/actions/address';
 import { AddressManagerModal } from './AddressManagerModal';
 
 export function AddressCard() {
@@ -12,7 +12,7 @@ export function AddressCard() {
 
     const fetchAddress = useCallback(async () => {
         if (!user) return;
-        const addresses = await getUserAddresses(user.id);
+        const addresses = await getUserAddresses();
         const def = addresses.find(a => a.isDefault) || addresses[0] || null;
 
         setDefaultAddress(prev => {

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { Address, getUserAddresses, createOrder, saveAddress } from '@/lib/api';
+import { createOrder } from '@/lib/api';
+import { Address, getUserAddresses, saveAddress } from '@/actions/address';
 import { formatPrice } from '@/lib/format';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 
@@ -45,7 +46,7 @@ export default function CheckoutPage() {
         const fetchAddresses = async () => {
             if (!user) return;
             try {
-                const data = await getUserAddresses(user.id);
+                const data = await getUserAddresses();
                 setAddresses(data);
                 // Auto-select default
                 const defaultAddr = data.find(a => a.isDefault) || data[0];
@@ -87,7 +88,7 @@ export default function CheckoutPage() {
                     address: `${newAddress.street}, ${newAddress.city}, ${newAddress.state} ${newAddress.postalCode}, ${newAddress.country}`
                 };
                 if (newAddress.saveForLater) {
-                    await saveAddress(user.id, { ...newAddress, label: 'Home', isDefault: addresses.length === 0 });
+                    await saveAddress({ ...newAddress, label: 'Home', isDefault: addresses.length === 0 });
                 }
             } else {
                 const addr = addresses.find(a => a.id === selectedAddressId);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Address, getUserAddresses, deleteAddress, setDefaultAddress } from '@/lib/api';
+import { Address, getUserAddresses, deleteAddress, setDefaultAddress } from '@/actions/address';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import { AddressList } from '@/components/profile/AddressList';
 import { AddressManagerModal } from '@/components/profile/AddressManagerModal';
@@ -19,7 +19,7 @@ export default function AddressesPage() {
         if (!user) return;
         setLoading(true);
         try {
-            const data = await getUserAddresses(user.id);
+            const data = await getUserAddresses();
             setAddresses(data);
         } catch (error) {
             console.error(error);
@@ -47,7 +47,7 @@ export default function AddressesPage() {
     const handleSetDefault = async (id: string) => {
         if (!user) return;
         try {
-            await setDefaultAddress(user.id, id);
+            await setDefaultAddress(id);
             await fetchAddresses();
         } catch (error) {
             console.error(error);
