@@ -68,14 +68,14 @@ function AdminProtectedLayout({
         { name: 'Orders', href: '/admin/orders', icon: 'shopping_bag' },
         { name: 'Products', href: '/admin/products', icon: 'inventory_2' },
 
-        ...(adminUser?.role === 'ADMIN' ? [ // Changed from super_admin to ADMIN as per new schema
+        ...((adminUser?.role === 'ADMIN' || adminUser?.role === 'SUPERADMIN') ? [ // Allow ADMIN and SUPERADMIN
             { name: 'Special Offers', href: '/admin/special-categories', icon: 'local_offer' },
             { name: 'Customers', href: '/admin/customers', icon: 'group' },
             { name: 'Merchants', href: '/admin/merchants', icon: 'admin_panel_settings' },
             { name: 'Categories', href: '/admin/categories', icon: 'category' }
         ] : []),
 
-        ...(adminUser?.role === 'ADMIN' ? [
+        ...((adminUser?.role === 'ADMIN' || adminUser?.role === 'SUPERADMIN') ? [
             { name: 'Reviews', href: '/admin/reviews', icon: 'reviews' },
         ] : []),
 
