@@ -5,6 +5,7 @@ import * as z from "zod"
 import { signIn } from "@/auth"
 import { LoginSchema } from "@/schemas"
 import { AuthError } from "next-auth"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 // Simple in-memory rate limiter for demo purpose
 // In production effectively use Redis (Upstash)
@@ -54,6 +55,12 @@ export const login = async (values: z.infer<typeof LoginSchema>, ipAddress: stri
             redirectTo: "/admin", // Default redirect
         })
     } catch (error) {
+        // NextAuth v5 throws a NEXT_REDIRECT error on successful login
+        // We must re-throw this error to allow the redirect to happen
+        if (isRedirectError(error)) {
+            throw error;
+        }
+
         if (error instanceof AuthError) {
             switch (error.type) {
                 case "CredentialsSignin":
