@@ -185,14 +185,16 @@ function AdminProtectedLayout({
     );
 }
 
+import { AdminAuthProvider } from '@/context/AdminAuthContext';
+
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // Removed AdminAuthProvider wrapper as we use SessionProvider from RootLayout
-    // and useSession hook directly in AdminProtectedLayout.
     return (
-        <AdminProtectedLayout>{children}</AdminProtectedLayout>
+        <AdminAuthProvider>
+            <AdminProtectedLayout>{children}</AdminProtectedLayout>
+        </AdminAuthProvider>
     );
 }

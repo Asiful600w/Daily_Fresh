@@ -9,6 +9,7 @@ import { LoginSchema } from "@/schemas"
 import { login } from "@/actions/login"
 import { useTheme } from "next-themes"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
     const { theme } = useTheme()
@@ -26,12 +27,13 @@ export default function LoginPage() {
         },
     })
 
+    const router = useRouter() // Import useRouter relative to next/navigation
+
     const onSubmit = (values: z.infer<typeof LoginSchema>) => {
         setError("")
         setSuccess("")
 
         startTransition(() => {
-            // Mock IP for now, in real app get from headers if needed or handle in action
             const ip = "127.0.0.1"
             login(values, ip)
                 .then((data) => {
@@ -47,6 +49,8 @@ export default function LoginPage() {
                     if (data?.success) {
                         form.reset()
                         setSuccess(data.success)
+                        // Redirect to admin dashboard
+                        window.location.href = '/admin'
                     }
                 })
                 .catch(() => setError("Something went wrong"))
