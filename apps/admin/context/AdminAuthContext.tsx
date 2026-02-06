@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 export interface AdminUser {
     id: string;
     email?: string | null;
-    role: 'ADMIN' | 'MERCHANT' | 'CUSTOMER'; // Updated to match schema
+    role: 'ADMIN' | 'MERCHANT' | 'CUSTOMER' | 'SUPERADMIN'; // Updated to match schema
     full_name?: string;
     shop_name?: string;
     phone?: string;

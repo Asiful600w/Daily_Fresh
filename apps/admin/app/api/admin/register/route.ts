@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseService } from '@/lib/supabaseService';
+import bcrypt from 'bcryptjs';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password, full_name, phone } = body;
+        const { email, password, full_name, phone, shop_name } = body;
 
         if (!email || !password || !full_name) {
             return NextResponse.json(
@@ -13,58 +14,57 @@ export async function POST(request: Request) {
             );
         }
 
-        const supabaseService = getSupabaseService();
+        // Check if email is already in use
+        const { data: existingUser } = await supabaseAdmin
+            .from('User')
+            .select('email')
+            .eq('email', email)
+            .single();
 
-        // 1. Create the user in Supabase Auth
-        // Using admin.createUser allows us to set metadata trusted
-        const { data: userData, error: userError } = await supabaseService.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata: {
-                full_name,
-                phone,
-                role: 'merchant'
-            }
-        });
-
-        if (userError) {
-            if (userError.message.includes('already registered')) {
-                return NextResponse.json(
-                    { error: 'Email already registered.' },
-                    { status: 409 }
-                );
-            }
-            throw userError;
+        if (existingUser) {
+            return NextResponse.json(
+                { error: 'Email already registered.' },
+                { status: 409 }
+            );
         }
 
-        if (!userData.user) {
-            throw new Error('Failed to create user');
-        }
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 10);
 
-        // 2. Insert into public.admins table
-        // This insert works because supabaseService bypasses RLS
-        const { error: dbError } = await supabaseService
-            .from('admins')
+        // Insert user into User table with MERCHANT role
+        const { data: newUser, error: insertError } = await supabaseAdmin
+            .from('User')
             .insert({
-                id: userData.user.id,
+                name: full_name,
                 email: email,
-                full_name: full_name,
-                phone: phone,
-                role: 'merchant',
-                shop_name: body.shop_name,
-                status: 'pending' // Default status
-            });
+                passwordHash: passwordHash,
+                role: 'MERCHANT',
+                shopName: shop_name || null,
+                phone: phone || null,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            })
+            .select('id')
+            .single();
 
-        if (dbError) {
-            console.error('DB Insert Error:', dbError);
-            // Cleanup auth user if DB insert fails
-            await supabaseService.auth.admin.deleteUser(userData.user.id);
-            throw new Error('Failed to create admin profile. Database error.');
+        if (insertError) {
+            console.error('DB Insert Error:', insertError);
+            return NextResponse.json(
+                { error: 'Failed to create account. Please try again.' },
+                { status: 500 }
+            );
         }
+
+        // If shop_name or phone provided, we could store in a separate merchant_profiles table
+        // For now, we'll rely on the basic User table fields
+        // TODO: Consider adding shop_name, phone columns to User table or a separate merchants table
 
         return NextResponse.json(
-            { message: 'Registration successful. Account pending approval.' },
+            {
+                message: 'Registration successful! You can now log in.',
+                userId: newUser?.id
+            },
             { status: 201 }
         );
 

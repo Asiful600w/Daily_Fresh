@@ -26,7 +26,7 @@ export default auth((req) => {
     if (isLoginRoute) {
         if (isLoggedIn) {
             // Redirect logged in users to their dashboard
-            if (user?.role === "ADMIN") return NextResponse.redirect(new URL("/admin", nextUrl))
+            if (user?.role === "SUPERADMIN" || user?.role === "ADMIN") return NextResponse.redirect(new URL("/admin", nextUrl))
             if (user?.role === "MERCHANT") return NextResponse.redirect(new URL("/merchant", nextUrl))
             return NextResponse.redirect(new URL("/", nextUrl))
         }
@@ -39,7 +39,7 @@ export default auth((req) => {
             // Redirect to login if not logged in
             return NextResponse.redirect(new URL("/admin/login", nextUrl))
         }
-        if (user?.role !== "ADMIN" && user?.role !== "MERCHANT") {
+        if (user?.role !== "SUPERADMIN" && user?.role !== "ADMIN" && user?.role !== "MERCHANT") {
             // Redirect to 403 if logged in but wrong role
             return NextResponse.rewrite(new URL("/403", nextUrl))
         }

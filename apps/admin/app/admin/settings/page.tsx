@@ -6,9 +6,10 @@ import { NoticeSettings } from '@/components/admin/NoticeSettings';
 import { AdScrollerSettings } from '@/components/admin/AdScrollerSettings';
 
 import { MerchantProfileSettings } from '@/components/admin/MerchantProfileSettings';
+import { SuperadminAccountSettings } from '@/components/admin/SuperadminAccountSettings';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 
-type Tab = 'general' | 'notices' | 'ads' | 'profile';
+type Tab = 'general' | 'notices' | 'ads' | 'profile' | 'account';
 
 export default function SettingsPage() {
     const { adminUser } = useAdminAuth();
@@ -19,11 +20,18 @@ export default function SettingsPage() {
         ? [
             { id: 'profile', label: 'Profile Settings', icon: 'person' }
         ]
-        : [
-            { id: 'general', label: 'General & Hero', icon: 'web' },
-            { id: 'notices', label: 'Notice Scroller', icon: 'campaign' },
-            { id: 'ads', label: 'Ad Scroller', icon: 'view_carousel' },
-        ];
+        : adminUser?.role === 'SUPERADMIN'
+            ? [
+                { id: 'account', label: 'Account Settings', icon: 'admin_panel_settings' },
+                { id: 'general', label: 'General & Hero', icon: 'web' },
+                { id: 'notices', label: 'Notice Scroller', icon: 'campaign' },
+                { id: 'ads', label: 'Ad Scroller', icon: 'view_carousel' },
+            ]
+            : [
+                { id: 'general', label: 'General & Hero', icon: 'web' },
+                { id: 'notices', label: 'Notice Scroller', icon: 'campaign' },
+                { id: 'ads', label: 'Ad Scroller', icon: 'view_carousel' },
+            ];
 
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-[#0b1a15] p-6 lg:p-10">
@@ -58,6 +66,12 @@ export default function SettingsPage() {
                     {/* Content Area */}
                     <main className="flex-1 min-w-0">
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {activeTab === 'account' && (
+                                <div className="space-y-6">
+                                    <SuperadminAccountSettings />
+                                </div>
+                            )}
+
                             {activeTab === 'profile' && (
                                 <div className="space-y-6">
                                     <MerchantProfileSettings />
