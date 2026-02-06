@@ -110,12 +110,12 @@ export async function getCategories(): Promise<Category[]> {
     const { data, error } = await supabase
         .from('categories')
         .select(`
-            id, name, slug, image_url, banner_url, is_hidden,
+            id, name, slug, image_url, banner_url,
             subcategories (
                 name,
                 products:products(count)
             )
-        `)
+        `);
 
     if (error) {
         console.error('Error fetching categories:', error);
@@ -1486,14 +1486,11 @@ export async function updateSpecialCategory(id: number, name: string, descriptio
 }
 
 // Admin Reviews Management
+// Admin Reviews Management
 export async function getAdminReviews(filters?: { rating?: number | 'all', visibility?: 'all' | 'visible' | 'hidden' }) {
     let query = supabase
         .from('reviews')
-        .select(`
-            *,
-            User (name, image),
-            products (name, images)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
     // Apply filters
@@ -1509,13 +1506,47 @@ export async function getAdminReviews(filters?: { rating?: number | 'all', visib
         }
     }
 
-    const { data, error } = await query;
+    const { data: reviews, error } = await query;
 
     if (error) {
         console.error('Error fetching admin reviews:', error);
         throw error;
     }
-    return data;
+
+    if (!reviews || reviews.length === 0) return [];
+
+    // Manually fetch related data (Safer than joins if relationships are missing)
+    const validReviews = reviews;
+
+    // Fetch Users
+    const userIds = [...new Set(validReviews.map((r: any) => r.user_id).filter(Boolean))];
+    let usersMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+        const { data: users } = await supabase.from('User').select('id, name, image').in('id', userIds);
+        if (users) {
+            users.forEach((u: any) => usersMap[u.id] = u);
+        }
+    }
+
+    // Fetch Products
+    const productIds = [...new Set(validReviews.map((r: any) => r.product_id).filter(Boolean))];
+    let productsMap: Record<string, any> = {};
+    if (productIds.length > 0) {
+        const { data: products } = await supabase.from('products').select('id, name, images').in('id', productIds);
+        if (products) {
+            products.forEach((p: any) => productsMap[p.id] = p);
+        }
+    }
+
+    // Map data
+    return validReviews.map((r: any) => ({
+        ...r,
+        User: usersMap[r.user_id] || { name: 'Unknown', image: null },
+        products: {
+            name: productsMap[r.product_id]?.name || 'Unknown Product',
+            image_url: productsMap[r.product_id]?.images?.[0] || null
+        }
+    }));
 }
 
 export async function toggleReviewVisibility(id: number | string, isHidden: boolean) {
