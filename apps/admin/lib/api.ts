@@ -116,7 +116,6 @@ export async function getCategories(): Promise<Category[]> {
                 products:products(count)
             )
         `)
-        .eq('is_hidden', false);
 
     if (error) {
         console.error('Error fetching categories:', error);
@@ -1492,7 +1491,7 @@ export async function getAdminReviews(filters?: { rating?: number | 'all', visib
         .from('reviews')
         .select(`
             *,
-            profiles (full_name, avatar_url),
+            User (name, image),
             products (name, images)
         `)
         .order('created_at', { ascending: false });

@@ -164,13 +164,13 @@ export default function AdminReviewsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                                                    {review.profiles?.avatar_url ? (
-                                                        <img src={review.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                    {review.User?.image ? (
+                                                        <img src={review.User.image} alt="" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <span className="material-symbols-outlined text-xs text-primary">person</span>
                                                     )}
                                                 </div>
-                                                <span className="text-text-main text-sm">{review.profiles?.full_name || 'Anonymous'}</span>
+                                                <span className="text-text-main text-sm">{review.User?.name || 'Anonymous'}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">

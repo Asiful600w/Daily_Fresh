@@ -16,6 +16,11 @@ export async function GET() {
             .in('role', ['MERCHANT', 'ADMIN'])
             .order('createdAt', { ascending: false });
 
+        if (error) {
+            console.error('Supabase error fetching merchants:', error);
+            throw error;
+        }
+
         if (error) throw error;
 
         // Transform to match expected format in the UI
