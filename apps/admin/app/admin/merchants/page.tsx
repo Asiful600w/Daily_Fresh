@@ -26,8 +26,8 @@ export default function MerchantsPage() {
         if (!adminLoading) {
             if (!adminUser) {
                 router.push('/admin/login');
-            } else if (adminUser.role !== 'ADMIN') {
-                router.push('/admin'); // Redirect non-super-admins
+            } else if (!['ADMIN', 'SUPERADMIN'].includes(adminUser.role)) {
+                router.push('/admin'); // Redirect non-admins
             } else {
                 fetchMerchants();
             }
