@@ -826,7 +826,15 @@ export async function createProduct(product: Partial<Product> & { specialCategor
         special_category_id: product.specialCategoryId,
         merchant_id: product.merchantId,
         shop_name: product.shopName,
-        is_approved: product.merchantId ? false : true // SuperAdmin (no merchantId passed by default?) -> true, Merchant -> false
+        is_approved: product.merchantId ? false : true, // SuperAdmin (no merchantId passed by default?) -> true, Merchant -> false
+
+        // SEO Fields
+        meta_title: product.metaTitle,
+        meta_description: product.metaDescription,
+        canonical_url: product.canonicalUrl,
+        keywords: product.keywords,
+        no_index: product.noIndex,
+        og_image: product.ogImage
     };
 
     const { data, error } = await supabase
@@ -874,6 +882,14 @@ export async function updateProduct(id: number, product: Partial<Product> & { sp
     if (product.colors) updates.colors = product.colors;
     if (product.sizes) updates.sizes = product.sizes;
     if (product.specialCategoryId !== undefined) updates.special_category_id = product.specialCategoryId;
+
+    // SEO updates
+    if (product.metaTitle !== undefined) updates.meta_title = product.metaTitle;
+    if (product.metaDescription !== undefined) updates.meta_description = product.metaDescription;
+    if (product.canonicalUrl !== undefined) updates.canonical_url = product.canonicalUrl;
+    if (product.keywords !== undefined) updates.keywords = product.keywords;
+    if (product.noIndex !== undefined) updates.no_index = product.noIndex;
+    if (product.ogImage !== undefined) updates.og_image = product.ogImage;
 
     // Merchant fields
     if (product.merchantId !== undefined) updates.merchant_id = product.merchantId;
