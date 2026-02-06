@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseService } from '@/lib/supabaseService';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(request: Request) {
     try {
@@ -11,11 +11,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
 
-        const supabaseService = getSupabaseService();
-
-        // Query admins table using Service Role (bypasses RLS)
-        const { data: adminData, error } = await supabaseService
-            .from('admins')
+        // Query User table using Service Role (bypasses RLS)
+        const { data: userData, error } = await supabaseAdmin
+            .from('User')
             .select('*')
             .eq('id', userId)
             .single();
@@ -23,19 +21,20 @@ export async function POST(request: Request) {
         if (error) {
             // If row missing
             if (error.code === 'PGRST116') {
-                return NextResponse.json({ error: 'User not found in admins table' }, { status: 404 });
+                return NextResponse.json({ error: 'User not found' }, { status: 404 });
             }
+            console.error('Verify API Error:', error);
             throw error;
         }
 
         return NextResponse.json({
-            status: adminData.status,
-            role: adminData.role,
-            shop_name: adminData.shop_name,
-            full_name: adminData.full_name,
-            phone: adminData.phone,
-            id: adminData.id,
-            email: adminData.email
+            status: userData.status || 'approved',
+            role: userData.role,
+            shop_name: userData.shopName,
+            full_name: userData.name,
+            phone: userData.phone,
+            id: userData.id,
+            email: userData.email
         }, { status: 200 });
 
     } catch (error: any) {

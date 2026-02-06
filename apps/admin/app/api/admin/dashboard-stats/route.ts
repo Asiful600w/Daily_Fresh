@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseService } from '@/lib/supabaseService';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET(request: Request) {
     try {
@@ -7,15 +7,13 @@ export async function GET(request: Request) {
         const role = searchParams.get('role');
         const userId = searchParams.get('userId'); // Merchant ID if role is merchant
 
-        const supabaseService = getSupabaseService();
-
         // --- SUPER ADMIN STATS ---
         if (role !== 'MERCHANT') {
-            // 1. Total Merchants
-            const { count: merchantCount, error: merchantError } = await supabaseService
-                .from('admins')
+            // 1. Total Merchants (from User table with role = MERCHANT)
+            const { count: merchantCount, error: merchantError } = await supabaseAdmin
+                .from('User')
                 .select('id', { count: 'exact', head: true })
-                .eq('role', 'merchant');
+                .eq('role', 'MERCHANT');
 
             if (merchantError) {
                 console.error('Error fetching merchant count:', merchantError);
@@ -23,7 +21,7 @@ export async function GET(request: Request) {
             }
 
             // 2. Low Stock (Reuse logic or fetch here)
-            const { count: lowStockCount, error: lowStockError } = await supabaseService
+            const { count: lowStockCount, error: lowStockError } = await supabaseAdmin
                 .from('products')
                 .select('id', { count: 'exact', head: true })
                 .lte('stock_quantity', 10) // Updated threshold to 10
@@ -38,7 +36,7 @@ export async function GET(request: Request) {
         // --- MERCHANT STATS ---
         if (role === 'MERCHANT' && userId) {
             // 1. Get Merchant Products
-            const { data: products, error: prodError } = await supabaseService
+            const { data: products, error: prodError } = await supabaseAdmin
                 .from('products')
                 .select('id, name, is_approved, sold_count, images')
                 .eq('merchant_id', userId)
@@ -50,7 +48,7 @@ export async function GET(request: Request) {
             // 2. Get Total Reviews for Merchant's Products
             let totalReviews = 0;
             if (productIds.length > 0) {
-                const { count: reviewCount, error: reviewError } = await supabaseService
+                const { count: reviewCount, error: reviewError } = await supabaseAdmin
                     .from('reviews')
                     .select('id', { count: 'exact', head: true })
                     .in('product_id', productIds);
@@ -66,7 +64,7 @@ export async function GET(request: Request) {
 
             if (productIds.length > 0) {
                 // Fetch order items with order details
-                const { data: orderItems, error: itemsError } = await supabaseService
+                const { data: orderItems, error: itemsError } = await supabaseAdmin
                     .from('order_items')
                     .select(`
                         price, 
