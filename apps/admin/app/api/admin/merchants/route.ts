@@ -12,9 +12,9 @@ export async function GET() {
 
         const { data, error } = await supabaseAdmin
             .from('User')
-            .select('id, name, email, role, status, shopName, phone, createdAt')
+            .select('id, name, email, role, status, shop_name, phone, created_at')
             .in('role', ['MERCHANT', 'ADMIN'])
-            .order('createdAt', { ascending: false });
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('Supabase error fetching merchants:', error);
@@ -28,10 +28,10 @@ export async function GET() {
             id: user.id,
             email: user.email,
             full_name: user.name,
-            shop_name: user.shopName,
+            shop_name: user.shop_name,
             status: user.status || 'approved',
             role: user.role,
-            created_at: user.createdAt,
+            created_at: user.created_at,
             phone: user.phone
         }));
 

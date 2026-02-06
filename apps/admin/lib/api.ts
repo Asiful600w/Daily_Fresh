@@ -117,6 +117,8 @@ export async function getCategories(): Promise<Category[]> {
             )
         `);
 
+    console.log('Fetching Categories Raw Data:', { dataLength: data?.length, error });
+
     if (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -266,8 +268,10 @@ export async function deleteSubcategory(id: string) {
 
 export async function getCustomers(phoneQuery?: string) {
     let query = supabase
-        .from('profiles')
-        .select('*');
+        .from('User')
+        .select('*')
+        .eq('role', 'CUSTOMER')
+        .order('created_at', { ascending: false });
 
     if (phoneQuery) {
         query = query.ilike('phone', `%${phoneQuery}%`);
@@ -279,7 +283,16 @@ export async function getCustomers(phoneQuery?: string) {
         console.error('Error fetching customers:', error);
         return [];
     }
-    return data;
+
+    // Map User table fields to profile-like structure if needed by UI
+    return data.map((user: any) => ({
+        id: user.id,
+        full_name: user.name,
+        avatar_url: user.image,
+        phone: user.phone,
+        email: user.email,
+        created_at: user.created_at
+    }));
 }
 
 export async function getCustomerById(id: string) {
