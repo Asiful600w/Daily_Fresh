@@ -35,10 +35,6 @@ export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
 
-    useEffect(() => {
-        loadData();
-    }, [filters]);
-
     const loadData = async () => {
         setLoading(true);
         const [ordersData, statsData] = await Promise.all([
@@ -49,6 +45,10 @@ export default function OrdersPage() {
         setStats(statsData);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadData();
+    }, [filters]);
 
     const handleStatusChange = async (orderId: number, newStatus: string) => {
         const result = await updateOrderStatus(orderId, newStatus);

@@ -22,10 +22,6 @@ export default function ReviewsPage() {
     const [filters, setFilters] = useState<ReviewFilters>({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        loadData();
-    }, [filters]);
-
     const loadData = async () => {
         setLoading(true);
         const [reviewsData, statsData] = await Promise.all([
@@ -36,6 +32,10 @@ export default function ReviewsPage() {
         setStats(statsData);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadData();
+    }, [filters]);
 
     const handleToggleVisibility = async (reviewId: number, currentlyHidden: boolean) => {
         const result = await toggleReviewVisibility(reviewId, !currentlyHidden);
@@ -228,8 +228,8 @@ export default function ReviewsPage() {
                                                 <span
                                                     key={i}
                                                     className={`material-icons-round text-sm ${i < review.rating
-                                                            ? 'text-yellow-400'
-                                                            : 'text-slate-200 dark:text-slate-700'
+                                                        ? 'text-yellow-400'
+                                                        : 'text-slate-200 dark:text-slate-700'
                                                         }`}
                                                 >
                                                     star
@@ -259,8 +259,8 @@ export default function ReviewsPage() {
                                         <button
                                             onClick={() => handleToggleVisibility(review.id, review.is_hidden)}
                                             className={`p-2 rounded-lg transition-colors ${review.is_hidden
-                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
-                                                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200'
+                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
+                                                : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200'
                                                 }`}
                                             title={review.is_hidden ? 'Show review' : 'Hide review'}
                                         >
