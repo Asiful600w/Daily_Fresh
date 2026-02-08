@@ -8,7 +8,7 @@ interface MobileFilterBarProps {
     onSortChange: (sort: string) => void;
 }
 
-export function MobileFilterBar({ totalResults, onFilterClick, currentSort, onSortChange }: MobileFilterBarProps) {
+export function MobileFilterBar({ onFilterClick, currentSort, onSortChange }: MobileFilterBarProps) {
     return (
         <div className="lg:hidden py-3 -mx-4 px-4 flex items-center justify-between border-b border-transparent">
             {/* Sort Dropdown (Simplified) */}

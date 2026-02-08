@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface MobileCategoryDrawerProps {

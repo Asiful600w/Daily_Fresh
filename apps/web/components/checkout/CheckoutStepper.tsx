@@ -25,10 +25,9 @@ export function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
                     }}
                 />
 
-                {steps.map((s, index) => {
+                {steps.map((s) => {
                     const isCompleted = currentStep > s.step;
                     const isActive = currentStep === s.step;
-                    const isPending = currentStep < s.step;
 
                     return (
                         <div key={s.step} className="flex flex-col items-center gap-3 relative group">

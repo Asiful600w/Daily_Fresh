@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     getAllReviews,
     toggleReviewVisibility,
@@ -22,20 +22,25 @@ export default function ReviewsPage() {
     const [filters, setFilters] = useState<ReviewFilters>({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
-        const [reviewsData, statsData] = await Promise.all([
-            getAllReviews({ ...filters, searchTerm }),
-            getReviewStatistics()
-        ]);
-        setReviews(reviewsData);
-        setStats(statsData);
-        setLoading(false);
-    };
+        try {
+            const [reviewsData, statsData] = await Promise.all([
+                getAllReviews(filters),
+                getReviewStatistics()
+            ]);
+            setReviews(reviewsData);
+            setStats(statsData);
+        } catch (error) {
+            console.error('Failed to load reviews:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [filters]);
 
     useEffect(() => {
         loadData();
-    }, [filters]);
+    }, [loadData]);
 
     const handleToggleVisibility = async (reviewId: number, currentlyHidden: boolean) => {
         const result = await toggleReviewVisibility(reviewId, !currentlyHidden);

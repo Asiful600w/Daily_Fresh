@@ -21,7 +21,7 @@ export default function SignupPage() {
 
     // ... inside component
 
-    const [isPending, startTransition] = React.useTransition();
+    const [isPending, startTransition] = useTransition();
 
 
     const handleSignup = (e: React.FormEvent) => {

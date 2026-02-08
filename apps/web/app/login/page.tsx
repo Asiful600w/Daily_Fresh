@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
 
-    const [isPending, startTransition] = React.useTransition();
+    const [isPending, startTransition] = useTransition();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState('');

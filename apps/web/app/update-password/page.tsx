@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function UpdatePasswordPage() {
-    const supabase = createClient();
+    const [supabase] = useState(() => createClient());
     const router = useRouter();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,7 +20,7 @@ export default function UpdatePasswordPage() {
                 setError("Invalid or expired session. Please request a new password reset link.");
             }
         });
-    }, []);
+    }, [supabase]);
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();

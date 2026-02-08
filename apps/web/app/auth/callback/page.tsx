@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AuthCallbackPage() {
-    const supabase = createClient();
-    const router = useRouter();
+    const [supabase] = useState(() => createClient());
 
     useEffect(() => {
         // The supabase client is configured with detectSessionInUrl: true
@@ -36,7 +34,7 @@ export default function AuthCallbackPage() {
         };
 
         handleAuth();
-    }, [router]);
+    }, [supabase]);
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#fafafa] dark:bg-[#111827]">

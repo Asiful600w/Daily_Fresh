@@ -10,7 +10,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 
 export default function WishlistPage() {
     const { user, loading: authLoading } = useAuth();
-    const supabase = createClient();
+    const [supabase] = useState(() => createClient());
     const { wishlistIds } = useWishlist();
     const [wishlistItems, setWishlistItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ export default function WishlistPage() {
         if (user) {
             fetchWishlist();
         }
-    }, [user]);
+    }, [user, supabase]);
 
     if (authLoading) {
         return (

@@ -16,7 +16,7 @@ interface CategoryViewProps {
 }
 
 export function CategoryView({ products, categoryData, slug }: CategoryViewProps) {
-    const router = useRouter();
+    // const router = useRouter();
     const searchParams = useSearchParams();
 
     // -- Derived Initial State --
