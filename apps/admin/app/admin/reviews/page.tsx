@@ -9,6 +9,7 @@ import {
     type AdminReview,
     type ReviewFilters
 } from '@/actions/reviews';
+import Image from 'next/image';
 
 export default function ReviewsPage() {
     const [reviews, setReviews] = useState<AdminReview[]>([]);
@@ -211,11 +212,14 @@ export default function ReviewsPage() {
                                         {/* Product Info */}
                                         <div className="flex items-center gap-3 mb-3">
                                             {review.product?.images?.[0] && (
-                                                <img
-                                                    src={review.product.images[0]}
-                                                    alt={review.product.name}
-                                                    className="w-12 h-12 rounded-lg object-cover"
-                                                />
+                                                <div className="relative w-12 h-12 rounded-lg overflow-hidden">
+                                                    <Image
+                                                        src={review.product.images[0]}
+                                                        alt={review.product.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
                                             )}
                                             <div>
                                                 <h3 className="font-bold text-slate-900 dark:text-white">

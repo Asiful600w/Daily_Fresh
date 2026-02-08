@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { LoginSchema } from "@/schemas"
-import { createClient } from "@/lib/supabase/client"
+
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -45,7 +45,10 @@ export default function LoginPage() {
     useEffect(() => {
         if (!adminLoading && adminUser) {
             console.log("Already logged in, redirecting to dashboard...");
-            setIsRedirecting(true);
+            // Wrap in setTimeout to avoid "setting state in effect" warning/error
+            setTimeout(() => {
+                setIsRedirecting(true);
+            }, 0);
             router.replace('/admin');
         }
     }, [adminUser, adminLoading, router]);
