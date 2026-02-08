@@ -31,8 +31,8 @@ export async function getAdminOrders(searchQuery?: string, merchantId?: string) 
         .from('orders')
         .select(`
             *,
-            order_items (
-                id, name, quantity, size, color, product_id, price
+            order_items!order_items_order_id_fkey (
+                id, name, quantity, size, color, product_id, price, image
             )
         `)
         .order('created_at', { ascending: false });
@@ -86,13 +86,13 @@ export async function getAdminOrders(searchQuery?: string, merchantId?: string) 
     // Fetch profiles for these users to show dynamic names
     const userIds = Array.from(new Set(processedOrders.map(o => o.user_id)));
     const { data: profiles } = await supabaseAdmin
-        .from('profiles')
-        .select('id, full_name, phone, avatar_url')
+        .from('User')
+        .select('id, name, phone, image')
         .in('id', userIds);
 
     return processedOrders.map(order => {
         const profile = profiles?.find(p => p.id === order.user_id);
-        const customerName = profile?.full_name || order.shipping_name || 'Guest';
+        const customerName = profile?.name || order.shipping_name || 'Guest';
         const customerPhone = profile?.phone || order.shipping_phone || '';
 
         // If merchant, use merchant_total, else total_amount
@@ -106,7 +106,7 @@ export async function getAdminOrders(searchQuery?: string, merchantId?: string) 
             customer: {
                 name: customerName,
                 phone: customerPhone,
-                avatar: profile?.avatar_url,
+                avatar: profile?.image,
                 id: order.user_id
             }
         };
@@ -127,10 +127,7 @@ export async function getAdminOrder(id: string) {
         .from('orders')
         .select(`
             *,
-            items:order_items(
-                *,
-                products (images)
-            )
+            items:order_items!order_items_order_id_fkey(*)
         `)
         .eq('id', id)
         .single();
@@ -142,12 +139,12 @@ export async function getAdminOrder(id: string) {
 
     // Fetch profile for dynamic customer info
     const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('full_name, phone, avatar_url')
+        .from('User')
+        .select('name, phone, image')
         .eq('id', order.user_id)
         .single();
 
-    const customerName = profile?.full_name || order.shipping_name || 'Guest';
+    const customerName = profile?.name || order.shipping_name || 'Guest';
     const customerPhone = profile?.phone || order.shipping_phone || '';
 
     return {
@@ -155,7 +152,7 @@ export async function getAdminOrder(id: string) {
         customer: {
             name: customerName,
             phone: customerPhone,
-            avatar: profile?.avatar_url,
+            avatar: profile?.image,
             id: order.user_id
         }
     };
@@ -200,8 +197,7 @@ export async function getSalesAnalytics() {
 
     const { data: orders, error } = await supabaseAdmin
         .from('orders')
-        .select('created_at, total_amount')
-        .eq('status', 'delivered')
+        .select('created_at, total_amount, status')
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
 
@@ -218,9 +214,11 @@ export async function getSalesAnalytics() {
     }
 
     orders.forEach(order => {
-        const date = new Date(order.created_at).toLocaleDateString('en-US');
-        const current = salesMap.get(date) || 0;
-        salesMap.set(date, current + order.total_amount);
+        if (order.status?.toUpperCase() === 'DELIVERED') {
+            const date = new Date(order.created_at).toLocaleDateString('en-US');
+            const current = salesMap.get(date) || 0;
+            salesMap.set(date, current + Number(order.total_amount));
+        }
     });
 
     return Array.from(salesMap.entries())
@@ -296,7 +294,7 @@ export async function getMerchantStats(merchantId: string) {
         .from('order_items')
         .select(`
             *,
-            orders (id, created_at, status, shipping_name)
+            orders!order_items_order_id_fkey (id, created_at, status, shipping_name)
         `)
         .in('product_id', productIds)
         .order('created_at', { ascending: false });
@@ -307,7 +305,7 @@ export async function getMerchantStats(merchantId: string) {
     }
 
     // 3. Calculate Stats
-    const validItems = orderItems.filter((i: any) => i.orders?.status !== 'cancelled');
+    const validItems = orderItems.filter((i: any) => i.orders?.status?.toLowerCase() !== 'cancelled');
     const totalEarnings = validItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
     const totalOrders = new Set(validItems.map((i: any) => i.order_id)).size;
 

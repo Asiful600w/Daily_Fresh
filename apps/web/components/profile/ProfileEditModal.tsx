@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 interface ProfileEditModalProps {
@@ -12,6 +12,7 @@ interface ProfileEditModalProps {
 
 export function ProfileEditModal({ isOpen, onClose }: ProfileEditModalProps) {
     const { user } = useAuth();
+    const supabase = createClient();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 

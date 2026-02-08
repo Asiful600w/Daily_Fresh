@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '@/context/AdminAuthContext';
+import { toggleFeaturedProduct } from '@/actions/products';
 
 export default function AdminProductsPage() {
     const { adminUser } = useAdminAuth();
@@ -61,7 +62,7 @@ export default function AdminProductsPage() {
             let targetMerchantId = undefined;
             if (adminUser.role === 'MERCHANT') {
                 targetMerchantId = adminUser.id;
-            } else if (adminUser.role === 'ADMIN' && queryMerchantId) {
+            } else if (adminUser.role === 'SUPERADMIN' && queryMerchantId) {
                 targetMerchantId = queryMerchantId;
             }
 
@@ -102,6 +103,21 @@ export default function AdminProductsPage() {
         } catch (error) {
             console.error('Error updating approval:', error);
             alert('Failed to update status');
+        }
+    };
+
+    const handleToggleFeatured = async (productId: number, currentFeatured: boolean) => {
+        try {
+            const result = await toggleFeaturedProduct(productId, !currentFeatured);
+            if (result.success) {
+                // Optimistic update
+                setProducts(prev => prev.map(p => p.id === productId ? { ...p, is_featured: !currentFeatured } : p));
+            } else {
+                alert('Failed to toggle featured status');
+            }
+        } catch (error) {
+            console.error('Error toggling featured:', error);
+            alert('Failed to toggle featured status');
         }
     };
 
@@ -189,7 +205,8 @@ export default function AdminProductsPage() {
                                 <th className="p-6 font-semibold">Price</th>
                                 <th className="p-6 font-semibold">Stock</th>
                                 <th className="p-6 font-semibold">Status</th>
-                                {adminUser?.role === 'ADMIN' && <th className="p-6 font-semibold">Merchant</th>}
+                                <th className="p-6 font-semibold">Featured</th>
+                                {adminUser?.role === 'SUPERADMIN' && <th className="p-6 font-semibold">Merchant</th>}
                                 <th className="p-6 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
@@ -256,7 +273,22 @@ export default function AdminProductsPage() {
                                             )}
                                         </td>
 
-                                        {adminUser?.role === 'ADMIN' && (
+                                        <td className="p-6">
+                                            <button
+                                                onClick={() => handleToggleFeatured(product.id, product.is_featured)}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${product.is_featured
+                                                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
+                                                        : 'text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-yellow-500'
+                                                    }`}
+                                                title={product.is_featured ? 'Remove from Featured' : 'Add to Featured'}
+                                            >
+                                                <span className="material-icons-round text-xl">
+                                                    {product.is_featured ? 'star' : 'star_outline'}
+                                                </span>
+                                            </button>
+                                        </td>
+
+                                        {adminUser?.role === 'SUPERADMIN' && (
                                             <td className="p-6 text-sm text-slate-600 dark:text-slate-300">
                                                 {product.shop_name || 'Daily Fresh'}
                                             </td>
@@ -265,7 +297,7 @@ export default function AdminProductsPage() {
                                         <td className="p-6 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 {/* Super Admin Approval Actions */}
-                                                {adminUser?.role === 'ADMIN' && (
+                                                {adminUser?.role === 'SUPERADMIN' && (
                                                     <button
                                                         onClick={() => toggleApproval(product)}
                                                         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${product.is_approved

@@ -48,20 +48,31 @@ export interface Product {
 
 // Helper to map DB result to app interface
 function mapCategory(row: any): Category {
-    return {
-        id: row.id,
-        name: row.name,
-        slug: row.slug,
-        img: row.image_url,
-        banner: row.banner_url || row.image_url, // Fallback to icon if banner missing
-        // Filter out hidden categories if necessary, but this mapper is usually for valid categories
-        subcategories: row.subcategories
-            ? row.subcategories.map((s: any) => ({
-                name: s.name,
-                count: s.products ? s.products[0]?.count || 0 : 0
-            }))
-            : []
-    };
+    try {
+        return {
+            id: row.id,
+            name: row.name || 'Untitled Category',
+            slug: row.slug || `category-${row.id}`,
+            img: row.image_url || '/placeholder.png',
+            banner: row.banner_url || row.image_url || '/placeholder.png', // Fallback to icon if banner missing
+            // Filter out hidden categories if necessary, but this mapper is usually for valid categories
+            subcategories: row.subcategories
+                ? row.subcategories.map((s: any) => ({
+                    name: s.name || 'Unknown',
+                    count: s.products ? s.products[0]?.count || 0 : 0
+                }))
+                : []
+        };
+    } catch (error) {
+        console.error('CRITICAL: Error mapping category row:', row, error);
+        return {
+            id: row.id || 'error',
+            name: 'Error Loading Category',
+            slug: 'error',
+            img: '',
+            subcategories: []
+        };
+    }
 }
 
 function mapProduct(row: any): Product {
@@ -112,6 +123,40 @@ export async function getCategories(): Promise<Category[]> {
         .select(`
             id, name, slug, image_url, banner_url,
             subcategories (
+                id, name
+            )
+        `)
+        .order('name', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+    }
+
+    if (!data || data.length === 0) {
+        console.warn('No categories found in database');
+        return [];
+    }
+
+    return data.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        img: row.image_url,
+        banner: row.banner_url || row.image_url,
+        subcategories: (row.subcategories || []).map((s: any) => ({
+            id: s.id,
+            name: s.name
+        }))
+    }));
+}
+/*
+export async function getCategories(): Promise<Category[]> {
+    const { data, error } = await supabase
+        .from('categories')
+        .select(`
+            id, name, slug, image_url, banner_url,
+            subcategories (
                 name,
                 products:products(count)
             )
@@ -120,12 +165,35 @@ export async function getCategories(): Promise<Category[]> {
     console.log('Fetching Categories Raw Data:', { dataLength: data?.length, error });
 
     if (error) {
-        console.error('Error fetching categories:', error);
+        console.error('CRITICAL: Error fetching categories:', JSON.stringify(error, null, 2));
         return [];
+    }
+
+    if (!data || data.length === 0) {
+        console.warn('CRITICAL: Categories fetch returned empty array. Attempting fallback query without joins.');
+        const { data: fallbackData, error: fallbackError } = await supabase
+            .from('categories')
+            .select('*');
+
+        if (fallbackError) {
+            console.error('CRITICAL: Fallback categories fetch failed:', JSON.stringify(fallbackError, null, 2));
+            return [];
+        }
+        console.log('Fallback Categories Data:', fallbackData);
+        // Map fallback data (won't have subcategories)
+        return fallbackData.map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            img: row.image_url,
+            banner: row.banner_url || row.image_url,
+            subcategories: []
+        }));
     }
 
     return data.map(mapCategory);
 }
+*/
 
 export async function getCategory(slug: string): Promise<Category | null> {
     const { data, error } = await supabase
@@ -266,12 +334,52 @@ export async function deleteSubcategory(id: string) {
     if (error) throw error;
 }
 
+export async function getMerchants() {
+    const { data, error } = await supabase
+        .from('User')
+        .select('id, name, email, role, status, shopName, phone, createdAt') // camelCase
+        .in('role', ['MERCHANT', 'ADMIN', 'SUPERADMIN']) // temporary debug query to see ALL admins/merchants
+        .order('createdAt', { ascending: false }); // camelCase
+
+    if (error) {
+        console.error('CRITICAL: Error fetching merchants:', JSON.stringify(error, null, 2));
+        return [];
+    }
+
+    if (!data || data.length === 0) {
+        console.warn('CRITICAL: Merchants fetch returned empty array. Checking query params:', { role: ['MERCHANT', 'ADMIN', 'SUPERADMIN'] });
+    }
+
+    return data.map((user: any) => ({
+        id: user.id,
+        email: user.email,
+        full_name: user.name,
+        shop_name: user.shopName, // camelCase in DB
+        status: user.status || 'approved',
+        role: user.role,
+        created_at: user.createdAt, // camelCase in DB
+        phone: user.phone
+    }));
+}
+
+export async function updateMerchantStatus(id: string, status: string) {
+    const { error } = await supabase
+        .from('User')
+        .update({ status, updatedAt: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error updating merchant status:', error);
+        throw error;
+    }
+}
+
 export async function getCustomers(phoneQuery?: string) {
     let query = supabase
         .from('User')
         .select('*')
         .eq('role', 'CUSTOMER')
-        .order('created_at', { ascending: false });
+        .order('createdAt', { ascending: false });
 
     if (phoneQuery) {
         query = query.ilike('phone', `%${phoneQuery}%`);
@@ -1522,11 +1630,14 @@ export async function getAdminReviews(filters?: { rating?: number | 'all', visib
     const { data: reviews, error } = await query;
 
     if (error) {
-        console.error('Error fetching admin reviews:', error);
+        console.error('CRITICAL: Error fetching admin reviews:', JSON.stringify(error, null, 2));
         throw error;
     }
 
-    if (!reviews || reviews.length === 0) return [];
+    if (!reviews || reviews.length === 0) {
+        console.warn('CRITICAL: Admin reviews fetch returned empty array.');
+        return [];
+    }
 
     // Manually fetch related data (Safer than joins if relationships are missing)
     const validReviews = reviews;

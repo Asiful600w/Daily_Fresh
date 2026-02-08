@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUnreadNotifications, markNotificationAsViewed, markAllNotificationsAsViewed, OrderNotification } from '@/actions/notifications';
+import { createClient } from '@/lib/supabase/client';
 
 interface AdminNotificationContextType {
     notifications: OrderNotification[];
@@ -49,18 +50,40 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     };
 
     useEffect(() => {
-        // Define async function inside effect to avoid calling setState directly
+        // Initial fetch
         const initFetch = async () => {
             await fetchNotifications(false);
         };
         initFetch();
 
-        // Poll every 30 seconds
-        const interval = setInterval(() => {
-            fetchNotifications(true);
-        }, 30000);
+        // Set up Realtime subscription for new orders
+        const supabase = createClient();
 
-        return () => clearInterval(interval);
+        const channel = supabase
+            .channel('admin-orders-realtime')
+            .on('postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'orders' },
+                (payload) => {
+                    console.log('New order received:', payload.new);
+                    // Play notification sound
+                    playNotificationSound();
+                    // Refresh notifications to include the new order
+                    fetchNotifications(false);
+                }
+            )
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'orders' },
+                (payload) => {
+                    console.log('Order updated:', payload.new);
+                    // Refresh to update order status in notifications
+                    fetchNotifications(false);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

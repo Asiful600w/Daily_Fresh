@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './AuthContext';
 
 interface WishlistContextType {
@@ -16,6 +16,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
+    const supabase = createClient();
     const [wishlistIds, setWishlistIds] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
 

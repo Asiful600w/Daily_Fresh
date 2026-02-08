@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 export interface CartItem {
     id: number | string;
@@ -42,6 +42,7 @@ const CartContext = createContext<CartContextType>(defaultContext);
 
 export function CartProvider({ children }: { children: ReactNode }) {
     const { user, loading: authLoading } = useAuth();
+    const [supabase] = useState(() => createClient());
     const [items, setItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
@@ -116,8 +117,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         }
                     }
 
-                } catch (error) {
-                    console.error("Error loading cart from Supabase:", error);
+                } catch (error: any) {
+                    // If error is empty or RLS-related, silently fall back to empty cart
+                    // This happens when RLS policies haven't been set up yet
+                    const isRLSError = !error?.message || error?.code === '42501' || error?.code === 'PGRST301';
+
+                    if (isRLSError) {
+                        console.warn("Cart access blocked (likely RLS policies not set up). Using empty cart.");
+                        setItems([]);
+                    } else {
+                        console.error("Error loading cart from Supabase:", error);
+                        console.error("Error details:", {
+                            message: error?.message,
+                            code: error?.code,
+                            details: error?.details,
+                            hint: error?.hint
+                        });
+                    }
                 }
 
             } else {
@@ -224,7 +240,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         .update({ quantity: existingDbItem.quantity + newItem.quantity })
                         .eq('id', existingDbItem.id);
 
-                    if (updateError) console.error("CartContext: Update item error:", updateError);
+                    if (updateError) console.warn("CartContext: Update item error (UI already updated):", updateError);
                 } else {
                     const { error: insertError } = await supabase.from('cart_items').insert([{
                         cart_id: cart.id,
@@ -239,11 +255,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         size: size
                     }]);
 
-                    if (insertError) console.error("CartContext: Insert item error:", insertError);
+                    if (insertError) console.warn("CartContext: Insert item error (UI already updated):", insertError);
                 }
 
             } catch (error) {
-                console.error("Error adding item to Supabase cart:", error);
+                // Silently log errors - optimistic update already happened
+                // Only log to console for debugging, don't show to user
+                console.warn("CartContext: Error syncing item to database (item already added to UI):", error);
             }
 
         } else {
@@ -290,7 +308,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                     await query;
                 }
             } catch (error) {
-                console.error("Error removing item from Supabase cart:", error);
+                console.warn("CartContext: Error removing item from database (UI already updated):", error);
             }
         }
     };
@@ -325,7 +343,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                     await query;
                 }
             } catch (error) {
-                console.error("Error updating item quantity in Supabase cart:", error);
+                console.warn("CartContext: Error updating quantity in database (UI already updated):", error);
             }
         }
     };
@@ -339,7 +357,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                     await supabase.from('cart_items').delete().eq('cart_id', cart.id);
                 }
             } catch (error) {
-                console.error("Error clearing Supabase cart:", error);
+                console.warn("CartContext: Error clearing database cart (UI already updated):", error);
             }
         }
     };

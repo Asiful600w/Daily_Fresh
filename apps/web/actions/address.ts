@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from "@/auth";
+import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { revalidatePath } from "next/cache";
 
@@ -19,13 +19,15 @@ export interface Address {
 
 export async function getUserAddresses() {
     try {
-        const session = await auth();
-        if (!session?.user?.id) return [];
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return [];
 
         const { data, error } = await supabaseAdmin
             .from('addresses')
             .select('*')
-            .eq('user_id', session.user.id)
+            .eq('user_id', user.id)
             .order('is_default', { ascending: false });
 
         if (error) {
@@ -53,11 +55,13 @@ export async function getUserAddresses() {
 
 export async function saveAddress(addressData: Partial<Address>) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) throw new Error("Unauthorized");
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) throw new Error("Unauthorized");
 
         const payload = {
-            user_id: session.user.id,
+            user_id: user.id,
             label: addressData.label,
             full_name: addressData.fullName,
             phone: addressData.phone,
@@ -77,7 +81,7 @@ export async function saveAddress(addressData: Partial<Address>) {
                 .from('addresses')
                 .update(payload)
                 .eq('id', addressData.id)
-                .eq('user_id', session.user.id);
+                .eq('user_id', user.id);
         } else {
             // Insert
             result = await supabaseAdmin
@@ -97,14 +101,16 @@ export async function saveAddress(addressData: Partial<Address>) {
 
 export async function deleteAddress(id: string) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) throw new Error("Unauthorized");
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) throw new Error("Unauthorized");
 
         const { error } = await supabaseAdmin
             .from('addresses')
             .delete()
             .eq('id', id)
-            .eq('user_id', session.user.id);
+            .eq('user_id', user.id);
 
         if (error) throw error;
 
@@ -118,14 +124,16 @@ export async function deleteAddress(id: string) {
 
 export async function setDefaultAddress(id: string) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) throw new Error("Unauthorized");
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) throw new Error("Unauthorized");
 
         const { error } = await supabaseAdmin
             .from('addresses')
             .update({ is_default: true })
             .eq('id', id)
-            .eq('user_id', session.user.id);
+            .eq('user_id', user.id);
 
         if (error) throw error;
 

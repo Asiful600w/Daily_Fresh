@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import { AuthProvider } from "@/context/AuthContext";
+import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Fresh produce delivered from farm to your doorstep.",
 };
 
-import { NextAuthSessionProvider } from '@/context/SessionProvider';
+
 
 // ... (imports)
 
@@ -37,24 +37,22 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
       >
-        <NextAuthSessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthProvider>
-              <WishlistProvider>
-                <CartProvider>
-                  <FlyToCartProvider>
-                    {children}
-                  </FlyToCartProvider>
-                </CartProvider>
-              </WishlistProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </NextAuthSessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AdminAuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <FlyToCartProvider>
+                  {children}
+                </FlyToCartProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </AdminAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

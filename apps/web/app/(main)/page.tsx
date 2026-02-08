@@ -19,10 +19,13 @@ export default async function Home() {
   const rawAds = await getAds(true);
   const ads = rawAds.map(a => a.image_url);
 
+  // Check if notice scroller should be shown (default to true if field doesn't exist)
+  const showNoticeScroller = heroSettings.show_notice_scroller !== false;
+
   return (
     <>
       <AdvertiseScroller ads={ads} />
-      <NoticeScroller notices={notices} />
+      {showNoticeScroller && <NoticeScroller notices={notices} />}
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <HeroSection settings={heroSettings} />
         <CategoryScroller categories={categories} />

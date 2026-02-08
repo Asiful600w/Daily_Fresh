@@ -1,5 +1,6 @@
+import { createClient } from '@/lib/supabase/client';
 
-import { supabase } from './supabase';
+const supabase = createClient();
 
 export interface Category {
     id: string;
@@ -260,26 +261,28 @@ export async function deleteSubcategory(id: string) {
 }
 
 export async function getCustomers(phoneQuery?: string) {
-    let query = supabase
-        .from('profiles')
+    const { data, error } = await supabase
+        .from('User')
         .select('*');
-
-    if (phoneQuery) {
-        query = query.ilike('phone', `%${phoneQuery}%`);
-    }
-
-    const { data, error } = await query;
 
     if (error) {
         console.error('Error fetching customers:', error);
         return [];
     }
-    return data;
+    // Map User table fields to profile-like structure
+    return data.map((user: any) => ({
+        id: user.id,
+        full_name: user.name,
+        avatar_url: user.image,
+        phone: user.phone,
+        email: user.email,
+        created_at: user.createdAt
+    }));
 }
 
 export async function getCustomerById(id: string) {
     const { data, error } = await supabase
-        .from('profiles')
+        .from('User')
         .select('*')
         .eq('id', id)
         .single();
@@ -288,7 +291,11 @@ export async function getCustomerById(id: string) {
         console.error(`Error fetching customer ${id}:`, error);
         return null;
     }
-    return data;
+    return {
+        ...data,
+        full_name: data.name,
+        avatar_url: data.image
+    };
 }
 
 
@@ -703,6 +710,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
             subcategories (name)
         `)
         .eq('is_deleted', false)
+        .eq('is_featured', true)
         .limit(8);
 
     if (error) {
@@ -992,58 +1000,98 @@ export async function createOrder(
 }
 
 export async function getOrder(id: string) {
-    const { data: order, error } = await supabase
+    console.log('getOrder called with id:', id);
+
+    if (!id) return null;
+
+    // 1. Fetch Order Metadata (No joins to avoid errors)
+    const { data: order, error: orderError } = await supabase
         .from('orders')
-        .select(`
-            *,
-            items:order_items(
-                *,
-                products (images)
-            )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
-    if (error) {
-        console.error('Error fetching order:', error);
-        return null;
+    if (orderError) {
+        console.error('Error fetching order metadata:', orderError);
+        console.error('Error details:', {
+            message: orderError.message,
+            code: orderError.code,
+            details: orderError.details,
+            hint: orderError.hint
+        });
+        return null; // Return null to trigger 404 handling in UI
     }
 
-    // Fetch profile for dynamic customer info
+    // 2. Fetch Order Items (Manual fetch)
+    const { data: items, error: itemsError } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', id);
+
+    if (itemsError) {
+        console.error('Error fetching order items:', itemsError);
+        // Continue even if items fail, to show at least order info? 
+        // Or fail? UI expects items. Let's return empty array if error.
+    }
+
+    // 3. Fetch User Profile
+    // database uses 'User' table, not 'profiles'
     const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, phone, avatar_url')
+        .from('User')
+        .select('name, phone, image')
         .eq('id', order.user_id)
         .single();
 
-    const customerName = profile?.full_name || order.shipping_name || 'Guest';
+    // 4. Assemble Result
+    const customerName = profile?.name || order.shipping_name || 'Guest';
     const customerPhone = profile?.phone || order.shipping_phone || '';
 
     return {
         ...order,
+        items: items || [], // Attach manually fetched items
         customer: {
             name: customerName,
             phone: customerPhone,
-            avatar: profile?.avatar_url,
+            avatar: profile?.image,
             id: order.user_id
         }
     };
 }
 
 export async function getUserOrders(userId: string) {
+    console.log('getUserOrders called with userId:', userId);
+    console.log('Current user from auth:', (await supabase.auth.getUser()).data.user?.id);
+
     const { data, error } = await supabase
         .from('orders')
         .select(`
             *,
-            order_items (id)
+            order_items!order_items_order_id_fkey (id)
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
     if (error) {
         console.error('Error fetching user orders:', error);
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+        console.error('Error details:', {
+            message: error.message || 'No message',
+            code: error.code || 'No code',
+            details: error.details || 'No details',
+            hint: error.hint || 'No hint',
+            statusCode: (error as any).statusCode || 'No status code'
+        });
+
+        // Empty error object usually means RLS is blocking
+        if (!error.message && !error.code) {
+            console.error('⚠️ EMPTY ERROR - This usually means RLS policies are blocking access!');
+            console.error('Please run the fix_order_permissions.sql script in Supabase');
+        }
+
         return [];
     }
+
+    console.log(`Found ${data?.length || 0} orders for user ${userId}`);
 
     return data.map(order => ({
         ...order,
@@ -1056,7 +1104,7 @@ export async function getAllOrders(searchQuery?: string) {
         .from('orders')
         .select(`
             *,
-            order_items (id, name, quantity, size, color)
+            order_items!order_items_order_id_fkey (id, name, quantity, size, color)
         `)
         .order('created_at', { ascending: false });
 
@@ -1074,13 +1122,13 @@ export async function getAllOrders(searchQuery?: string) {
     // Fetch profiles for these users to show dynamic names
     const userIds = Array.from(new Set((data || []).map(o => o.user_id)));
     const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone, avatar_url')
+        .from('User')
+        .select('id, name, phone, image')
         .in('id', userIds);
 
     return (data || []).map(order => {
         const profile = profiles?.find(p => p.id === order.user_id);
-        const customerName = profile?.full_name || order.shipping_name || 'Guest';
+        const customerName = profile?.name || order.shipping_name || 'Guest';
         const customerPhone = profile?.phone || order.shipping_phone || '';
 
         return {
@@ -1090,7 +1138,7 @@ export async function getAllOrders(searchQuery?: string) {
             customer: {
                 name: customerName,
                 phone: customerPhone,
-                avatar: profile?.avatar_url,
+                avatar: profile?.image,
                 id: order.user_id
             }
         };

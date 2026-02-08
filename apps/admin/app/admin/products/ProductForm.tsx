@@ -247,40 +247,59 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setUploading(true);
 
         try {
-            // 1. Determine Product ID
-            // If editing, use existing. If new, generate one to allow Image Upload path construction.
-            // Ideally we'd upload images after creation, but we need ID for path.
-            const productId = initialData?.id ? String(initialData.id) : String(Math.floor(Math.random() * 90000000) + 10000000);
+            // 1. Prepare initial payload (without images)
+            console.log('Admin User:', adminUser);
+            console.log('Admin User ID:', adminUser?.id);
+            console.log('Admin User Role:', adminUser?.role);
 
-            // 2. Upload Images (Client-side upload to Storage is still allowed if Storage RLS permits authenticated users)
-            // If Storage RLS is strict, we might need a Server Action for this too, but usually Storage allows Auth users to upload.
-            let newImageUrls: string[] = [];
-            if (selectedFiles.length > 0) {
-                newImageUrls = await uploadImages(productId);
-            }
-
-            // 3. Final Images List
-            const finalImages = [...(formData.images || []), ...newImageUrls];
-
-            // 4. Prepare Payload
             const payload = {
                 ...formData,
-                id: Number(productId),
-                images: finalImages,
+                images: formData.images || [], // Keep existing images if editing
+                // Only include ID if editing
+                ...(initialData?.id && { id: initialData.id }),
                 // Attach Merchant Info if applicable
-                merchantId: adminUser?.role === 'MERCHANT' ? adminUser.id : undefined,
+                merchantId: adminUser?.id, // Always include user ID
                 shopName: adminUser?.role === 'MERCHANT' ? (adminUser.shop_name || adminUser.full_name) : undefined
             };
 
-            // 5. Save using Server Action
+            console.log('Submitting product payload:', payload);
+
+            // 2. Save product first to get the ID
             const { upsertProductAction } = await import('@/actions/products');
-            const result = await upsertProductAction(payload as any); // Cast to catch-all or define exact type match
+            const result = await upsertProductAction(payload as any);
+
+            console.log('Server action result:', result);
 
             if (!result.success) {
                 throw new Error(result.error);
+            }
+
+            // 3. Upload images if any new files selected
+            if (selectedFiles.length > 0 && result.data?.id) {
+                setUploading(true);
+                const productId = String(result.data.id);
+                console.log('Uploading images for product ID:', productId);
+
+                const newImageUrls = await uploadImages(productId);
+                console.log('Uploaded image URLs:', newImageUrls);
+
+                // 4. Update product with image URLs
+                if (newImageUrls.length > 0) {
+                    const finalImages = [...(formData.images || []), ...newImageUrls];
+                    const updateResult = await upsertProductAction({
+                        ...payload,
+                        id: result.data.id,
+                        images: finalImages
+                    } as any);
+
+                    if (!updateResult.success) {
+                        console.error('Failed to update product with images:', updateResult.error);
+                    } else {
+                        console.log('Product updated with images successfully');
+                    }
+                }
             }
 
             router.push('/admin/products');

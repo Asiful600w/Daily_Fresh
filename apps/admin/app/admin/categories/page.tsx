@@ -20,8 +20,11 @@ export default function AdminCategoriesPage() {
         try {
             const data = await getCategories();
             setCategories(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch categories', error);
+            // Alert the user to the error for debugging
+            alert(`Debug Error: ${error.message || JSON.stringify(error)}`);
+            setCategories([]);
         } finally {
             setLoading(false);
         }

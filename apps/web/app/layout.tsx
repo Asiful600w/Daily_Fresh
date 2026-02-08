@@ -3,7 +3,6 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { NextAuthSessionProvider } from "@/context/SessionProvider";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { ThemeProvider } from "@/context/ThemeProvider";
 
@@ -68,22 +67,20 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextAuthSessionProvider>
-            <AuthProvider>
-              <WishlistProvider>
-                <CartProvider>
-                  <FlyToCartProvider>
-                    <NextTopLoader color="#22C55E" showSpinner={false} />
-                    <UIProvider>
-                      <GlobalSearch />
-                      {children}
-                      <MobileNav categories={categories} />
-                    </UIProvider>
-                  </FlyToCartProvider>
-                </CartProvider>
-              </WishlistProvider>
-            </AuthProvider>
-          </NextAuthSessionProvider>
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <FlyToCartProvider>
+                  <NextTopLoader color="#22C55E" showSpinner={false} />
+                  <UIProvider>
+                    <GlobalSearch />
+                    {children}
+                    <MobileNav categories={categories} />
+                  </UIProvider>
+                </FlyToCartProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -14,6 +14,7 @@ import {
 import { formatPrice } from '@/lib/format';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useAdminAuth } from '@/context/AdminAuthContext';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminDashboard() {
     const { adminUser, adminLoading } = useAdminAuth();
@@ -80,6 +81,39 @@ export default function AdminDashboard() {
             setLoading(false);
         }
     };
+
+    // Set up Realtime subscription for orders (Super Admin only)
+    useEffect(() => {
+        if (adminUser?.role !== 'SUPERADMIN') return;
+
+        const supabase = createClient();
+
+        const channel = supabase
+            .channel('dashboard-orders-realtime')
+            .on('postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'orders' },
+                (payload: any) => {
+                    console.log('Dashboard: New order received', payload.new);
+                    // Prepend new order to the list
+                    setOrders(prev => [payload.new, ...prev]);
+                }
+            )
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'orders' },
+                (payload: any) => {
+                    console.log('Dashboard: Order updated', payload.new);
+                    // Update order in the list
+                    setOrders(prev => prev.map(order =>
+                        order.id === payload.new.id ? payload.new : order
+                    ));
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [adminUser]);
 
     if (adminLoading || loading) {
         return <div className="p-8 text-center">Loading Dashboard...</div>;
@@ -245,7 +279,7 @@ export default function AdminDashboard() {
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                                 {(recentOrders || []).map((order: any) => (
                                     <tr key={order.id + order.product_name} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                        <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">#{order.id.slice(0, 8)}</td>
+                                        <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">#{String(order.id).padStart(8, '0')}</td>
                                         <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                                             <div className="flex items-center gap-3">
                                                 <span className="material-symbols-outlined text-slate-400 text-lg">inventory_2</span>
@@ -280,10 +314,10 @@ export default function AdminDashboard() {
     // --- SUPER ADMIN DASHBOARD (Existing) ---
 
     // Calculate Stats
-    const totalSales = orders.reduce((sum, order) => sum + (order.status === 'delivered' ? order.total_amount : 0), 0);
-    const processingOrders = orders.filter(o => o.status === 'processing').length;
-    const pendingOrders = orders.filter(o => o.status === 'pending').length;
-    const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+    const totalSales = orders.reduce((sum, order) => sum + (order.status?.toUpperCase() === 'DELIVERED' ? Number(order.total_amount) : 0), 0);
+    const processingOrders = orders.filter(o => o.status?.toUpperCase() === 'PROCESSING').length;
+    const pendingOrders = orders.filter(o => o.status?.toUpperCase() === 'PENDING').length;
+    const deliveredOrders = orders.filter(o => o.status?.toUpperCase() === 'DELIVERED').length;
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -519,7 +553,7 @@ export default function AdminDashboard() {
                             ) : (
                                 orders.slice(0, 5).map((order) => (
                                     <tr key={order.id} className="hover:bg-primary/5 transition-colors group">
-                                        <td className="px-6 py-4 text-sm font-bold text-text-main">#{order.id.slice(0, 8)}</td>
+                                        <td className="px-6 py-4 text-sm font-bold text-text-main">#{String(order.id).padStart(8, '0')}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-medium text-text-main">{order.shipping_name || 'Guest'}</span>

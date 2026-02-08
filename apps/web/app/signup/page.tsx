@@ -2,10 +2,9 @@
 
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { register } from '@/actions/register';
 
 export default function SignupPage() {
     const router = useRouter();
@@ -24,12 +23,11 @@ export default function SignupPage() {
 
     const [isPending, startTransition] = React.useTransition();
 
+
     const handleSignup = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        // Validation logic ...
-        // (Copy regex checks here or keep validFields logic if using zod form in future, keeping simple for now)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setError("Please enter a valid email address.");
@@ -49,28 +47,44 @@ export default function SignupPage() {
         const formattedPhone = `+88${cleanPhone}`;
 
         startTransition(async () => {
-            try {
-                const result = await register({
-                    email,
-                    password,
-                    name: fullName,
-                    phone: formattedPhone, // Note: RegisterSchema needs to accept phone if we want to save it. 
-                    // Wait, Step 1359 register action only takes email, password, name.
-                    // I should check RegisterSchema z.object definition too.
-                    // For now, I will pass what register accepts or update register.
-                    // Looking at Step 1359: const { email, password, name } = validatedFields.data
-                    // It ignores phone? I should probably add phone to schema/action later, but getting it working is prio.
-                });
+            const supabase = createClient();
 
-                if (result.error) {
-                    setError(result.error);
-                } else if (result.success) {
-                    alert('Registration successful! You can now log in.');
-                    router.push('/login');
+            // Check if email already exists in public.User table
+            const { data: existingUser } = await supabase
+                .from('User')
+                .select('email, role')
+                .eq('email', email)
+                .single();
+
+            if (existingUser) {
+                if (existingUser.role === 'MERCHANT' || existingUser.role === 'SUPERADMIN') {
+                    setError('This email is already registered as a merchant or admin account. Please use a different email.');
+                } else {
+                    setError('This email is already registered. Please login instead.');
                 }
-            } catch (err) {
-                console.error(err);
-                setError("Something went wrong");
+                return;
+            }
+
+            const { data, error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        phone: formattedPhone,
+                        role: 'CUSTOMER',
+                    }
+                }
+            });
+
+            if (signUpError) {
+                setError(signUpError.message);
+                return;
+            }
+
+            if (data?.user) {
+                alert('Registration successful! Check your email for confirmation or log in.');
+                router.push('/login');
             }
         });
     };

@@ -48,16 +48,12 @@ export default function ProfilePage() {
                 setStats(prev => ({
                     ...prev,
                     // savedItems is handled by effect above
-                    activeOrders: allOrders ? allOrders.filter((o: any) => o.status !== 'delivered').length : 0,
-                    pendingOrders: allOrders
-                        ? allOrders.filter((o: any) => o.status === 'pending').length
-                        : 0,
-                    completedOrders: allOrders ? allOrders.filter((o: any) => o.status === 'delivered').length : 0,
+                    activeOrders: allOrders.filter((o: any) => ['processing', 'on_delivery'].includes(o.status?.toLowerCase())).length,
+                    pendingOrders: allOrders.filter((o: any) => o.status?.toLowerCase() === 'pending').length,
+                    completedOrders: allOrders.filter((o: any) => o.status?.toLowerCase() === 'delivered').length,
                     totalSpent: allOrders
-                        ? allOrders
-                            .filter((o: any) => o.status === 'delivered')
-                            .reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0)
-                        : 0
+                        .filter((o: any) => o.status?.toLowerCase() === 'delivered')
+                        .reduce((sum: number, o: any) => sum + Number(o.total_amount || 0), 0)
                 }));
 
                 setOrders(recentOrders);

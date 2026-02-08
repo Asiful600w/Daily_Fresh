@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import { ProductCard } from '@/components/product/ProductCard';
 
 export default function WishlistPage() {
     const { user, loading: authLoading } = useAuth();
+    const supabase = createClient();
     const { wishlistIds } = useWishlist();
     const [wishlistItems, setWishlistItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

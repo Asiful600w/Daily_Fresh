@@ -17,34 +17,103 @@ export default function OrderDetailsPage() {
 
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
-        const fetchOrder = async () => {
+        const fetchOrder = async (attempt = 0) => {
             try {
+                setError(null);
+                console.log(`Fetching order ${id}, attempt ${attempt + 1}`);
+
                 const data = await getOrder(id as string);
-                if (data && data.user_id === user?.id) {
-                    setOrder(data);
-                } else {
-                    router.push('/404');
+
+                if (!data) {
+                    // Order not found - might need to retry if it was just created
+                    if (attempt < 3 && isSuccess) {
+                        console.log('Order not found, retrying in 1 second...');
+                        setTimeout(() => {
+                            setRetryCount(prev => prev + 1);
+                        }, 1000);
+                        return;
+                    }
+                    setError('Order not found. It may have been deleted or you may not have permission to view it.');
+                    setLoading(false);
+                    return;
                 }
-            } catch (error) {
-                console.error(error);
-            } finally {
+
+                if (data.user_id !== user?.id) {
+                    console.error('Order user_id mismatch:', data.user_id, 'vs', user?.id);
+                    setError('You do not have permission to view this order.');
+                    setLoading(false);
+                    return;
+                }
+
+                console.log('Order loaded successfully:', data);
+                setOrder(data);
                 setLoading(false);
+            } catch (error: any) {
+                console.error('Error fetching order:', error);
+                console.error('Error details:', {
+                    message: error?.message,
+                    code: error?.code,
+                    details: error?.details
+                });
+
+                // Retry logic for transient errors
+                if (attempt < 3 && isSuccess) {
+                    console.log('Error fetching order, retrying in 1 second...');
+                    setTimeout(() => {
+                        setRetryCount(prev => prev + 1);
+                    }, 1000);
+                } else {
+                    setError(error?.message || 'Failed to load order details. Please try again.');
+                    setLoading(false);
+                }
             }
         };
 
         if (!authLoading && !user) {
             router.push('/login');
         } else if (user && id) {
-            fetchOrder();
+            fetchOrder(retryCount);
         }
-    }, [user, authLoading, id, router]);
+    }, [user, authLoading, id, router, retryCount, isSuccess]);
 
-    if (loading || !order) {
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-slate-500">Loading order details...</p>
+                    {retryCount > 0 && <p className="text-xs text-slate-400 mt-2">Retry attempt {retryCount}/3</p>}
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark p-4">
+                <div className="text-center max-w-md">
+                    <span className="material-icons-round text-6xl text-red-400 mb-4">error_outline</span>
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Unable to Load Order</h2>
+                    <p className="text-slate-500 mb-6">{error || 'Order not found'}</p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => router.push('/profile/orders')}
+                            className="px-6 py-3 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border-2 border-slate-200 dark:border-slate-700 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                        >
+                            View All Orders
+                        </button>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-1 transition-all"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }

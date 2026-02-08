@@ -6,7 +6,7 @@ import { AdminNotificationProvider } from '@/context/AdminNotificationContext';
 import { NotificationDropdown } from '@/components/admin/NotificationDropdown';
 import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { useSession, signOut } from "next-auth/react"
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 function ThemeToggle() {
     const { theme, setTheme } = useTheme();
@@ -33,24 +33,33 @@ function AdminProtectedLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { data: session, status } = useSession()
-    const loading = status === "loading"
-    const adminUser = session?.user
+    const { adminUser, adminLoading, signOutAdmin } = useAdminAuth();
 
     const isPublicAdminPage = pathname === '/admin/login' || pathname === '/admin/register';
 
     useEffect(() => {
-        if (!isPublicAdminPage && !loading && !session) {
-            router.push('/admin/login');
+        console.log('[LAYOUT DEBUG] Session Check:', {
+            adminLoading,
+            hasUser: !!adminUser,
+            pathname,
+        });
+
+        if (!isPublicAdminPage && !adminLoading && !adminUser) {
+            console.log('[LAYOUT DEBUG] Redirecting to login due to missing session - Ensuring Logout');
+            // Force sign out to clear potentially invalid session cookies that trap the user in a loop
+            // asking for /admin -> middleware sees valid cookie -> /admin -> layout sees no profile -> /login
+            signOutAdmin().then(() => {
+                router.replace('/admin/login');
+            });
         }
-    }, [session, loading, router, isPublicAdminPage]);
+    }, [adminUser, adminLoading, router, isPublicAdminPage, pathname, signOutAdmin]);
 
     // Allow access to login and register page without auth check or dashboard layout
     if (isPublicAdminPage) {
         return <>{children}</>;
     }
 
-    if (loading) {
+    if (adminLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
                 <div className="flex flex-col items-center gap-4">
@@ -61,21 +70,27 @@ function AdminProtectedLayout({
         );
     }
 
-    if (!session) return null;
+    if (!adminUser) {
+        // Don't show blocking UI which can get stuck.
+        // The useEffect will handle the redirect.
+        // Return null to render nothing while redirecting? 
+        // Or better: render null, but ensure the useEffect fires.
+        return null;
+    }
 
     const navItems = [
         { name: 'Dashboard', href: '/admin', icon: 'dashboard' },
         { name: 'Orders', href: '/admin/orders', icon: 'shopping_bag' },
         { name: 'Products', href: '/admin/products', icon: 'inventory_2' },
 
-        ...((adminUser?.role === 'ADMIN' || adminUser?.role === 'SUPERADMIN') ? [ // Allow ADMIN and SUPERADMIN
+        ...((adminUser?.role === 'SUPERADMIN') ? [ // Allow SUPERADMIN
             { name: 'Special Offers', href: '/admin/special-categories', icon: 'local_offer' },
             { name: 'Customers', href: '/admin/customers', icon: 'group' },
             { name: 'Merchants', href: '/admin/merchants', icon: 'admin_panel_settings' },
             { name: 'Categories', href: '/admin/categories', icon: 'category' }
         ] : []),
 
-        ...((adminUser?.role === 'ADMIN' || adminUser?.role === 'SUPERADMIN') ? [
+        ...((adminUser?.role === 'SUPERADMIN') ? [
             { name: 'Reviews', href: '/admin/reviews', icon: 'reviews' },
         ] : []),
 
@@ -146,7 +161,7 @@ function AdminProtectedLayout({
                                 <span className="text-[10px] text-text-muted truncate">Administrator</span>
                             </div>
                             <button
-                                onClick={() => signOut()}
+                                onClick={() => signOutAdmin()}
                                 className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
                             >
                                 <span className="material-symbols-outlined !text-[18px]">logout</span>

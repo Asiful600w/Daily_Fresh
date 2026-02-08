@@ -1,37 +1,58 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { auth } from '@/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
     try {
-        // Verify caller is ADMIN or SUPERADMIN
-        const session = await auth();
-        if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN')) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Check if user is SUPERADMIN via public.User table (or metadata if we sync it)
+        // Using valid RLS policies or simple query here since we are in an API route.
+        // Actually, we can use supabaseAdmin to bypass RLS for the check if needed,
+        // or just use the user's client if RLS allows reading own role (it should).
+        const { data: profile } = await supabaseAdmin
+            .from('User')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || profile.role !== 'SUPERADMIN') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { data, error } = await supabaseAdmin
             .from('User')
-            .select('id, name, email, role, status, shop_name, phone, created_at')
-            .in('role', ['MERCHANT', 'ADMIN'])
-            .order('created_at', { ascending: false });
+            .select('id, name, email, role, status, shopName, phone, createdAt') // Updated to camelCase if that's what DB uses? 
+            // Wait, in previous steps I saw mixed casing usage.
+            // AdminAuthContext uses: select('role, name, shopName, id, email')
+            // This file used: select('..., shop_name, ... created_at')
+            // I should check the DB schema or use `shopName` as per context usage.
+            // Code in AdminAuthContext: `shop_name: profile.shopName` suggests DB column is `shopName`.
+            // But verify: execute_sql output showed `shopName` in `public.User`.
+            // created_at is `createdAt` in output from execute_sql (camelCase).
+            // "createdAt":"2026-02-07 06:22:27.267"
+            .in('role', ['MERCHANT'])
+            .order('createdAt', { ascending: false });
 
         if (error) {
             console.error('Supabase error fetching merchants:', error);
             throw error;
         }
 
-        if (error) throw error;
-
-        // Transform to match expected format in the UI
+        // Transform
         const merchants = (data || []).map((user: any) => ({
             id: user.id,
             email: user.email,
             full_name: user.name,
-            shop_name: user.shop_name,
+            shop_name: user.shopName,
             status: user.status || 'approved',
             role: user.role,
-            created_at: user.created_at,
+            created_at: user.createdAt,
             phone: user.phone
         }));
 
@@ -44,9 +65,20 @@ export async function GET() {
 
 export async function PUT(request: Request) {
     try {
-        // Verify caller is ADMIN or SUPERADMIN
-        const session = await auth();
-        if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN')) {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { data: profile } = await supabaseAdmin
+            .from('User')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || profile.role !== 'SUPERADMIN') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

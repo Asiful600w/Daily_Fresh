@@ -5,44 +5,55 @@ import Link from 'next/link';
 // Remove supabase import
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { login } from '@/actions/login';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
+
+    const [isPending, startTransition] = React.useTransition();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // const [loading, setLoading] = useState(false); // Removed in favor of isPending
     const [error, setError] = useState<string | null>(null);
-
-    const [isPending, startTransition] = React.useTransition();
-
-    // Import action (add import at top manually if needed, but tool handles it best if I include it)
-    // I will replace imports separately or in one go if I rewrite the file.
-    // Let's rewrite the handleLogin logic.
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         startTransition(async () => {
-            try {
-                // Call server action
-                const result = await login({ email, password }, "127.0.0.1");
+            const supabase = createClient();
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-                if (result.error) {
-                    setError(result.error);
-                } else if (result.success) {
-                    // Redirect logic handled by action or manually here?
-                    // Action usually does redirect or returns success.
-                    // If action did not redirect (e.g. no server-side redirect), we do it client-side.
-                    const redirectUrl = searchParams.get('redirect') || '/';
-                    // Force hard redirect to ensure session cookies are picked up immediately
-                    window.location.href = redirectUrl;
-                }
-            } catch (err) {
-                console.error(err)
-                setError("Something went wrong");
+            if (error) {
+                setError(error.message);
+                return;
             }
+
+            // Check user role from public.User table
+            if (data.user) {
+                const { data: profile } = await supabase
+                    .from('User')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                // Only allow CUSTOMER role to login to web app
+                if (profile && profile.role !== 'CUSTOMER') {
+                    await supabase.auth.signOut();
+                    setError('This account is not authorized to access the customer portal. Please use the admin panel.');
+                    return;
+                }
+            }
+
+            // Successfully logged in
+            // Refresh router to update server components with new cookies
+            router.refresh();
+
+            // Redirect
+            const redirectUrl = searchParams.get('redirect') || '/';
+            router.push(redirectUrl);
         });
     }
 

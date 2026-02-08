@@ -1,19 +1,13 @@
 "use client";
 
-// 'use client' is needed if we use client-side hooks, but if we pass data from server, we can keep it as is or make it a server component if it doesn't use hooks.
-// However, the original file has 'use client' and marquee animation might be fine.
-// Actually, for marquee to work with dynamic width, CSS is fine.
-
 export function NoticeScroller({ notices = [] }: { notices?: string[] }) {
-    // Fallback if no notices provided
-    const displayNotices = notices.length > 0 ? notices : [
-        "📢 Free delivery on orders over $50!",
-        "Fresh organic vegetables restocked daily at 8 AM.",
-        "Use code FRESH20 for 20% off your first order."
-    ];
+    // If no notices, don't render anything
+    if (notices.length === 0) {
+        return null;
+    }
 
     // Duplicate list to ensure smooth infinite scroll
-    const items = [...displayNotices, ...displayNotices, ...displayNotices, ...displayNotices];
+    const items = [...notices, ...notices, ...notices, ...notices];
 
     return (
         <div className="w-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground py-2 overflow-hidden border-y border-primary/20 relative">

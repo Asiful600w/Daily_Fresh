@@ -1,8 +1,6 @@
-
 "use server"
 
 import * as z from "zod"
-import bcrypt from "bcryptjs"
 import { RegisterSchema } from "@/schemas"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
@@ -14,30 +12,30 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     }
 
     const { email, password, name } = validatedFields.data
-    const hashedPassword = await bcrypt.hash(password, 10)
 
-    const { data: existingUser } = await supabaseAdmin
-        .from('User')
-        .select('email')
-        .eq('email', email)
-        .single()
+    // Check for existing user in auth.users
+    const { data: existingAuthUser } = await supabaseAdmin.auth.admin.listUsers()
+    const userExists = existingAuthUser.users.some(u => u.email === email)
 
-    if (existingUser) {
+    if (userExists) {
         return { error: "Email already in use!" }
     }
 
-    const { error } = await supabaseAdmin.from('User').insert({
-        name,
+    // Create user with Supabase Auth (this will trigger handle_new_user)
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
         email,
-        passwordHash: hashedPassword,
-        role: "MERCHANT",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        password,
+        email_confirm: true, // Auto-confirm for admin-created users
+        user_metadata: {
+            full_name: name,
+            role: 'MERCHANT'
+        }
     })
 
     if (error) {
-        return { error: "Failed to create user" }
+        console.error('Registration error:', error)
+        return { error: error.message || "Failed to create user" }
     }
 
-    return { success: "User created!" }
+    return { success: "Merchant account created successfully!" }
 }

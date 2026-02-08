@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { LoginSchema } from "@/schemas"
-import { login } from "@/actions/login"
+import { createClient } from "@/lib/supabase/client"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -27,33 +27,44 @@ export default function LoginPage() {
         },
     })
 
-    const router = useRouter() // Import useRouter relative to next/navigation
+
+    const router = useRouter()
+    const supabase = createClient()
 
     const onSubmit = (values: z.infer<typeof LoginSchema>) => {
         setError("")
         setSuccess("")
 
-        startTransition(() => {
-            const ip = "127.0.0.1"
-            login(values, ip)
-                .then((data) => {
-                    if (data?.error) {
-                        if (data.error === "2FA_REQUIRED") {
-                            setShowTwoFactor(true)
-                        } else {
-                            form.reset()
-                            setError(data.error)
-                        }
-                    }
+        startTransition(async () => {
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: values.email,
+                password: values.password,
+            })
 
-                    if (data?.success) {
-                        form.reset()
-                        setSuccess(data.success)
-                        // Redirect to admin dashboard
-                        window.location.href = '/admin'
-                    }
-                })
-                .catch(() => setError("Something went wrong"))
+            if (authError) {
+                setError(authError.message)
+                return
+            }
+
+            // Check user role from public.User table
+            if (data.user) {
+                const { data: profile } = await supabase
+                    .from('User')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single()
+
+                // Only allow MERCHANT and SUPERADMIN roles to login to admin panel
+                if (profile && profile.role !== 'MERCHANT' && profile.role !== 'SUPERADMIN') {
+                    await supabase.auth.signOut()
+                    setError('This account is not authorized to access the admin panel. Please use the customer portal.')
+                    return
+                }
+            }
+
+            setSuccess("Login successful!")
+            router.refresh()
+            router.push('/admin')
         })
     }
 

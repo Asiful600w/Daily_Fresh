@@ -1,235 +1,286 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAdminReviews, toggleReviewVisibility, deleteReview } from '@/lib/api';
-import { formatPrice } from '@/lib/format';
+import {
+    getAllReviews,
+    toggleReviewVisibility,
+    deleteReview,
+    getReviewStatistics,
+    type AdminReview,
+    type ReviewFilters
+} from '@/actions/reviews';
 
-export default function AdminReviewsPage() {
-    const [reviews, setReviews] = useState<any[]>([]);
+export default function ReviewsPage() {
+    const [reviews, setReviews] = useState<AdminReview[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // Filters
-    const [ratingFilter, setRatingFilter] = useState<number | 'all'>('all');
-    const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'hidden'>('all');
+    const [stats, setStats] = useState({
+        totalReviews: 0,
+        hiddenReviews: 0,
+        averageRating: 0,
+        recentReviews: 0
+    });
+    const [filters, setFilters] = useState<ReviewFilters>({});
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetchData();
-    }, [ratingFilter, visibilityFilter]);
+        loadData();
+    }, [filters]);
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const data = await getAdminReviews({
-                rating: ratingFilter,
-                visibility: visibilityFilter
-            });
-            setReviews(data);
-        } catch (err: any) {
-            console.error('Failed to fetch reviews', err);
-            setError(err.message || 'Failed to fetch reviews');
-        } finally {
-            setLoading(false);
+    const loadData = async () => {
+        setLoading(true);
+        const [reviewsData, statsData] = await Promise.all([
+            getAllReviews({ ...filters, searchTerm }),
+            getReviewStatistics()
+        ]);
+        setReviews(reviewsData);
+        setStats(statsData);
+        setLoading(false);
+    };
+
+    const handleToggleVisibility = async (reviewId: number, currentlyHidden: boolean) => {
+        const result = await toggleReviewVisibility(reviewId, !currentlyHidden);
+        if (result.success) {
+            loadData();
+        } else {
+            alert(result.error);
         }
     };
 
-    const handleToggleVisibility = async (id: number, currentStatus: boolean) => {
-        try {
-            await toggleReviewVisibility(id, !currentStatus);
-            // Optimistic update or refresh
-            setReviews(reviews.map(r => r.id === id ? { ...r, is_hidden: !currentStatus } : r));
-        } catch (error) {
-            alert('Failed to update status');
+    const handleDelete = async (reviewId: number) => {
+        if (!confirm('Are you sure you want to delete this review?')) return;
+
+        const result = await deleteReview(reviewId);
+        if (result.success) {
+            loadData();
+        } else {
+            alert(result.error);
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
-        try {
-            await deleteReview(id);
-            setReviews(reviews.filter(r => r.id !== id));
-        } catch (error) {
-            alert('Failed to delete review');
-        }
+    const handleSearch = () => {
+        setFilters({ ...filters, searchTerm });
     };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-8 text-center text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30">
-                <span className="material-symbols-outlined text-4xl mb-2">error</span>
-                <p className="font-bold">Error loading reviews</p>
-                <p className="text-sm opacity-80">{error}</p>
-                <button onClick={fetchData} className="mt-4 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold shadow-sm hover:bg-slate-50">
-                    Retry
-                </button>
-            </div>
-        );
-    }
 
     return (
-        <div>
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-text-main">Reviews</h1>
-                <p className="text-text-muted mt-2">Manage customer product reviews.</p>
-            </div>
+        <div className="p-8">
+            <h1 className="text-3xl font-bold mb-8">Reviews Management</h1>
 
-            {/* Filters Toolbar */}
-            <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-border-subtle shadow-sm">
-                <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-text-muted">filter_list</span>
-                    <span className="font-bold text-sm text-text-main">Filters:</span>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Total Reviews</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalReviews}</p>
+                        </div>
+                        <span className="material-icons-round text-3xl text-blue-500">rate_review</span>
+                    </div>
                 </div>
 
-                <select
-                    value={ratingFilter}
-                    onChange={(e) => setRatingFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                    className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                    <option value="all">All Ratings</option>
-                    <option value="5">5 Stars</option>
-                    <option value="4">4 Stars</option>
-                    <option value="3">3 Stars</option>
-                    <option value="2">2 Stars</option>
-                    <option value="1">1 Star</option>
-                </select>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Average Rating</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.averageRating.toFixed(1)}</p>
+                        </div>
+                        <span className="material-icons-round text-3xl text-yellow-500">star</span>
+                    </div>
+                </div>
 
-                <select
-                    value={visibilityFilter}
-                    onChange={(e) => setVisibilityFilter(e.target.value as any)}
-                    className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                    <option value="all">All Status</option>
-                    <option value="visible">Visible</option>
-                    <option value="hidden">Hidden</option>
-                </select>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Hidden Reviews</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.hiddenReviews}</p>
+                        </div>
+                        <span className="material-icons-round text-3xl text-red-500">visibility_off</span>
+                    </div>
+                </div>
 
-                {(ratingFilter !== 'all' || visibilityFilter !== 'all') && (
-                    <button
-                        onClick={() => { setRatingFilter('all'); setVisibilityFilter('all'); }}
-                        className="ml-auto px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
-                    >
-                        Clear Filters
-                    </button>
-                )}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Last 7 Days</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.recentReviews}</p>
+                        </div>
+                        <span className="material-icons-round text-3xl text-green-500">trending_up</span>
+                    </div>
+                </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-border-subtle">
-                            <tr>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Product</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Reviewer</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Rating</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Comment</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 font-bold text-sm text-text-muted uppercase tracking-wider text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border-subtle">
-                            {reviews.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-text-muted">
-                                        No reviews found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                reviews.map((review) => (
-                                    <tr key={review.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0">
-                                                    {review.products?.image_url ? (
-                                                        <img src={review.products.image_url} alt="" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="flex items-center justify-center h-full">
-                                                            <span className="material-symbols-outlined text-slate-400">image</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <span className="font-medium text-text-main line-clamp-1 max-w-[150px]" title={review.products?.name}>
-                                                    {review.products?.name || 'Unknown Product'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                                                    {review.User?.image ? (
-                                                        <img src={review.User.image} alt="" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <span className="material-symbols-outlined text-xs text-primary">person</span>
-                                                    )}
-                                                </div>
-                                                <span className="text-text-main text-sm">{review.User?.name || 'Anonymous'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex text-yellow-500 text-sm">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <span key={i} className={`material-symbols-outlined !text-[16px] ${i < review.rating ? 'fill-current' : 'text-slate-300 dark:text-slate-700'}`}>star</span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm text-text-muted line-clamp-2 max-w-xs" title={review.comment}>
-                                                {review.comment}
-                                            </p>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
-                                            {new Date(review.created_at).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {review.is_hidden ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                                    Hidden
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                                    Visible
-                                                </span>
+            {/* Filters */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Search</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                placeholder="Product, user, comment..."
+                                className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                            />
+                            <button
+                                onClick={handleSearch}
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Visibility</label>
+                        <select
+                            value={filters.isHidden === undefined ? 'all' : filters.isHidden ? 'hidden' : 'visible'}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setFilters({
+                                    ...filters,
+                                    isHidden: value === 'all' ? undefined : value === 'hidden'
+                                });
+                            }}
+                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                        >
+                            <option value="all">All</option>
+                            <option value="visible">Visible</option>
+                            <option value="hidden">Hidden</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Rating</label>
+                        <select
+                            value={filters.rating || 'all'}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setFilters({
+                                    ...filters,
+                                    rating: value === 'all' ? undefined : Number(value)
+                                });
+                            }}
+                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                        >
+                            <option value="all">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">&nbsp;</label>
+                        <button
+                            onClick={() => {
+                                setFilters({});
+                                setSearchTerm('');
+                            }}
+                            className="w-full px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Reviews List */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                {loading ? (
+                    <div className="p-8 text-center">
+                        <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                ) : reviews.length === 0 ? (
+                    <div className="p-8 text-center text-slate-500">
+                        No reviews found
+                    </div>
+                ) : (
+                    <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                        {reviews.map((review) => (
+                            <div key={review.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        {/* Product Info */}
+                                        <div className="flex items-center gap-3 mb-3">
+                                            {review.product?.images?.[0] && (
+                                                <img
+                                                    src={review.product.images[0]}
+                                                    alt={review.product.name}
+                                                    className="w-12 h-12 rounded-lg object-cover"
+                                                />
                                             )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => handleToggleVisibility(review.id, review.is_hidden)}
-                                                    className={`p-2 rounded-lg transition-colors ${review.is_hidden
-                                                        ? 'bg-green-50 hover:bg-green-100 text-green-600 dark:bg-green-900/20 dark:hover:bg-green-900/40 dark:text-green-400'
-                                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300'
-                                                        }`}
-                                                    title={review.is_hidden ? "Show Review" : "Hide Review"}
-                                                >
-                                                    <span className="material-symbols-outlined !text-lg">
-                                                        {review.is_hidden ? 'visibility' : 'visibility_off'}
-                                                    </span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(review.id)}
-                                                    className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 transition-colors"
-                                                    title="Delete Review"
-                                                >
-                                                    <span className="material-symbols-outlined !text-lg">delete</span>
-                                                </button>
+                                            <div>
+                                                <h3 className="font-bold text-slate-900 dark:text-white">
+                                                    {review.product?.name || 'Unknown Product'}
+                                                </h3>
+                                                <p className="text-sm text-slate-500">
+                                                    by {review.User?.name || review.User?.email || 'Anonymous'}
+                                                </p>
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        </div>
+
+                                        {/* Rating */}
+                                        <div className="flex items-center gap-1 mb-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                <span
+                                                    key={i}
+                                                    className={`material-icons-round text-sm ${i < review.rating
+                                                            ? 'text-yellow-400'
+                                                            : 'text-slate-200 dark:text-slate-700'
+                                                        }`}
+                                                >
+                                                    star
+                                                </span>
+                                            ))}
+                                            <span className="text-sm text-slate-500 ml-2">
+                                                {new Date(review.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+
+                                        {/* Comment */}
+                                        <p className="text-slate-600 dark:text-slate-300 mb-2">
+                                            {review.comment}
+                                        </p>
+
+                                        {/* Status Badge */}
+                                        {review.is_hidden && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded-full">
+                                                <span className="material-icons-round text-xs">visibility_off</span>
+                                                Hidden
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleToggleVisibility(review.id, review.is_hidden)}
+                                            className={`p-2 rounded-lg transition-colors ${review.is_hidden
+                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
+                                                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200'
+                                                }`}
+                                            title={review.is_hidden ? 'Show review' : 'Hide review'}
+                                        >
+                                            <span className="material-icons-round text-lg">
+                                                {review.is_hidden ? 'visibility' : 'visibility_off'}
+                                            </span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(review.id)}
+                                            className="p-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 transition-colors"
+                                            title="Delete review"
+                                        >
+                                            <span className="material-icons-round text-lg">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

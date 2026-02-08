@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Notice, getNotices, createNotice, updateNotice, deleteNotice } from '@/lib/api';
+import { Notice, getNotices, createNotice, updateNotice, deleteNotice, getHeroSettings, updateHeroSettings } from '@/lib/api';
 
 export function NoticeSettings() {
     const [notices, setNotices] = useState<Notice[]>([]);
     const [newNotice, setNewNotice] = useState('');
     const [loading, setLoading] = useState(true);
+    const [showScroller, setShowScroller] = useState(true);
+    const [savingVisibility, setSavingVisibility] = useState(false);
 
     const loadNotices = async () => {
         setLoading(true);
@@ -15,9 +17,21 @@ export function NoticeSettings() {
         setLoading(false);
     };
 
+    const loadSettings = async () => {
+        try {
+            const settings = await getHeroSettings();
+            setShowScroller(settings.show_notice_scroller !== false);
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            // Default to true if column doesn't exist yet
+            setShowScroller(true);
+        }
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         loadNotices();
+        loadSettings();
     }, []);
 
     const handleAdd = async (e: React.FormEvent) => {
@@ -40,11 +54,44 @@ export function NoticeSettings() {
         loadNotices();
     };
 
+    const handleToggleVisibility = async () => {
+        setSavingVisibility(true);
+        try {
+            await updateHeroSettings({ show_notice_scroller: !showScroller });
+            setShowScroller(!showScroller);
+        } catch (error: any) {
+            console.error('Failed to update visibility:', error);
+            if (error.message?.includes('show_notice_scroller')) {
+                alert('Please run the SQL script "add_notice_visibility_toggle.sql" in Supabase to add the required database column.');
+            } else {
+                alert('Failed to update visibility: ' + (error.message || 'Unknown error'));
+            }
+        } finally {
+            setSavingVisibility(false);
+        }
+    };
+
     return (
         <div className="rounded-2xl border border-slate-200 dark:border-[#1e3a31] bg-white dark:bg-[#10221c] p-6 shadow-xl">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
-                Notice Scroller
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Notice Scroller
+                </h2>
+                <button
+                    onClick={handleToggleVisibility}
+                    disabled={savingVisibility}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${showScroller
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        } hover:opacity-80 disabled:opacity-50`}
+                    title={showScroller ? 'Hide notice scroller from main site' : 'Show notice scroller on main site'}
+                >
+                    <span className="material-icons-round text-sm">
+                        {showScroller ? 'visibility' : 'visibility_off'}
+                    </span>
+                    {showScroller ? 'Visible on Site' : 'Hidden from Site'}
+                </button>
+            </div>
 
             {/* Add New Notice */}
             <form onSubmit={handleAdd} className="flex gap-4 mb-8">

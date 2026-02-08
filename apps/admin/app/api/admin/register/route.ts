@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
 
 export async function POST(request: Request) {
     try {
@@ -14,56 +14,35 @@ export async function POST(request: Request) {
             );
         }
 
-        // Check if email is already in use
-        const { data: existingUser } = await supabaseAdmin
-            .from('User')
-            .select('email')
-            .eq('email', email)
-            .single();
-
-        if (existingUser) {
-            return NextResponse.json(
-                { error: 'Email already registered.' },
-                { status: 409 }
-            );
-        }
-
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 10);
-
-        // Insert user into User table with MERCHANT role
-        const { data: newUser, error: insertError } = await supabaseAdmin
-            .from('User')
-            .insert({
-                name: full_name,
-                email: email,
-                passwordHash: passwordHash,
+        const { data: { user }, error } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true, // Confirm email automatically for admin-created users (or pending verification workflow in app)
+            user_metadata: {
+                full_name,
                 role: 'MERCHANT',
-                shopName: shop_name || null,
-                phone: phone || null,
-                status: 'pending',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            })
-            .select('id')
-            .single();
+                phone: phone,
+                shop_name: shop_name,
+                avatar_url: null, // Default
+            }
+        });
 
-        if (insertError) {
-            console.error('DB Insert Error:', insertError);
-            return NextResponse.json(
-                { error: 'Failed to create account. Please try again.' },
-                { status: 500 }
-            );
+        if (error) {
+            console.error('Supabase Auth Create Error:', error);
+            // Check for specific error codes if needed, e.g. email exists
+            if (error.message.includes("already registered") || error.status === 422) { // rough check
+                return NextResponse.json({ error: "Email already registered." }, { status: 409 });
+            }
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // If shop_name or phone provided, we could store in a separate merchant_profiles table
-        // For now, we'll rely on the basic User table fields
-        // TODO: Consider adding shop_name, phone columns to User table or a separate merchants table
+        // Trigger handles public.User creation.
+        // We can return success.
 
         return NextResponse.json(
             {
                 message: 'Registration successful! You can now log in.',
-                userId: newUser?.id
+                userId: user?.id
             },
             { status: 201 }
         );

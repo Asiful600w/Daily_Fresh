@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { createOrder } from '@/lib/api';
+import { createOrderAction } from '@/actions/orders';
 import { Address, getUserAddresses, saveAddress } from '@/actions/address';
 import { formatPrice } from '@/lib/format';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
@@ -66,17 +66,14 @@ export default function CheckoutPage() {
 
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
-    // ... (rest of logic)
-
     const handlePlaceOrder = async () => {
         if (!user) return;
         setLoading(true);
 
         try {
-            // ... (Address logic same as before)
+            // Prepare shipping details
             let finalShippingDetails = { name: '', phone: '', address: '' };
             if (isNewAddress || !selectedAddressId) {
-                // ... (validate)
                 if (!newAddress.fullName || !newAddress.street || !newAddress.phone || !newAddress.city) {
                     alert('Please fill in all required shipping fields.');
                     setLoading(false);
@@ -101,20 +98,36 @@ export default function CheckoutPage() {
             }
 
             const total = totalPrice * 1.05;
-            const order = await createOrder(user.id, total, cart, finalShippingDetails, 'cod');
+
+            console.log('Placing order...');
+            console.log('User ID:', user.id);
+            console.log('Total:', total);
+            console.log('Cart items:', cart.length);
+
+            const result = await createOrderAction(user.id, total, cart, finalShippingDetails, 'cod');
+
+            if (!result.success) {
+                console.error('Order creation failed:', result.error);
+                throw new Error(result.error || 'Failed to create order');
+            }
+
+            console.log('Order created successfully:', result.orderId);
 
             // Trigger Animation
             setShowSuccessAnimation(true);
 
-            // Wait for animation before redirect
+            // Wait longer for animation and to ensure order is committed to database
             setTimeout(async () => {
                 await clearCart();
-                router.push(`/orders/${order.id}?success=true`);
-            }, 3000);
+                router.push(`/orders/${result.orderId}?success=true`);
+            }, 3500); // Increased from 3000ms to 3500ms
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Checkout failed:', error);
-            alert('Failed to place order. Please try again.');
+            console.error('Error message:', error?.message);
+            console.error('Error details:', error?.details);
+            console.error('Error hint:', error?.hint);
+            alert(`Failed to place order: ${error?.message || 'Please try again.'}`);
             setLoading(false);
         }
     };
