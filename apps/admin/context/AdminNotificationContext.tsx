@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUnreadNotifications, markNotificationAsViewed, markAllNotificationsAsViewed, OrderNotification } from '@/actions/notifications';
 import { createClient } from '@/lib/supabase/client';
@@ -33,7 +33,7 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         }
     };
 
-    const fetchNotifications = async (checkForNew: boolean = false) => {
+    const fetchNotifications = useCallback(async (checkForNew: boolean = false) => {
         try {
             const data = await getUnreadNotifications();
 
@@ -47,19 +47,16 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
         }
-    };
+    }, [notifications.length]);
 
     useEffect(() => {
         // Initial fetch
-        const initFetch = async () => {
-            await fetchNotifications(false);
-        };
-        initFetch();
+        fetchNotifications(false);
 
         // Set up Realtime subscription for new orders
-        const supabase = createClient();
+        const supabaseClient = createClient();
 
-        const channel = supabase
+        const channel = supabaseClient
             .channel('admin-orders-realtime')
             .on('postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'orders' },
@@ -82,12 +79,11 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
             .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabaseClient.removeChannel(channel);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [fetchNotifications]);
 
-    const markAsViewed = async (orderId: string) => {
+    const markAsViewed = useCallback(async (orderId: string) => {
         try {
             await markNotificationAsViewed(orderId);
             setNotifications(prev => prev.filter(n => n.id !== orderId));
@@ -96,9 +92,9 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         } catch (error) {
             console.error("Failed to mark as viewed", error);
         }
-    };
+    }, [router]);
 
-    const markAllAsViewed = async () => {
+    const markAllAsViewed = useCallback(async () => {
         try {
             await markAllNotificationsAsViewed();
             setNotifications([]);
@@ -106,7 +102,7 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         } catch (error) {
             console.error("Failed to mark all as viewed", error);
         }
-    };
+    }, []);
 
     return (
         <AdminNotificationContext.Provider value={{ notifications, unreadCount, markAsViewed, markAllAsViewed }}>

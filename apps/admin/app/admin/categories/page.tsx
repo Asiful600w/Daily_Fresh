@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getCategories, deleteCategory, getCategoryProducts, deleteProduct } from '@/lib/api';
 
 export default function AdminCategoriesPage() {
@@ -115,8 +116,8 @@ export default function AdminCategoriesPage() {
                                 categories.map((cat) => (
                                     <tr key={cat.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden border border-border-subtle">
-                                                <img src={cat.img} alt={cat.name} className="w-full h-full object-cover" />
+                                            <div className="w-12 h-12 bg-gray-100 relative rounded-lg overflow-hidden border border-border-subtle">
+                                                <Image src={cat.img} alt={cat.name} fill className="object-cover" />
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-sm font-bold text-text-main">{cat.name}</td>
@@ -187,10 +188,11 @@ export default function AdminCategoriesPage() {
                                             <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/30">
                                                 <td className="px-6 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                                                            {product.image ? (
-                                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                                            ) : (
+                                                        <div className="w-10 h-10 rounded-lg relative overflow-hidden bg-gray-100 flex items-center justify-center">
+                                                            {product.image && (
+                                                                <Image src={product.image} alt={product.name} fill className="object-cover" />
+                                                            )}
+                                                            {!product.image && (
                                                                 <span className="material-symbols-outlined text-gray-400 text-sm">image</span>
                                                             )}
                                                         </div>

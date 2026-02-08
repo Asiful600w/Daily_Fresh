@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     getAllOrders,
     updateOrderStatus,
@@ -35,20 +35,25 @@ export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
-        const [ordersData, statsData] = await Promise.all([
-            getAllOrders({ ...filters, searchTerm }),
-            getOrderStatistics()
-        ]);
-        setOrders(ordersData);
-        setStats(statsData);
-        setLoading(false);
-    };
+        try {
+            const [ordersData, statsData] = await Promise.all([
+                getAllOrders(filters),
+                getOrderStatistics()
+            ]);
+            setOrders(ordersData);
+            setStats(statsData);
+        } catch (error) {
+            console.error('Failed to load orders data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [filters]);
 
     useEffect(() => {
         loadData();
-    }, [filters]);
+    }, [loadData]);
 
     const handleStatusChange = async (orderId: number, newStatus: string) => {
         const result = await updateOrderStatus(orderId, newStatus);
@@ -60,7 +65,7 @@ export default function OrdersPage() {
     };
 
     const handleSearch = () => {
-        setFilters({ ...filters, searchTerm });
+        setFilters((prev) => ({ ...prev, searchTerm }));
     };
 
     // Set up Realtime subscription for orders

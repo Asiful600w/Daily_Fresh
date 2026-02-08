@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createCategory, updateCategory, getCategoryById, uploadCategoryImage } from '@/lib/api';
 
 interface CategoryFormProps {
@@ -189,8 +190,8 @@ export default function CategoryForm({ id }: CategoryFormProps) {
                         />
                     </div>
                     {formData.image_url && (
-                        <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-border-subtle">
-                            <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="mt-2 w-16 h-16 relative rounded-lg overflow-hidden border border-border-subtle">
+                            <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
                         </div>
                     )}
                 </div>
@@ -221,8 +222,8 @@ export default function CategoryForm({ id }: CategoryFormProps) {
                         />
                     </div>
                     {formData.banner_url && (
-                        <div className="mt-2 w-full h-32 rounded-lg overflow-hidden border border-border-subtle">
-                            <img src={formData.banner_url} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="mt-2 w-full h-32 relative rounded-lg overflow-hidden border border-border-subtle">
+                            <Image src={formData.banner_url} alt="Preview" fill className="object-cover" />
                         </div>
                     )}
                 </div>

@@ -12,11 +12,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-    const { theme } = useTheme()
+    useTheme()
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
-    const [showTwoFactor, setShowTwoFactor] = useState(false)
+    const [showTwoFactor] = useState(false)
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),

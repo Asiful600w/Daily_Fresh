@@ -1,15 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
     getAdminOrders,
-    updateAdminOrderStatus,
-    getLowStockProducts,
     getSalesAnalytics,
     getCategoryStats,
     getBestSellingProducts,
-    getTotalMerchantsCount,
-    getMerchantStats
 } from '@/lib/adminApi';
 import { formatPrice } from '@/lib/format';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -32,13 +28,7 @@ export default function AdminDashboard() {
 
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (!adminLoading && adminUser) {
-            fetchData();
-        }
-    }, [adminUser, adminLoading]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             if (adminUser?.role === 'MERCHANT') {
@@ -80,7 +70,13 @@ export default function AdminDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [adminUser]);
+
+    useEffect(() => {
+        if (!adminLoading && adminUser) {
+            fetchData();
+        }
+    }, [adminUser, adminLoading, fetchData]);
 
     // Set up Realtime subscription for orders (Super Admin only)
     useEffect(() => {

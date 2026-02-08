@@ -22,7 +22,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     }
 
     // Create user with Supabase Auth (this will trigger handle_new_user)
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    const { error } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
         email_confirm: true, // Auto-confirm for admin-created users

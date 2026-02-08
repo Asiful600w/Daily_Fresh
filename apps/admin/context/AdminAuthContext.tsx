@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -35,7 +35,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
     const [adminLoading, setAdminLoading] = useState(true);
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
 
     useEffect(() => {
@@ -109,11 +109,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
-    const signOutAdmin = async () => {
+    const signOutAdmin = useCallback(async () => {
         await supabase.auth.signOut();
         // Use window.location for hard redirect to clear all state
         window.location.href = '/admin/login';
-    };
+    }, [supabase]);
 
     const value = {
         adminUser,

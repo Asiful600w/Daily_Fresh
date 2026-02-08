@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getAdminOrder, updateAdminOrderStatus } from '@/lib/adminApi';
 import { formatPrice } from '@/lib/format';
-import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export default function AdminOrderDetailsPage() {
@@ -13,11 +12,7 @@ export default function AdminOrderDetailsPage() {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchOrder();
-    }, [id]);
-
-    const fetchOrder = async () => {
+    const fetchOrder = useCallback(async () => {
         try {
             const data = await getAdminOrder(id as string);
             if (data) {
@@ -30,7 +25,11 @@ export default function AdminOrderDetailsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, router]);
+
+    useEffect(() => {
+        fetchOrder();
+    }, [fetchOrder]);
 
     const handleStatusUpdate = async (newStatus: string) => {
         try {

@@ -52,7 +52,7 @@ function AdminProtectedLayout({
                 router.replace('/admin/login');
             });
         }
-    }, [adminUser, adminLoading, router, isPublicAdminPage, pathname, signOutAdmin]);
+    }, [adminUser, adminLoading, router, isPublicAdminPage, signOutAdmin]);
 
     // Allow access to login and register page without auth check or dashboard layout
     if (isPublicAdminPage) {

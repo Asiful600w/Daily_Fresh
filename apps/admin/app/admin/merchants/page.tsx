@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { getMerchants, updateMerchantStatus } from '@/lib/api';
 
@@ -23,19 +23,7 @@ export default function MerchantsPage() {
     const [merchants, setMerchants] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (!adminLoading) {
-            if (!adminUser) {
-                router.push('/admin/login');
-            } else {
-                fetchMerchants();
-            }
-        }
-        // Removed strict role check redirect here to allow debugging if role is slightly off
-    }, [adminUser, adminLoading]);
-
-
-    const fetchMerchants = async () => {
+    const fetchMerchants = useCallback(async () => {
         try {
             setLoading(true);
             const data = await getMerchants();
@@ -46,7 +34,18 @@ export default function MerchantsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!adminLoading) {
+            if (!adminUser) {
+                router.push('/admin/login');
+            } else {
+                fetchMerchants();
+            }
+        }
+        // Removed strict role check redirect here to allow debugging if role is slightly off
+    }, [adminUser, adminLoading, router, fetchMerchants]);
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
