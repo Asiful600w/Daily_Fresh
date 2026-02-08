@@ -41,11 +41,27 @@ export async function updateSession(request: NextRequest) {
         request.nextUrl.pathname === '/admin/register'
 
     if (isAdminRoute && !isPublicAdminRoute && !user) {
-        return NextResponse.redirect(new URL('/admin/login', request.url))
+        const redirectUrl = new URL('/admin/login', request.url)
+        const redirectResponse = NextResponse.redirect(redirectUrl)
+
+        // Copy cookies from response to redirectResponse
+        response.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return redirectResponse
     }
 
     if (isPublicAdminRoute && user) {
-        return NextResponse.redirect(new URL('/admin', request.url))
+        const redirectUrl = new URL('/admin', request.url)
+        const redirectResponse = NextResponse.redirect(redirectUrl)
+
+        // Copy cookies from response to redirectResponse
+        response.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return redirectResponse
     }
 
     return response

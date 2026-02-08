@@ -44,11 +44,26 @@ export async function updateSession(request: NextRequest) {
     if (isProtectedRoute && !user) {
         const redirectUrl = new URL('/login', request.url)
         redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-        return NextResponse.redirect(redirectUrl)
+        const redirectResponse = NextResponse.redirect(redirectUrl)
+
+        // Copy cookies from response to redirectResponse to ensure session is saved
+        response.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return redirectResponse
     }
 
     if (isAuthRoute && user) {
-        return NextResponse.redirect(new URL('/', request.url))
+        const redirectUrl = new URL('/', request.url)
+        const redirectResponse = NextResponse.redirect(redirectUrl)
+
+        // Copy cookies from response to redirectResponse
+        response.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return redirectResponse
     }
 
     return response
