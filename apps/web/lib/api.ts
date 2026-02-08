@@ -1060,7 +1060,11 @@ export async function getOrder(id: string) {
 
 export async function getUserOrders(userId: string) {
     console.log('getUserOrders called with userId:', userId);
-    console.log('Current user from auth:', (await supabase.auth.getUser()).data.user?.id);
+
+    if (!userId) {
+        console.error('getUserOrders called without userId');
+        return [];
+    }
 
     const { data, error } = await supabase
         .from('orders')

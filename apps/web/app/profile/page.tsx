@@ -37,12 +37,24 @@ export default function ProfilePage() {
     }, [wishlistIds]);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchDashboardData = async () => {
             try {
-                setLoading(true);
+                if (isMounted) setLoading(true);
 
-                // Fetch Orders
-                const allOrders = await getUserOrders(user!.id);
+                // Create a timeout promise
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Request timed out')), 10000)
+                );
+
+                // Fetch Orders with timeout
+                const allOrders = await Promise.race([
+                    getUserOrders(user!.id),
+                    timeoutPromise
+                ]) as any[];
+
+                if (!isMounted) return;
+
                 const recentOrders = allOrders.slice(0, 5);
 
                 setStats(prev => ({
@@ -60,14 +72,19 @@ export default function ProfilePage() {
 
             } catch (error) {
                 console.error('Error loading dashboard data!', error);
+                // Optionally show a toast or error message here
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
         if (user) {
             fetchDashboardData();
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, [user]);
 
     if (authLoading) {
