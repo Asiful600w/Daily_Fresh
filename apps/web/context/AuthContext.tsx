@@ -21,52 +21,74 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children, initialUser = null }: { children: React.ReactNode; initialUser?: User | null }) {
+    const [user, setUser] = useState<User | null>(initialUser);
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialUser);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const router = useRouter();
     const supabase = createClient();
 
     useEffect(() => {
+        let mounted = true;
+
+        // Safety timeout to prevent infinite loading
+        const safetyTimeout = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn('Auth check timed out, forcing app to load');
+                setLoading(false);
+            }
+        }, 5000);
+
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!mounted) return;
+
             if (session) {
                 setSession(session);
-                // Extend user object with data from public.User if needed, 
-                // or just use the session user which is now the source of truth for auth.
-                // For now, we just set the Supabase Auth User.
-                // In a real app we might fetch public.User here to get the role.
-                const { data: profile } = await supabase
-                    .from('User')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
 
-                if (profile) {
-                    // Merge profile data securely
-                    setUser({
-                        ...session.user,
-                        role: profile.role,
-                        user_metadata: {
-                            ...session.user.user_metadata,
-                            full_name: profile.name,
-                            phone: profile.phone
+                // If we already have an initialUser (hydrated from server), matches session, and loading is false,
+                // we might want to skip refetching to prevent flash, OR verify data.
+                // For now, let's allow it to re-verify/refetch to be safe, but UI shows initialUser in meantime.
+
+                try {
+                    const { data: profile } = await supabase
+                        .from('User')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (mounted) {
+                        if (profile) {
+                            setUser({
+                                ...session.user,
+                                role: profile.role,
+                                user_metadata: {
+                                    ...session.user.user_metadata,
+                                    full_name: profile.name,
+                                    phone: profile.phone
+                                }
+                            } as any);
+                        } else {
+                            setUser(session.user);
                         }
-                    } as any);
-                } else {
-                    setUser(session.user);
+                    }
+                } catch (e) {
+                    console.error('Profile fetch error', e);
+                    if (mounted) setUser(session.user);
                 }
             } else {
                 setSession(null);
                 setUser(null);
             }
-            setLoading(false);
+
+            if (mounted) setLoading(false);
         });
 
         return () => {
+            mounted = false;
+            clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
     }, []);

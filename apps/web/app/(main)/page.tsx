@@ -4,16 +4,18 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { PromotionalBanners } from "@/components/home/PromotionalBanners";
 import { Footer } from "@/components/layout/Footer";
+import { createClient } from "@/lib/supabase/server";
 import { getCategories, getFeaturedProducts, getBestSellingProducts, getSpecialCategories, getHeroSettings, getNotices, getAds } from "@/lib/api";
 import { AdvertiseScroller } from "@/components/home/AdvertiseScroller";
 import { NoticeScroller } from "@/components/home/NoticeScroller";
 
 export default async function Home() {
+  const supabase = await createClient();
   const categories = await getCategories();
   const featured = await getFeaturedProducts();
   const bestSelling = await getBestSellingProducts();
   const offers = await getSpecialCategories();
-  const heroSettings = await getHeroSettings();
+  const heroSettings = await getHeroSettings(supabase);
   const rawNotices = await getNotices(true);
   const notices = rawNotices.map(n => n.text);
   const rawAds = await getAds(true);

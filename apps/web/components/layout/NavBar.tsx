@@ -229,7 +229,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
                             )}
                         </Link>
 
-                        {user ? (
+                        {mounted && user ? (
                             <div className="flex items-center gap-3">
 
 

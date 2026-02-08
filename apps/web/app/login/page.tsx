@@ -5,7 +5,7 @@ import Link from 'next/link';
 // Remove supabase import
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
+import { loginWeb } from '@/actions/auth';
 
 export default function LoginPage() {
 
@@ -16,44 +16,23 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
-        startTransition(async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
+        const formData = new FormData(e.currentTarget);
 
-            if (error) {
-                setError(error.message);
+        startTransition(async () => {
+            const result = await loginWeb({}, formData);
+
+            if (result?.error) {
+                setError(result.error);
                 return;
             }
 
-            // Check user role from public.User table
-            if (data.user) {
-                const { data: profile } = await supabase
-                    .from('User')
-                    .select('role')
-                    .eq('id', data.user.id)
-                    .single();
-
-                // Only allow CUSTOMER role to login to web app
-                if (profile && profile.role !== 'CUSTOMER') {
-                    await supabase.auth.signOut();
-                    setError('This account is not authorized to access the customer portal. Please use the admin panel.');
-                    return;
-                }
-            }
-
             // Successfully logged in
-            // Refresh router to update server components with new cookies
-            router.refresh();
-
-            // Redirect
+            // Force hard redirect to sync server cookies immediately
             const redirectUrl = searchParams.get('redirect') || '/';
-            router.push(redirectUrl);
+            window.location.replace(redirectUrl);
         });
     }
 
@@ -151,6 +130,7 @@ export default function LoginPage() {
                                     className="w-full h-14 px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
                                     placeholder="name@example.com"
                                     type="email"
+                                    name="email"
                                     required
                                 />
                             </div>
@@ -165,6 +145,7 @@ export default function LoginPage() {
                                     className="w-full h-14 px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
                                     placeholder="••••••••"
                                     type="password"
+                                    name="password"
                                     required
                                 />
                             </div>
@@ -176,6 +157,7 @@ export default function LoginPage() {
                                     className="peer size-5 cursor-pointer appearance-none rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 checked:bg-primary checked:border-primary focus:ring-4 focus:ring-primary/20 transition-all"
                                     id="remember"
                                     type="checkbox"
+                                    name="rememberMe"
                                 />
                                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transform scale-50 peer-checked:scale-100 transition-all material-icons-round text-sm font-bold">check</span>
                             </div>

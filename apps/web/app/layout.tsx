@@ -12,6 +12,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { getCategories } from "@/lib/api";
 import { UIProvider } from "@/context/UIContext";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
+import { createClient } from "@/lib/supabase/server";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -50,6 +51,33 @@ export default async function RootLayout({
 }>) {
   const categories = await getCategories();
 
+  // Server-side Auth Check for Session Sync
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let initialUser = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('User')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      initialUser = {
+        ...user,
+        role: profile.role,
+        user_metadata: {
+          ...user.user_metadata,
+          full_name: profile.name,
+          phone: profile.phone
+        }
+      };
+    } else {
+      initialUser = user;
+    }
+  }
+
   return (
     <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
@@ -67,7 +95,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
+          <AuthProvider initialUser={initialUser as any}>
             <WishlistProvider>
               <CartProvider>
                 <FlyToCartProvider>

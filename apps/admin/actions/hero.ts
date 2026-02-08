@@ -15,13 +15,12 @@ export interface HeroSection {
 
 export async function getHeroSection(): Promise<HeroSection | null> {
     const { data, error } = await supabaseAdmin
-        .from('hero_sections')
+        .from('hero_settings')
         .select('*')
-        .eq('is_active', true)
         .single();
 
     if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching hero section:', error);
+        console.error('Error fetching hero settings:', error);
     }
 
     return data;
@@ -29,16 +28,25 @@ export async function getHeroSection(): Promise<HeroSection | null> {
 
 export async function saveHeroSection(data: Omit<HeroSection, 'id' | 'is_active'>) {
     try {
-        // We'll just insert a new one and set it as active, trigger will handle the rest
-        // OR update the existing active one if we want to keep history?
-        // Let's Insert new one to keep history of changes, simple.
+        // We'll update the single row if it exists, or insert if empty
+        // Since we don't have is_active, we assume the single row is the active one.
 
-        const { error } = await supabaseAdmin
-            .from('hero_sections')
-            .insert({
-                ...data,
-                is_active: true
-            });
+        // Check if exists
+        const existing = await getHeroSection();
+
+        let error;
+        if (existing) {
+            const { error: updateError } = await supabaseAdmin
+                .from('hero_settings')
+                .update(data)
+                .eq('id', existing.id);
+            error = updateError;
+        } else {
+            const { error: insertError } = await supabaseAdmin
+                .from('hero_settings')
+                .insert([data]); // Insert as array
+            error = insertError;
+        }
 
         if (error) throw error;
 

@@ -115,8 +115,8 @@ export default function ReviewsPage() {
 
             {/* Filters */}
             <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-1">
                         <label className="block text-sm font-medium mb-2">Search</label>
                         <div className="flex gap-2">
                             <input
@@ -124,14 +124,14 @@ export default function ReviewsPage() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                placeholder="Product, user, comment..."
-                                className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                                placeholder="Search..."
+                                className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 outline-none focus:ring-2 focus:ring-primary/50"
                             />
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                                className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center transition-colors"
                             >
-                                Search
+                                <span className="material-icons-round text-lg">search</span>
                             </button>
                         </div>
                     </div>
@@ -147,7 +147,7 @@ export default function ReviewsPage() {
                                     isHidden: value === 'all' ? undefined : value === 'hidden'
                                 });
                             }}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                         >
                             <option value="all">All</option>
                             <option value="visible">Visible</option>
@@ -166,7 +166,7 @@ export default function ReviewsPage() {
                                     rating: value === 'all' ? undefined : Number(value)
                                 });
                             }}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                         >
                             <option value="all">All Ratings</option>
                             <option value="5">5 Stars</option>
@@ -184,7 +184,7 @@ export default function ReviewsPage() {
                                 setFilters({});
                                 setSearchTerm('');
                             }}
-                            className="w-full px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                            className="w-full px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                         >
                             Clear Filters
                         </button>

@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -11,12 +11,20 @@ import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { useAdminAuth } from "@/context/AdminAuthContext"
+
+// ... imports
+
+import { loginAdmin } from "@/actions/auth"
+
 export default function LoginPage() {
     useTheme()
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
     const [showTwoFactor] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
+    const { adminUser, adminLoading } = useAdminAuth()
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -29,43 +37,62 @@ export default function LoginPage() {
 
 
     const router = useRouter()
-    const supabase = createClient()
+    // const supabase = createClient() // No longer needed for login action
+
+    const [isRedirecting, setIsRedirecting] = useState(false)
+
+    // Redirect if already logged in (breaks back-button loop)
+    useEffect(() => {
+        if (!adminLoading && adminUser) {
+            console.log("Already logged in, redirecting to dashboard...");
+            setIsRedirecting(true);
+            router.replace('/admin');
+        }
+    }, [adminUser, adminLoading, router]);
 
     const onSubmit = (values: z.infer<typeof LoginSchema>) => {
         setError("")
         setSuccess("")
 
         startTransition(async () => {
-            const { data, error: authError } = await supabase.auth.signInWithPassword({
-                email: values.email,
-                password: values.password,
-            })
+            const formData = new FormData()
+            formData.append('email', values.email)
+            formData.append('password', values.password)
+            if (values.code) formData.append('code', values.code)
+            if (rememberMe) formData.append('rememberMe', 'on')
 
-            if (authError) {
-                setError(authError.message)
+            // Call server action
+            const result = await loginAdmin({ error: '', success: false }, formData)
+
+            if (result?.error) {
+                setError(result.error)
                 return
             }
 
-            // Check user role from public.User table
-            if (data.user) {
-                const { data: profile } = await supabase
-                    .from('User')
-                    .select('role')
-                    .eq('id', data.user.id)
-                    .single()
-
-                // Only allow MERCHANT and SUPERADMIN roles to login to admin panel
-                if (profile && profile.role !== 'MERCHANT' && profile.role !== 'SUPERADMIN') {
-                    await supabase.auth.signOut()
-                    setError('This account is not authorized to access the admin panel. Please use the customer portal.')
-                    return
-                }
-            }
-
             setSuccess("Login successful!")
-            router.refresh()
-            router.push('/admin')
+            setIsRedirecting(true) // Show full screen loader
+
+            // Force full reload to ensure AdminAuthContext picks up the new cookie from Server Action
+            // and to clean browser history stack
+            window.location.replace('/admin')
         })
+    }
+
+    if (isRedirecting) {
+        return (
+            <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 transition-all duration-300">
+                <div className="flex flex-col items-center gap-6">
+                    <div className="relative w-16 h-16">
+                        <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Authenticating</h2>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Redirecting to your dashboard...</p>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -94,7 +121,12 @@ export default function LoginPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Password</label>
+                                    <Link href="/admin/forgot-password" className="text-xs font-medium text-primary hover:underline">
+                                        Forgot Password?
+                                    </Link>
+                                </div>
                                 <input
                                     {...form.register("password")}
                                     type="password"
@@ -105,6 +137,20 @@ export default function LoginPage() {
                                 {form.formState.errors.password && (
                                     <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
                                 )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    disabled={isPending}
+                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 bg-gray-50 dark:bg-slate-900 dark:border-slate-700 cursor-pointer"
+                                />
+                                <label htmlFor="rememberMe" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer select-none">
+                                    Keep me signed in
+                                </label>
                             </div>
                         </>
                     )}

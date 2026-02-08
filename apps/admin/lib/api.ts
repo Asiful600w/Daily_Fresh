@@ -1414,7 +1414,7 @@ export async function getHeroSettings() {
     const { data, error } = await supabase
         .from('hero_settings')
         .select('*')
-        .single();
+        .maybeSingle(); // Changed to maybeSingle to prevent error on empty table
 
     if (error) {
         console.error('Error fetching hero settings:', error);
@@ -1423,7 +1423,7 @@ export async function getHeroSettings() {
             title: 'Quality Food For Your Healthy Life',
             subtitle: 'New Season Freshness',
             description: 'Get up to 50% OFF on your first order. Fresh produce delivered from farm to your doorstep.',
-            image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBX7x1HBOqMMI518qHW17jKGkryeaKonnXGEbdkBR4GvbEVZENLzYW_8cEKLeU3nLCoxfDxvRuzBWc2UMxkRlp8Qix2LgxHKpsToQHO10vMCHMKjOmg6ucwmqOZ7GIMiSBIxBw0qaqFeK63SiQ5EQ4C-LMvZy28P7MaNy4uzcV2DaK1H5zIykFWkZMYBE6Xh8ac9E1nba7cTZ14OBTrDW-wpN-j8lDq-VbvUaLl6OtViD2uWDMpEBWT1yXDZluirbsS6BEgrgXwzyI',
+            image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop',
             button_text: 'Shop Now',
             button_link: '/shop'
         };
@@ -1432,12 +1432,25 @@ export async function getHeroSettings() {
 }
 
 export async function updateHeroSettings(settings: any) {
-    const { error } = await supabase
+    // First, check if a row exists
+    const { data: existing } = await supabase
         .from('hero_settings')
-        .update(settings)
-        .eq('id', 1);
+        .select('id')
+        .limit(1)
+        .maybeSingle();
 
-    if (error) throw error;
+    if (existing) {
+        const { error } = await supabase
+            .from('hero_settings')
+            .update(settings)
+            .eq('id', existing.id);
+        if (error) throw error;
+    } else {
+        const { error } = await supabase
+            .from('hero_settings')
+            .insert(settings);
+        if (error) throw error;
+    }
 }
 
 // -- Notices --

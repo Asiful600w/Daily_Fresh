@@ -1321,15 +1321,27 @@ export async function setDefaultAddress(userId: string, id: string) {
 }
 
 
-export async function getHeroSettings() {
-    const { data, error } = await supabase
-        .from('hero_sections')
+export async function getHeroSettings(supabaseClient?: any) {
+    const sb = supabaseClient || supabase;
+
+    // Log context for debugging
+    console.log(`fetching hero settings with ${supabaseClient ? 'server' : 'default'} client`);
+
+    const { data, error } = await sb
+        .from('hero_settings')
         .select('*')
-        .eq('is_active', true)
-        .single();
+        .maybeSingle();
+
+    console.log("getHeroSettings result:", { data, error });
 
     if (error) {
         console.error('Error fetching hero settings:', error);
+        console.error('Error Details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+        });
         // Fallback default
         return {
             title: 'Quality Food For Your Healthy Life',
