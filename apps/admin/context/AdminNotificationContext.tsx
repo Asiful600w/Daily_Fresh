@@ -54,6 +54,8 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
             setUnreadCount(data.length);
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
+            // Log full error details for debugging
+            console.error(JSON.stringify(error, null, 2));
         }
     }, []);
 

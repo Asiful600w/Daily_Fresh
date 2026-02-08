@@ -118,9 +118,21 @@ export default function CheckoutPage() {
 
             // Wait longer for animation and to ensure order is committed to database
             setTimeout(async () => {
-                await clearCart();
-                router.push(`/orders/${result.orderId}?success=true`);
-            }, 3500); // Increased from 3000ms to 3500ms
+                try {
+                    // Attempt to clear cart, but don't block navigation if it fails/hangs
+                    await clearCart().catch(e => console.error("Failed to clear cart:", e));
+                } catch (e) {
+                    console.error("Cart clear exception:", e);
+                } finally {
+                    if (result.orderId) {
+                        router.push(`/orders/${result.orderId}?success=true`);
+                    } else {
+                        console.error("No order ID returned");
+                        // Fallback to profile orders or home
+                        router.push('/profile/orders');
+                    }
+                }
+            }, 3500);
 
         } catch (error: any) {
             console.error('Checkout failed:', error);

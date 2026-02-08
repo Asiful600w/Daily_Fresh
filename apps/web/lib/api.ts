@@ -1323,8 +1323,9 @@ export async function setDefaultAddress(userId: string, id: string) {
 
 export async function getHeroSettings() {
     const { data, error } = await supabase
-        .from('hero_settings')
+        .from('hero_sections')
         .select('*')
+        .eq('is_active', true)
         .single();
 
     if (error) {
@@ -1334,22 +1335,19 @@ export async function getHeroSettings() {
             title: 'Quality Food For Your Healthy Life',
             subtitle: 'New Season Freshness',
             description: 'Get up to 50% OFF on your first order. Fresh produce delivered from farm to your doorstep.',
-            image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBX7x1HBOqMMI518qHW17jKGkryeaKonnXGEbdkBR4GvbEVZENLzYW_8cEKLeU3nLCoxfDxvRuzBWc2UMxkRlp8Qix2LgxHKpsToQHO10vMCHMKjOmg6ucwmqOZ7GIMiSBIxBw0qaqFeK63SiQ5EQ4C-LMvZy28P7MaNy4uzcV2DaK1H5zIykFWkZMYBE6Xh8ac9E1nba7cTZ14OBTrDW-wpN-j8lDq-VbvUaLl6OtViD2uWDMpEBWT1yXDZluirbsS6BEgrgXwzyI',
+            image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop',
             button_text: 'Shop Now',
             button_link: '/shop'
         };
     }
-    return data;
+
+    // Map fields if necessary
+    return {
+        ...data,
+        description: data.subtitle // Use subtitle as description for the paragraph text
+    };
 }
 
-export async function updateHeroSettings(settings: any) {
-    const { error } = await supabase
-        .from('hero_settings')
-        .update(settings)
-        .eq('id', 1);
-
-    if (error) throw error;
-}
 
 // -- Notices --
 export interface Notice {

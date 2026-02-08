@@ -95,6 +95,7 @@ function AdminProtectedLayout({
         ] : []),
 
         { name: 'Settings', href: '/admin/settings', icon: 'settings' },
+        { name: 'Hero Settings', href: '/admin/settings/hero', icon: 'image' },
         { name: 'Documentation', href: '/admin/documentation', icon: 'menu_book' },
     ];
 

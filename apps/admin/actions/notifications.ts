@@ -10,7 +10,10 @@ export interface OrderNotification {
     is_admin_viewed: boolean;
 }
 
+import { unstable_noStore as noStore } from 'next/cache';
+
 export async function getUnreadNotifications(): Promise<OrderNotification[]> {
+    noStore();
     const { data, error } = await supabaseAdmin
         .from('orders')
         .select('id, created_at, total_amount, shipping_name, is_admin_viewed')
