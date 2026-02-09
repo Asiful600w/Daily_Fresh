@@ -11,7 +11,7 @@ import { formatPrice } from '@/lib/format';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 
 export default function CheckoutPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshSession } = useAuth();
     const { items: cart, totalPrice, clearCart } = useCart();
     const router = useRouter();
 
@@ -64,19 +64,40 @@ export default function CheckoutPage() {
         }
     }, [user, authLoading, router]);
 
-    const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+    const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'success'>('idle');
 
     const handlePlaceOrder = async () => {
-        if (!user) return;
-        setLoading(true);
+        // 1. Session Validation
+        if (!user) {
+            router.push('/login?redirect=/checkout');
+            return;
+        }
+
+        // Show processing screen IMMEDIATELY
+        setCheckoutState('processing');
 
         try {
+            // Fire-and-forget address saving to reduce delay
+            if ((isNewAddress || !selectedAddressId) && newAddress.saveForLater) {
+                saveAddress({ ...newAddress, label: 'Home', isDefault: addresses.length === 0 }).catch(console.error);
+            }
+
+            // Refresh session with timeout (blocking but necessary for auth)
+            if (refreshSession) {
+                const sessionTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timed out')), 5000));
+                try {
+                    await Promise.race([refreshSession(), sessionTimeout]);
+                } catch (e) {
+                    console.warn("Session refresh skipped/timed out:", e);
+                }
+            }
+
             // Prepare shipping details
             let finalShippingDetails = { name: '', phone: '', address: '' };
             if (isNewAddress || !selectedAddressId) {
                 if (!newAddress.fullName || !newAddress.street || !newAddress.phone || !newAddress.city) {
                     alert('Please fill in all required shipping fields.');
-                    setLoading(false);
+                    setCheckoutState('idle');
                     return;
                 }
                 finalShippingDetails = {
@@ -84,12 +105,11 @@ export default function CheckoutPage() {
                     phone: newAddress.phone,
                     address: `${newAddress.street}, ${newAddress.city}, ${newAddress.state} ${newAddress.postalCode}, ${newAddress.country}`
                 };
-                if (newAddress.saveForLater) {
-                    await saveAddress({ ...newAddress, label: 'Home', isDefault: addresses.length === 0 });
-                }
             } else {
                 const addr = addresses.find(a => a.id === selectedAddressId);
-                if (!addr) throw new Error('Selected address not found');
+                if (!addr) {
+                    throw new Error('Selected address not found');
+                }
                 finalShippingDetails = {
                     name: addr.fullName,
                     phone: addr.phone,
@@ -100,11 +120,16 @@ export default function CheckoutPage() {
             const total = totalPrice * 1.05;
 
             console.log('Placing order...');
-            console.log('User ID:', user.id);
-            console.log('Total:', total);
-            console.log('Cart items:', cart.length);
 
-            const result = await createOrderAction(user.id, total, cart, finalShippingDetails, 'cod');
+            // 2. Create Order with Timeout Race
+            const timeoutPromise = new Promise<{ success: boolean; error?: string }>((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out. Please check your connection.')), 15000)
+            );
+
+            const result = await Promise.race([
+                createOrderAction(user.id, total, cart, finalShippingDetails, 'cod'),
+                timeoutPromise
+            ]) as { success: boolean, orderId?: number, error?: string };
 
             if (!result.success) {
                 console.error('Order creation failed:', result.error);
@@ -113,48 +138,58 @@ export default function CheckoutPage() {
 
             console.log('Order created successfully:', result.orderId);
 
-            // Trigger Animation
-            setShowSuccessAnimation(true);
+            // Update UI to Success State
+            setCheckoutState('success');
 
-            // Wait longer for animation and to ensure order is committed to database
-            setTimeout(async () => {
-                try {
-                    // Attempt to clear cart, but don't block navigation if it fails/hangs
-                    await clearCart().catch(e => console.error("Failed to clear cart:", e));
-                } catch (e) {
-                    console.error("Cart clear exception:", e);
-                } finally {
-                    if (result.orderId) {
-                        router.push(`/orders/${result.orderId}?success=true`);
-                    } else {
-                        console.error("No order ID returned");
-                        // Fallback to profile orders or home
-                        router.push('/profile/orders');
-                    }
+            // Wait for animation then navigate
+            setTimeout(() => {
+                // Fire and forget clear cart
+                clearCart().catch(e => console.error("Failed to clear cart:", e));
+
+                console.log("Navigating to order...", result.orderId);
+
+                if (result.orderId) {
+                    router.push(`/orders/${result.orderId}?success=true`);
+                } else {
+                    router.push('/profile/orders');
                 }
-            }, 3500);
+            }, 2000); // Reduced delay slightly
 
         } catch (error: any) {
             console.error('Checkout failed:', error);
-            console.error('Error message:', error?.message);
-            console.error('Error details:', error?.details);
-            console.error('Error hint:', error?.hint);
-            alert(`Failed to place order: ${error?.message || 'Please try again.'}`);
-            setLoading(false);
+            const msg = error?.message || 'Please try again.';
+
+            // Hide overlay to show error
+            setCheckoutState('idle');
+
+            if (msg.includes('stay logged in') || msg.toLowerCase().includes('session') || msg.includes('JWT')) {
+                alert("Your session has expired. Please login again.");
+                router.push('/login?redirect=/checkout');
+            } else {
+                alert(`Failed to place order: ${msg}`);
+            }
         }
     };
 
-    if (showSuccessAnimation) {
+    if (checkoutState !== 'idle') {
         return (
             <div className="fixed inset-0 z-50 bg-white dark:bg-[#0d1b17] flex flex-col items-center justify-center animate-in fade-in duration-300">
                 <div className="relative w-32 h-32 mb-8">
                     <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
                     <div className="absolute inset-0 bg-white dark:bg-[#0d1b17] rounded-full m-2 flex items-center justify-center border-4 border-primary shadow-2xl shadow-primary/40">
-                        <span className="material-icons-round text-6xl text-primary animate-bounce">receipt_long</span>
+                        {checkoutState === 'success' ? (
+                            <span className="material-icons-round text-6xl text-primary animate-bounce">check_circle</span>
+                        ) : (
+                            <span className="material-icons-round text-6xl text-primary animate-spin">autorenew</span>
+                        )}
                     </div>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Generating Receipt</h2>
-                <p className="text-slate-500 font-medium animate-pulse">Please wait while we confirm your order...</p>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
+                    {checkoutState === 'success' ? 'Order Confirmed!' : 'Processing Order...'}
+                </h2>
+                <p className="text-slate-500 font-medium animate-pulse">
+                    {checkoutState === 'success' ? 'Generating your receipt...' : 'Please wait while we confirm your details...'}
+                </p>
             </div>
         );
     }
@@ -345,10 +380,10 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handlePlaceOrder}
-                                disabled={loading}
+                                disabled={loading || checkoutState !== 'idle'}
                                 className="w-full py-4 bg-[#4c9a80] hover:bg-[#3d8b72] text-white font-bold rounded-2xl shadow-lg shadow-[#4c9a80]/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                {loading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                                {(loading || checkoutState !== 'idle') && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                 Place Your Order <span className="material-icons-round">arrow_forward</span>
                             </button>
 

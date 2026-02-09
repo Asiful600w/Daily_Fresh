@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { getOrder } from '@/lib/api';
+import { getOrderDetails } from '@/actions/orders';
 import { formatPrice } from '@/lib/format';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 
@@ -23,18 +23,37 @@ export default function OrderDetailsPage() {
     useEffect(() => {
         const fetchOrder = async (attempt = 0) => {
             try {
+                // Wait for auth to handle session restoration first
+                if (authLoading) return;
+
+                // If no user, redirect
+                if (!user) {
+                    router.push('/login?redirect=/orders/' + id);
+                    return;
+                }
+
                 setError(null);
                 console.log(`Fetching order ${id}, attempt ${attempt + 1}`);
 
-                const data = await getOrder(id as string);
+                // Timeout for server action
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Request timed out')), 10000)
+                );
+
+                // Use Server Action instead of client API
+                // Type casting id to matching expected type (string | number)
+                const data = await Promise.race([
+                    getOrderDetails(id as string),
+                    timeoutPromise
+                ]) as any;
 
                 if (!data) {
                     // Order not found - might need to retry if it was just created
                     if (attempt < 3 && isSuccess) {
-                        console.log('Order not found, retrying in 1 second...');
+                        console.log('Order not found, retrying in 2 seconds...');
                         setTimeout(() => {
                             setRetryCount(prev => prev + 1);
-                        }, 1000);
+                        }, 2000);
                         return;
                     }
                     setError('Order not found. It may have been deleted or you may not have permission to view it.');
@@ -42,30 +61,25 @@ export default function OrderDetailsPage() {
                     return;
                 }
 
-                if (data.user_id !== user?.id) {
-                    console.error('Order user_id mismatch:', data.user_id, 'vs', user?.id);
+                if (data.user_id !== user.id) {
+                    console.error('Order user_id mismatch:', data.user_id, 'vs', user.id);
                     setError('You do not have permission to view this order.');
                     setLoading(false);
                     return;
                 }
 
-                console.log('Order loaded successfully:', data);
+                console.log('Order loaded successfully:', data.id);
                 setOrder(data);
                 setLoading(false);
             } catch (error: any) {
                 console.error('Error fetching order:', error);
-                console.error('Error details:', {
-                    message: error?.message,
-                    code: error?.code,
-                    details: error?.details
-                });
 
                 // Retry logic for transient errors
                 if (attempt < 3 && isSuccess) {
-                    console.log('Error fetching order, retrying in 1 second...');
+                    console.log('Error fetching order, retrying in 2 seconds...');
                     setTimeout(() => {
                         setRetryCount(prev => prev + 1);
-                    }, 1000);
+                    }, 2000);
                 } else {
                     setError(error?.message || 'Failed to load order details. Please try again.');
                     setLoading(false);
@@ -73,9 +87,7 @@ export default function OrderDetailsPage() {
             }
         };
 
-        if (!authLoading && !user) {
-            router.push('/login');
-        } else if (user && id) {
+        if (!authLoading) {
             fetchOrder(retryCount);
         }
     }, [user, authLoading, id, router, retryCount, isSuccess]);
@@ -157,7 +169,7 @@ export default function OrderDetailsPage() {
 
                     {/* Order Items */}
                     <div className="p-6 md:p-8 space-y-6">
-                        {order.items?.map((item: any) => (
+                        {order.order_items?.map((item: any) => (
                             <div key={item.id} className="flex items-center gap-4">
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0">
                                     {/* Prioritize current product image (index 0), then snapshot image */}

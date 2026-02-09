@@ -1,197 +1,39 @@
-'use client';
+import { createClient } from '@/lib/supabase/server';
+import { getUserStats, getRecentOrders } from '@/actions/orders';
+import ProfileClient from './ProfileClient';
+import { redirect } from 'next/navigation';
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useWishlist } from '@/context/WishlistContext';
-import { getUserOrders } from '@/lib/api';
-import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
-import { ProfileStats } from '@/components/profile/ProfileStats';
-import { RecentOrders } from '@/components/profile/RecentOrders';
-import { QuickActions } from '@/components/profile/QuickActions';
-import { AddressCard } from '@/components/profile/AddressCard';
-import { MembershipCard } from '@/components/profile/MembershipCard';
-import { ProfileEditModal } from '@/components/profile/ProfileEditModal';
-
-export default function ProfilePage() {
-    const { user, loading: authLoading } = useAuth();
-    const { wishlistIds } = useWishlist();
-    const [loading, setLoading] = useState(true);
-    const [orders, setOrders] = useState<any[]>([]);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-    // Stats State
-    const [stats, setStats] = useState({
-        pendingOrders: 0,
-        savedItems: 0,
-        completedOrders: 0,
-        totalSpent: 0
-    });
-
-    // Update stats when wishlistIds changes
-    useEffect(() => {
-        setStats(prev => ({
-            ...prev,
-            savedItems: wishlistIds.length
-        }));
-    }, [wishlistIds]);
-
-    useEffect(() => {
-        let isMounted = true;
-        const fetchDashboardData = async () => {
-            try {
-                if (isMounted) setLoading(true);
-
-                // Create a timeout promise
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Request timed out')), 10000)
-                );
-
-                // Fetch Orders with timeout
-                const allOrders = await Promise.race([
-                    getUserOrders(user!.id),
-                    timeoutPromise
-                ]) as any[];
-
-                if (!isMounted) return;
-
-                const recentOrders = allOrders.slice(0, 5);
-
-                setStats(prev => ({
-                    ...prev,
-                    // savedItems is handled by effect above
-                    activeOrders: allOrders.filter((o: any) => ['processing', 'on_delivery'].includes(o.status?.toLowerCase())).length,
-                    pendingOrders: allOrders.filter((o: any) => o.status?.toLowerCase() === 'pending').length,
-                    completedOrders: allOrders.filter((o: any) => o.status?.toLowerCase() === 'delivered').length,
-                    totalSpent: allOrders
-                        .filter((o: any) => o.status?.toLowerCase() === 'delivered')
-                        .reduce((sum: number, o: any) => sum + Number(o.total_amount || 0), 0)
-                }));
-
-                setOrders(recentOrders);
-
-            } catch (error) {
-                console.error('Error loading dashboard data!', error);
-                // Optionally show a toast or error message here
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        if (user) {
-            fetchDashboardData();
-        }
-
-        return () => {
-            isMounted = false;
-        };
-    }, [user]);
-
-    if (authLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
+export default async function ProfilePage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0d1b17] p-4 text-center">
-                <div className="bg-white dark:bg-[#10221c] p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-100 dark:border-[#1e3a31]">
-                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="material-icons-round text-4xl text-primary">person</span>
-                    </div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Login Required</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mb-8">
-                        Please login to view your profile and manage your orders.
-                    </p>
-                    <Link href="/login" replace className="block w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-                        Login / Signup
-                    </Link>
-                    <div className="mt-4">
-                        <Link href="/" className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
-                            Back to Shopping
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
+        redirect('/login');
     }
 
-    if (loading) {
+    try {
+        console.log('ProfilePage: Fetching data for user', user.id);
+        const [stats, recentOrders] = await Promise.all([
+            getUserStats(user.id),
+            getRecentOrders(user.id)
+        ]);
+
+        console.log('ProfilePage: Data fetched', { stats, recentOrders: recentOrders?.length });
+
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
+            <ProfileClient
+                initialStats={stats}
+                initialOrders={recentOrders}
+            />
+        );
+    } catch (error: any) {
+        console.error('ProfilePage Error:', error);
+        return (
+            <ProfileClient
+                initialStats={null}
+                initialOrders={[]}
+                error={error.message || 'Failed to load profile data'}
+            />
         );
     }
-
-    return (
-        <div className="flex justify-center bg-background-light dark:bg-background-dark min-h-screen">
-            <div className="flex w-full max-w-7xl">
-                <ProfileSidebar activeTab="overview" onEditProfile={() => setIsEditModalOpen(true)} />
-
-                <main className="flex flex-col flex-1 p-4 md:p-8 w-full">
-                    {/* Mobile Header (Hidden on Desktop) */}
-                    <div className="lg:hidden flex items-center gap-4 mb-8 bg-white dark:bg-[#10221c] p-4 rounded-2xl border border-slate-100 dark:border-[#1e3a31] shadow-sm">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary">
-                            {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <span className="material-icons-round text-slate-400 text-2xl">person</span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
-                                {user?.user_metadata?.full_name || 'User'}
-                            </h2>
-                            <p className="text-primary text-xs font-semibold uppercase tracking-wider">Prime Member</p>
-                        </div>
-                        <button
-                            onClick={() => setIsEditModalOpen(true)}
-                            className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-colors"
-                        >
-                            <span className="material-icons-round">edit</span>
-                        </button>
-                    </div>
-
-                    {/* PageHeading */}
-                    <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
-                        <div className="flex flex-col gap-2">
-
-                            <p className="text-[#0d1b17] dark:text-white text-3xl md:text-4xl font-black tracking-tight">Profile Overview</p>
-                            <p className="text-[#4c9a80] text-base font-normal">
-                                Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'User'}! Here's what's happening with your groceries today.
-                            </p>
-                        </div>
-                        <div className="text-[#4c9a80] text-sm font-medium bg-white dark:bg-[#10221c] px-4 py-2 rounded-lg border border-[#cfe7df] dark:border-[#1e3a31]">
-                            Today is {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                        </div>
-                    </div>
-
-                    <ProfileStats stats={stats} />
-
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        {/* Left Column */}
-                        <div className="xl:col-span-2 space-y-8">
-                            <RecentOrders orders={orders} />
-                            <QuickActions />
-                        </div>
-
-                        {/* Right Column */}
-                        <div className="flex flex-col gap-6">
-                            <AddressCard />
-                            <MembershipCard />
-                        </div>
-                    </div>
-                </main>
-            </div>
-
-            <ProfileEditModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
-        </div>
-    );
 }
-

@@ -12,6 +12,7 @@ interface AdminNotificationContextType {
     unreadCount: number;
     markAsViewed: (orderId: string) => Promise<void>;
     markAllAsViewed: () => Promise<void>;
+    connectionStatus: string;
 }
 
 const AdminNotificationContext = createContext<AdminNotificationContextType | undefined>(undefined);
@@ -19,6 +20,7 @@ const AdminNotificationContext = createContext<AdminNotificationContextType | un
 export function AdminNotificationProvider({ children }: { children: React.ReactNode }) {
     const [notifications, setNotifications] = useState<OrderNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [connectionStatus, setConnectionStatus] = useState<string>('CONNECTING');
     const router = useRouter();
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const notificationsRef = useRef<OrderNotification[]>([]);
@@ -67,27 +69,41 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
         // Set up Realtime subscription for new orders
         const supabaseClient = createClient();
 
+        console.log("Setting up admin-orders-realtime subscription...");
+
         const channel = supabaseClient
             .channel('admin-orders-realtime')
             .on('postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'orders' },
+                { event: '*', schema: 'public', table: 'orders' },
                 (payload) => {
-                    console.log('New order received:', payload.new);
-                    // Play notification sound
-                    playNotificationSound();
-                    // Refresh notifications to include the new order
-                    fetchNotifications(false);
+                    console.log('Realtime change received:', payload);
+
+                    if (payload.eventType === 'INSERT') {
+                        console.log('New order matched:', payload.new);
+                        playNotificationSound();
+
+                        // Optimistically update UI
+                        const newOrder = payload.new as OrderNotification;
+                        // Ensure it matches interface
+                        if (newOrder.is_admin_viewed === false) { // Should be false by default
+                            setNotifications(prev => [newOrder, ...prev]);
+                            setUnreadCount(prev => prev + 1);
+                        } else {
+                            // Fetch to be sure
+                            fetchNotifications(true);
+                        }
+                    } else if (payload.eventType === 'UPDATE') {
+                        fetchNotifications(false);
+                    }
                 }
             )
-            .on('postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'orders' },
-                (payload) => {
-                    console.log('Order updated:', payload.new);
-                    // Refresh to update order status in notifications
-                    fetchNotifications(false);
+            .subscribe((status) => {
+                console.log("Realtime Subscription Status:", status);
+                setConnectionStatus(status);
+                if (status === 'SUBSCRIBED') {
+                    console.log("Listening for changes on 'orders' table...");
                 }
-            )
-            .subscribe();
+            });
 
         return () => {
             supabaseClient.removeChannel(channel);
@@ -116,7 +132,7 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     }, []);
 
     return (
-        <AdminNotificationContext.Provider value={{ notifications, unreadCount, markAsViewed, markAllAsViewed }}>
+        <AdminNotificationContext.Provider value={{ notifications, unreadCount, markAsViewed, markAllAsViewed, connectionStatus }}>
             {children}
         </AdminNotificationContext.Provider>
     );

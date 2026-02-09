@@ -13,7 +13,9 @@ export default async function MainLayout({
     return (
         <>
             <NavBar categories={categories} />
-            {children}
+            <div className="pt-[120px] lg:pt-[130px]">
+                {children}
+            </div>
         </>
     );
 }

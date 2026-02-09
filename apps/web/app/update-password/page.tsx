@@ -14,7 +14,8 @@ export default function UpdatePasswordPage() {
 
     // Ensure we have a session (user clicked the email link)
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(({ data }: { data: { session: any } }) => {
+            const session = data?.session;
             if (!session) {
                 // If no session, they might have accessed this page directly without the link
                 setError("Invalid or expired session. Please request a new password reset link.");

@@ -87,8 +87,9 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning={true}
-        className={`${plusJakartaSans.variable} font-sans antialiased bg-gray-50 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-24 md:pb-0 overflow-x-hidden`}
+        className={`${plusJakartaSans.variable} font-sans antialiased text-slate-900 dark:text-slate-100 pb-24 md:pb-0 overflow-x-hidden`}
       >
+        <div className="fixed inset-0 -z-50 bg-gray-50 dark:bg-[#0F172A] transition-colors duration-300 pointer-events-none" />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -99,7 +100,7 @@ export default async function RootLayout({
             <WishlistProvider>
               <CartProvider>
                 <FlyToCartProvider>
-                  <NextTopLoader color="#22C55E" showSpinner={false} />
+                  <NextTopLoader color="#22C55E" showSpinner={false} shadow={false} height={2} />
                   <UIProvider>
                     <GlobalSearch />
                     {children}

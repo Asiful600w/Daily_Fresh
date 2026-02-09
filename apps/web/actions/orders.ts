@@ -133,7 +133,7 @@ export async function getUserOrders(userId: string) {
             .from('orders')
             .select(`
                 *,
-                order_items (
+                order_items!fk_order_items_order (
                     *
                 )
             `)
@@ -152,10 +152,94 @@ export async function getUserOrders(userId: string) {
     }
 }
 
+export async function getUserStats(userId: string) {
+    try {
+        console.log('getUserStats: Starting for userId:', userId);
+        const supabase = await createClient();
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            console.error('getUserStats: No authenticated user (server-side):', authError);
+        } else {
+            console.log('getUserStats: Authenticated user:', user.id);
+        }
+
+        // Use count queries for better performance
+        // We can run these in parallel
+        const [processing, pending, delivered, totalSpentReq, savedItems] = await Promise.all([
+            // Use Uppercase for status to match DB
+            supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', userId).in('status', ['PROCESSING', 'ON_DELIVERY']),
+            supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'PENDING'),
+            supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'DELIVERED'),
+            supabase.from('orders').select('total_amount').eq('user_id', userId).eq('status', 'DELIVERED'),
+            supabase.from('wishlists').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+        ]);
+
+        const totalSpent = totalSpentReq.data?.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0) || 0;
+
+        return {
+            activeOrders: processing.count || 0,
+            pendingOrders: pending.count || 0,
+            completedOrders: delivered.count || 0,
+            totalSpent,
+            savedItems: savedItems.count || 0
+        };
+    } catch (error: any) {
+        console.error('Error fetching user stats:', error);
+        console.error('Stats Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        return { activeOrders: 0, pendingOrders: 0, completedOrders: 0, totalSpent: 0 };
+    }
+}
+
+export async function getRecentOrders(userId: string, limit: number = 5) {
+    try {
+        console.log('getRecentOrders: Starting for userId:', userId);
+        const supabase = await createClient();
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            console.error('getRecentOrders: No authenticated user (server-side):', authError);
+        } else {
+            console.log('getRecentOrders: Authenticated user:', user.id);
+        }
+
+        // Fetch strictly what is needed for the list
+        const { data, error } = await supabase
+            .from('orders')
+            .select(`
+                id,
+                created_at,
+                total_amount,
+                status,
+                payment_status,
+                order_items!fk_order_items_order (
+                    name,
+                    image,
+                    quantity
+                )
+            `)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('getRecentOrders Supabase Error:', JSON.stringify(error, null, 2));
+            throw error;
+        }
+
+        console.log('getRecentOrders: Request Successful. Rows:', data ? data.length : 0);
+        return data || [];
+    } catch (error: any) {
+        console.error('Error fetching recent orders:', error);
+        console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        return [];
+    }
+}
+
 /**
  * Get single order details
  */
-export async function getOrderDetails(orderId: number) {
+export async function getOrderDetails(orderId: number | string) {
     try {
         const supabase = await createClient();
 
@@ -163,7 +247,7 @@ export async function getOrderDetails(orderId: number) {
             .from('orders')
             .select(`
                 *,
-                order_items (
+                order_items!fk_order_items_order (
                     *
                 )
             `)

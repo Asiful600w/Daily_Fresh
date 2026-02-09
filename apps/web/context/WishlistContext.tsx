@@ -21,70 +21,69 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(false);
 
     const fetchWishlistIds = React.useCallback(async () => {
+        if (!user?.id) return;
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('wishlists')
-                .select('product_id')
-                .eq('user_id', user?.id);
+            const { getWishlistIdsAction } = await import('@/actions/wishlist');
+            const result = await getWishlistIdsAction();
 
-            if (error) throw error;
-            setWishlistIds(data.map((item: any) => item.product_id));
-        } catch (error) {
-            console.error('Error fetching wishlist:', error);
+            if (result.success) {
+                setWishlistIds(result.data);
+            } else {
+                console.error('Error fetching wishlist:', result.error);
+            }
+        } catch (error: any) {
+            console.error('Exception fetching wishlist:', error);
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, [user?.id]);
 
     useEffect(() => {
-        if (user) {
+        if (user?.id) {
             fetchWishlistIds();
         } else {
             setWishlistIds([]);
         }
-    }, [user, fetchWishlistIds]);
+    }, [user?.id, fetchWishlistIds]);
 
     const addToWishlist = async (productId: number) => {
         if (!user) return;
+
+        // Optimistic Update
+        setWishlistIds(prev => [...prev, productId]);
+
         try {
-            // Optimistic update
-            setWishlistIds(prev => [...prev, productId]);
-
-            const { error } = await supabase
-                .from('wishlists')
-                .insert({ user_id: user.id, product_id: productId });
-
-            if (error) {
-                // Revert on error
+            const { addToWishlistAction } = await import('@/actions/wishlist');
+            const result = await addToWishlistAction(productId);
+            if (!result.success) {
+                console.error('Failed to add to wishlist:', result.error);
                 setWishlistIds(prev => prev.filter(id => id !== productId));
-                throw error;
+                alert(`Failed to add: ${result.error}`);
             }
-        } catch (error) {
-            console.error('Error adding to wishlist:', error);
-            alert('Failed to add to wishlist');
+        } catch (e) {
+            console.error('Exception adding to wishlist:', e);
+            setWishlistIds(prev => prev.filter(id => id !== productId));
         }
     };
 
     const removeFromWishlist = async (productId: number) => {
         if (!user) return;
+
+        // Optimistic Update
+        setWishlistIds(prev => prev.filter(id => id !== productId));
+
         try {
-            // Optimistic update
-            setWishlistIds(prev => prev.filter(id => id !== productId));
-
-            const { error } = await supabase
-                .from('wishlists')
-                .delete()
-                .eq('user_id', user.id)
-                .eq('product_id', productId);
-
-            if (error) {
-                // Revert
+            const { removeFromWishlistAction } = await import('@/actions/wishlist');
+            const result = await removeFromWishlistAction(productId);
+            if (!result.success) {
+                console.error('Failed to remove from wishlist:', result.error);
                 setWishlistIds(prev => [...prev, productId]);
-                throw error;
+                alert(`Failed to remove: ${result.error}`);
             }
-        } catch (error) {
-            console.error('Error removing from wishlist:', error);
+        } catch (e) {
+            console.error('Exception removing from wishlist:', e);
+            setWishlistIds(prev => [...prev, productId]);
         }
     };
 

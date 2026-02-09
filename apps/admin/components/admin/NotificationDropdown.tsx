@@ -7,9 +7,12 @@ import { formatPrice } from '@/lib/format';
 import { formatDistanceToNow } from 'date-fns';
 
 export function NotificationDropdown() {
-    const { notifications, unreadCount, markAsViewed, markAllAsViewed } = useAdminNotification();
+    const { notifications, unreadCount, markAsViewed, markAllAsViewed, connectionStatus } = useAdminNotification();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Status Color
+    const statusColor = connectionStatus === 'SUBSCRIBED' ? 'bg-green-500' : (connectionStatus === 'CONNECTING' ? 'bg-yellow-500' : 'bg-red-500');
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -48,8 +51,11 @@ export function NotificationDropdown() {
             {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-border-subtle z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                    <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-gray-50 dark:bg-slate-900/50">
-                        <h3 className="font-bold text-text-main">Notifications</h3>
+                    <div className="p-4 border-b border-border-subtle flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-text-main">Notifications</h3>
+                            <div className={`w-2 h-2 rounded-full ${statusColor}`} title={`Realtime: ${connectionStatus}`}></div>
+                        </div>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsViewed}

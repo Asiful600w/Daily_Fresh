@@ -11,7 +11,10 @@ export async function RelatedProducts({ productId }: { productId: string | numbe
         <section className="mt-20">
             <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Related Products</h2>
-                <Link className="text-primary font-semibold hover:underline" href="/category/vegetables">
+                <Link
+                    className="text-primary font-semibold hover:underline"
+                    href={`/category/${related[0].category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}${related[0].subcategory ? `?subcategory=${encodeURIComponent(related[0].subcategory)}` : ''}`}
+                >
                     View all
                 </Link>
             </div>

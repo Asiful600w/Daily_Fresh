@@ -41,7 +41,7 @@ const defaultContext: CartContextType = {
 const CartContext = createContext<CartContextType>(defaultContext);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshSession } = useAuth();
     const [supabase] = useState(() => createClient());
     const [items, setItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -54,6 +54,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const loadCart = async () => {
             setLoading(true);
             if (user) {
+                // Ensure session is valid before making DB calls
+                if (refreshSession) {
+                    await refreshSession();
+                }
+
                 // Load from Supabase
                 try {
                     // Get cart_id for user, or create if not exists

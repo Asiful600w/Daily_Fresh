@@ -97,56 +97,59 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
 
     return (
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group relative h-full flex flex-col">
-            <Link href={`/product/${product.id}`} className="flex flex-col h-full">
-                {/* Image & Badges */}
-                {/* Image & Badges */}
-                <div className="relative h-40 w-full mb-4 group-hover:scale-105 transition-transform duration-500 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden">
-                    {product.images && product.images.length > 0 && product.images[0] ? (
-                        <img
-                            alt={product.name}
-                            className="w-full h-full object-contain"
-                            src={product.images[0]}
-                        />
-                    ) : (
-                        <span className="material-symbols-outlined text-4xl text-gray-300">image</span>
-                    )}
+            {/* Image & Badges Container */}
+            <div className="relative h-40 w-full mb-4 group-hover:scale-105 transition-transform duration-500 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden">
+                <Link href={`/product/${product.id}`} className="absolute inset-0 z-0" aria-label={`View ${product.name}`} />
 
-                    {/* Discount Badge */}
-                    {product.discountPercent && product.discountPercent > 0 && (
-                        <div className="absolute top-0 left-0 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10">
-                            {product.discountPercent}% OFF
-                        </div>
-                    )}
+                {product.images && product.images.length > 0 && product.images[0] ? (
+                    <img
+                        alt={product.name}
+                        className="w-full h-full object-contain relative z-0 pointer-events-none"
+                        src={product.images[0]}
+                    />
+                ) : (
+                    <span className="material-symbols-outlined text-4xl text-gray-300 relative z-0">image</span>
+                )}
 
-                    {/* Special Category Badge */}
-                    {product.specialCategoryLabel && (
-                        <div className="absolute top-0 left-0 mt-6 bg-yellow-400/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10">
-                            {product.specialCategoryLabel}
-                        </div>
-                    )}
+                {/* Discount Badge */}
+                {product.discountPercent && product.discountPercent > 0 && (
+                    <div className="absolute top-0 left-0 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10 pointer-events-none">
+                        {product.discountPercent}% OFF
+                    </div>
+                )}
 
-                    {variant === 'wishlist' ? (
-                        <button
-                            onClick={handleDeleteClick}
-                            className="absolute top-0 right-0 p-2 rounded-full transition-colors bg-red-50 text-red-500 hover:bg-red-100"
-                            title="Remove from wishlist"
-                        >
-                            <span className="material-icons-round text-sm">delete_outline</span>
-                        </button>
-                    ) : (
-                        <button
-                            onClick={handleWishlistClick}
-                            className={`absolute top-0 right-0 p-2 rounded-full transition-colors ${isWishlisted ? 'bg-red-50 text-red-500' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500'}`}
-                        >
-                            <span className={`material-icons-round text-sm ${isWishlisted ? 'material-icons' : 'material-icons-outlined'}`}>
-                                {isWishlisted ? 'favorite' : 'favorite_border'}
-                            </span>
-                        </button>
-                    )}
-                </div>
+                {/* Special Category Badge */}
+                {product.specialCategoryLabel && (
+                    <div className="absolute top-0 left-0 mt-6 bg-yellow-400/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10 pointer-events-none">
+                        {product.specialCategoryLabel}
+                    </div>
+                )}
 
-                {/* Content */}
-                <div className="space-y-2 flex-1 flex flex-col">
+                {variant === 'wishlist' ? (
+                    <button
+                        onClick={handleDeleteClick}
+                        className="absolute top-0 right-0 p-2 rounded-full transition-colors bg-red-50 text-red-500 hover:bg-red-100 z-20 cursor-pointer"
+                        title="Remove from wishlist"
+                    >
+                        <span className="material-icons-round text-sm">delete_outline</span>
+                    </button>
+                ) : (
+                    <button
+                        onClick={handleWishlistClick}
+                        className={`absolute top-0 right-0 p-2 rounded-full transition-colors z-20 cursor-pointer ${isWishlisted ? 'bg-red-50 text-red-500' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500'}`}
+                    >
+                        <span className={`material-icons-round text-sm ${isWishlisted ? 'material-icons' : 'material-icons-outlined'}`}>
+                            {isWishlisted ? 'favorite' : 'favorite_border'}
+                        </span>
+                    </button>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2 flex-1 flex flex-col relative">
+                <Link href={`/product/${product.id}`} className="absolute inset-0 z-0" />
+
+                <div className="relative z-10 pointer-events-none">
                     {product.category && (
                         <p className="text-xs font-bold text-primary uppercase tracking-wider">{product.category}</p>
                     )}
@@ -154,52 +157,52 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                         {product.name}
                     </h3>
                     {product.quantity && <p className="text-xs text-slate-500 dark:text-slate-400">{product.quantity}</p>}
+                </div>
 
-                    <div className="mt-auto pt-2 space-y-3">
-                        {/* Price Area */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <div className="flex items-baseline gap-2">
-                                    <span className={`font-bold text-lg ${product.discountPercent ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
-                                        {formatPrice(product.price)}
+                <div className="mt-auto pt-2 space-y-3 relative z-20">
+                    {/* Price Area */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <div className="flex items-baseline gap-2">
+                                <span className={`font-bold text-lg ${product.discountPercent ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
+                                    {formatPrice(product.price)}
+                                </span>
+                                {product.originalPrice && (
+                                    <span className="text-xs text-slate-400 line-through decoration-slate-400/50">
+                                        {formatPrice(product.originalPrice)}
                                     </span>
-                                    {product.originalPrice && (
-                                        <span className="text-xs text-slate-400 line-through decoration-slate-400/50">
-                                            {formatPrice(product.originalPrice)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Quantity Selector */}
-                            <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                                <button
-                                    onClick={handleDecrement}
-                                    className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all"
-                                >
-                                    <span className="material-icons-round text-xs">remove</span>
-                                </button>
-                                <span className="w-8 text-center text-sm font-bold text-slate-900 dark:text-white">{quantity}</span>
-                                <button
-                                    onClick={handleIncrement}
-                                    className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all"
-                                >
-                                    <span className="material-icons-round text-xs">add</span>
-                                </button>
+                                )}
                             </div>
                         </div>
 
-                        {/* Add to Cart Button */}
-                        <button
-                            onClick={handleAddToCart}
-                            className="w-full py-2 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2"
-                        >
-                            <span className="material-icons-round text-sm">shopping_cart</span>
-                            <span>Add to Cart</span>
-                        </button>
+                        {/* Quantity Selector */}
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                            <button
+                                onClick={handleDecrement}
+                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer"
+                            >
+                                <span className="material-icons-round text-xs">remove</span>
+                            </button>
+                            <span className="w-8 text-center text-sm font-bold text-slate-900 dark:text-white pointer-events-none">{quantity}</span>
+                            <button
+                                onClick={handleIncrement}
+                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer"
+                            >
+                                <span className="material-icons-round text-xs">add</span>
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Add to Cart Button */}
+                    <button
+                        onClick={handleAddToCart}
+                        className="w-full py-2 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <span className="material-icons-round text-sm">shopping_cart</span>
+                        <span>Add to Cart</span>
+                    </button>
                 </div>
-            </Link>
+            </div>
         </div>
     );
 }
