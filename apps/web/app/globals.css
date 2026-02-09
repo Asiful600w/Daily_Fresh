@@ -59,15 +59,54 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: 9999;
-    /* On top of everything */
-    clip-path: circle(0% at var(--origin-x, 50%) var(--origin-y, 50%));
+    z-index: -1;
+    background-color: #0f172a;
+    /* Always dark for fill/unfill effect */
     opacity: 0;
+    clip-path: circle(0% at var(--origin-x, 50%) var(--origin-y, 50%));
+    /* No transitions here, we use keyframes for specific control */
   }
 
-  .theme-transition.active {
-    clip-path: circle(150% at var(--origin-x, 50%) var(--origin-y, 50%));
-    transition: clip-path 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  .theme-transition.filling {
+    animation: fill-wave 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
     opacity: 1;
+  }
+
+  .theme-transition.unfilling {
+    animation: unfill-wave 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    opacity: 1;
+  }
+
+  /* Utility to force background color during transitions to prevent invisible waves */
+  html.force-light .theme-transition {
+    z-index: -1;
+  }
+
+  html.force-light body {
+    background-color: #f4f7f5 !important;
+  }
+
+  html.force-dark body {
+    background-color: #0d1b17 !important;
+  }
+
+  @keyframes fill-wave {
+    from {
+      clip-path: circle(0% at var(--origin-x, 50%) var(--origin-y, 50%));
+    }
+
+    to {
+      clip-path: circle(150% at var(--origin-x, 50%) var(--origin-y, 50%));
+    }
+  }
+
+  @keyframes unfill-wave {
+    from {
+      clip-path: circle(150% at var(--origin-x, 50%) var(--origin-y, 50%));
+    }
+
+    to {
+      clip-path: circle(0% at var(--origin-x, 50%) var(--origin-y, 50%));
+    }
   }
 }

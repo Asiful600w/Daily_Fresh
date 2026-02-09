@@ -106,9 +106,8 @@ export function NavBar({ categories }: { categories: Category[] }) {
     const [mounted, setMounted] = React.useState(false);
 
     const [isScrolled, setIsScrolled] = React.useState(false);
-    const [isAnimating, setIsAnimating] = React.useState(false);
+    const [animationMode, setAnimationMode] = React.useState<'none' | 'filling' | 'unfilling'>('none');
     const [animationOrigin, setAnimationOrigin] = React.useState({ x: 0, y: 0 });
-    const [targetTheme, setTargetTheme] = React.useState<'light' | 'dark'>('light');
 
     // Wait for theme to hydrate
     React.useEffect(() => {
@@ -124,7 +123,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
     }, []);
 
     const toggleTheme = (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (isAnimating || !mounted) return; // Prevent clicks before theme loads
+        if (animationMode !== 'none' || !mounted) return; // Prevent clicks before theme loads
 
         const button = event.currentTarget;
         const rect = button.getBoundingClientRect();
@@ -132,27 +131,43 @@ export function NavBar({ categories }: { categories: Category[] }) {
         const y = rect.top + rect.height / 2;
 
         const newTheme = theme === 'dark' ? 'light' : 'dark';
+        const mode = newTheme === 'dark' ? 'filling' : 'unfilling';
 
-        // Set origin first, then start animation
+        // Set origin first
         setAnimationOrigin({ x, y });
-        setTargetTheme(newTheme);
 
         // Double RAF to ensure state updates complete before animation
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                setIsAnimating(true);
+                setAnimationMode(mode);
             });
         });
 
-        // Change theme slightly early (40% through) for best visual sync
-        setTimeout(() => {
-            setTheme(newTheme);
-        }, 300);
+        if (mode === 'unfilling') {
+            // Dark to Light: Force a light background behind the wave so shrinking is visible
+            document.documentElement.classList.add('force-light');
 
-        // End animation (matches 0.8s in CSS)
+            // Start shrinking
+            setAnimationMode(mode);
+
+            // Change theme LATE (when wave is almost gone) so Navbar reveals last
+            setTimeout(() => {
+                setTheme(newTheme);
+                document.documentElement.classList.remove('force-light');
+            }, 600);
+        } else {
+            // Light to Dark: Change theme slightly later (after fill starts)
+            document.documentElement.classList.add('force-dark');
+            setTimeout(() => {
+                setTheme(newTheme);
+                document.documentElement.classList.remove('force-dark');
+            }, 300);
+        }
+
+        // End animation
         setTimeout(() => {
-            setIsAnimating(false);
-        }, 850); // Extra 50ms for safety
+            setAnimationMode('none');
+        }, 850);
     };
 
     const { openSearch } = useUI();
@@ -160,10 +175,9 @@ export function NavBar({ categories }: { categories: Category[] }) {
     return (
         <>
             <ThemeTransition
-                isAnimating={isAnimating}
+                mode={animationMode}
                 originX={animationOrigin.x}
                 originY={animationOrigin.y}
-                targetTheme={targetTheme}
             />
             <header className={`fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300`}>
                 {/* Top Bar */}

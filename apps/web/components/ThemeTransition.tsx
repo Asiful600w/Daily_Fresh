@@ -3,15 +3,14 @@
 import { useEffect } from 'react';
 
 interface ThemeTransitionProps {
-    isAnimating: boolean;
+    mode: 'none' | 'filling' | 'unfilling';
     originX: number;
     originY: number;
-    targetTheme: 'light' | 'dark';
 }
 
-export function ThemeTransition({ isAnimating, originX, originY, targetTheme }: ThemeTransitionProps) {
+export function ThemeTransition({ mode, originX, originY }: ThemeTransitionProps) {
     useEffect(() => {
-        if (isAnimating) {
+        if (mode !== 'none') {
             // Prevent scrolling during animation
             document.body.style.overflow = 'hidden';
         } else {
@@ -21,15 +20,14 @@ export function ThemeTransition({ isAnimating, originX, originY, targetTheme }: 
         return () => {
             document.body.style.overflow = '';
         };
-    }, [isAnimating]);
+    }, [mode]);
 
     return (
         <div
-            className={`theme-transition ${isAnimating ? 'active' : ''}`}
+            className={`theme-transition ${mode}`}
             style={{
                 '--origin-x': `${originX}px`,
-                '--origin-y': `${originY}px`,
-                backgroundColor: targetTheme === 'dark' ? '#0f172a' : '#ffffff'
+                '--origin-y': `${originY}px`
             } as React.CSSProperties}
         />
     );

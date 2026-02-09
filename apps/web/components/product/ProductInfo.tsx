@@ -74,6 +74,15 @@ export function ProductInfo({ product }: { product: Product }) {
                         </div>
                     )}
 
+                    {/* Out of Stock Overlay */}
+                    {isOutOfStock && (
+                        <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-[2px] z-10 flex items-center justify-center pointer-events-none">
+                            <span className="bg-red-500 text-white text-base sm:text-lg font-black px-6 py-3 rounded-full shadow-2xl uppercase tracking-[0.2em] transform -rotate-12 border-4 border-white/30">
+                                Out of Stock
+                            </span>
+                        </div>
+                    )}
+
                     {/* Wishlist Button */}
                     <button
                         onClick={handleWishlistClick}

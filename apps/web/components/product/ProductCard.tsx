@@ -20,6 +20,7 @@ export interface Product {
     discountPercent?: number;
     specialCategoryLabel?: string;
     description?: string;
+    stockQuantity?: number;
 }
 
 interface ProductCardProps {
@@ -32,6 +33,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     const { user } = useAuth();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const { triggerFly } = useFlyToCart();
+    const isOutOfStock = product.stockQuantity === 0;
 
     // Local state for quantity
     const [quantity, setQuantity] = React.useState(1);
@@ -70,12 +72,15 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     const handleDecrement = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isOutOfStock) return;
         setQuantity(prev => Math.max(1, prev - 1));
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent navigation to product detail
         e.stopPropagation();
+
+        if (isOutOfStock) return;
 
         addItem({
             id: String(product.id), // Ensure string ID for consistency
@@ -115,6 +120,15 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                 {product.discountPercent && product.discountPercent > 0 && (
                     <div className="absolute top-0 left-0 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10 pointer-events-none">
                         {product.discountPercent}% OFF
+                    </div>
+                )}
+
+                {/* Out of Stock Overlay */}
+                {isOutOfStock && (
+                    <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
+                        <span className="bg-red-500 text-white text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full shadow-xl uppercase tracking-widest transform -rotate-12 border-2 border-white/20">
+                            Out of Stock
+                        </span>
                     </div>
                 )}
 
@@ -176,17 +190,19 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                         </div>
 
                         {/* Quantity Selector */}
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                        <div className={`flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1 transition-opacity ${isOutOfStock ? 'opacity-50' : ''}`}>
                             <button
                                 onClick={handleDecrement}
-                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer"
+                                disabled={isOutOfStock}
+                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
                             >
                                 <span className="material-icons-round text-xs">remove</span>
                             </button>
                             <span className="w-8 text-center text-sm font-bold text-slate-900 dark:text-white pointer-events-none">{quantity}</span>
                             <button
                                 onClick={handleIncrement}
-                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer"
+                                disabled={isOutOfStock || (product.stockQuantity !== undefined && quantity >= product.stockQuantity)}
+                                className="w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-slate-600 shadow-sm text-slate-600 dark:text-slate-200 hover:text-primary active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
                             >
                                 <span className="material-icons-round text-xs">add</span>
                             </button>
@@ -196,10 +212,16 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                     {/* Add to Cart Button */}
                     <button
                         onClick={handleAddToCart}
-                        className="w-full py-2 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        disabled={isOutOfStock}
+                        className={`w-full py-2 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer
+                            ${isOutOfStock
+                                ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 shadow-none cursor-not-allowed translate-y-0'
+                                : 'bg-primary text-white shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none'}`}
                     >
-                        <span className="material-icons-round text-sm">shopping_cart</span>
-                        <span>Add to Cart</span>
+                        <span className="material-icons-round text-sm">
+                            {isOutOfStock ? 'block' : 'shopping_cart'}
+                        </span>
+                        <span>{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</span>
                     </button>
                 </div>
             </div>

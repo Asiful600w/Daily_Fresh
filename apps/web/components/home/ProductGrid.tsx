@@ -13,35 +13,6 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, title = "Best selling 🔥", subtitle = "Based on this week's most popular purchases" }: ProductGridProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
-    const isDragging = useRef(false);
-    const startX = useRef(0);
-    const scrollLeft = useRef(0);
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (!scrollRef.current) return;
-        isDragging.current = true;
-        startX.current = e.pageX - scrollRef.current.offsetLeft;
-        scrollLeft.current = scrollRef.current.scrollLeft;
-        scrollRef.current.style.cursor = 'grabbing';
-        scrollRef.current.style.userSelect = 'none';
-        scrollRef.current.style.scrollBehavior = 'auto';
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isDragging.current || !scrollRef.current) return;
-        e.preventDefault();
-        const x = e.pageX - scrollRef.current.offsetLeft;
-        const walk = (x - startX.current) * 2;
-        scrollRef.current.scrollLeft = scrollLeft.current - walk;
-    };
-
-    const handleMouseUp = () => {
-        if (!scrollRef.current) return;
-        isDragging.current = false;
-        scrollRef.current.style.cursor = 'grab';
-        scrollRef.current.style.userSelect = '';
-        scrollRef.current.style.scrollBehavior = 'smooth';
-    };
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollRef.current) {
@@ -79,14 +50,10 @@ export function ProductGrid({ products, title = "Best selling 🔥", subtitle = 
             {/* Slider Container */}
             <div
                 ref={scrollRef}
-                className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x cursor-grab"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x"
             >
                 {products.map((product) => (
-                    <div key={product.id} className="min-w-[200px] w-[200px] md:min-w-[240px] md:w-[240px] snap-start select-none pointer-events-auto">
+                    <div key={product.id} className="min-w-[200px] w-[200px] md:min-w-[240px] md:w-[240px] snap-start">
                         <ProductCard product={{ ...product, id: product.id }} />
                     </div>
                 ))}
