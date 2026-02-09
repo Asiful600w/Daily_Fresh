@@ -77,7 +77,9 @@ function mapProduct(row: any): Product {
         discountPercent: row.discount_percent > 0 ? row.discount_percent : undefined,
         specialCategoryLabel: row.special_categories?.name,
         // Ensure images is an array and filter out empty strings/nulls
-        images: Array.isArray(row.images) ? row.images.filter((img: any) => img && typeof img === 'string' && img.trim() !== '') : [],
+        images: Array.isArray(row.images) && row.images.length > 0
+            ? row.images.filter((img: any) => img && typeof img === 'string' && img.trim() !== '')
+            : row.image_url ? [row.image_url] : [],
         description: row.description,
         quantity: row.quantity_label,
         stockQuantity: row.stock_quantity || 0,

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { MobileCategoryDrawer } from '@/components/category/MobileCategoryDrawer';
 import { Category } from '@/lib/api';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 
 interface MobileNavProps {
@@ -13,11 +13,19 @@ interface MobileNavProps {
 export function MobileNav({ categories }: MobileNavProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
     const { totalItems } = useCart();
 
     const isActive = (path: string) => {
         if (path === '/') return pathname === '/';
         return pathname?.startsWith(path);
+    };
+
+    const handleNav = (e: React.MouseEvent, path: string) => {
+        // We use router.push instead of pure Link for wishlist/profile 
+        // to ensure the top loader triggers immediately.
+        e.preventDefault();
+        router.push(path);
     };
 
     // Hide on login/signup pages
@@ -28,14 +36,14 @@ export function MobileNav({ categories }: MobileNavProps) {
     return (
         <>
             <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 md:hidden z-[90] flex items-center justify-around py-4 pb-safe safe-area-inset-bottom shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                <Link href="/" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                <Link href="/" className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive('/') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
                     <span className="material-icons-round text-2xl">home</span>
                     <span className="text-[10px] font-bold">Home</span>
                 </Link>
 
                 <button
                     onClick={() => setIsDrawerOpen(true)}
-                    className={`flex flex-col items-center gap-1 transition-colors ${isDrawerOpen ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                    className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isDrawerOpen ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                     <span className="material-icons-round text-2xl">grid_view</span>
                     <span className="text-[10px] font-bold">Categories</span>
@@ -53,12 +61,20 @@ export function MobileNav({ categories }: MobileNavProps) {
                     </Link>
                 </div>
 
-                <Link href="/profile/wishlist" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/profile/wishlist') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                <Link
+                    href="/profile/wishlist"
+                    onClick={(e) => handleNav(e, '/profile/wishlist')}
+                    className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive('/profile/wishlist') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                >
                     <span className="material-icons-round text-2xl">favorite</span>
                     <span className="text-[10px] font-bold">Wishlist</span>
                 </Link>
 
-                <Link href="/profile" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/profile') && !isActive('/profile/wishlist') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                <Link
+                    href="/profile"
+                    onClick={(e) => handleNav(e, '/profile')}
+                    className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive('/profile') && !isActive('/profile/wishlist') ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                >
                     <span className="material-icons-round text-2xl">person</span>
                     <span className="text-[10px] font-bold">Profile</span>
                 </Link>

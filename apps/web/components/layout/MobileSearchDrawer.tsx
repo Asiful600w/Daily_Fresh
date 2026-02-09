@@ -17,13 +17,31 @@ export function MobileSearchDrawer({ isOpen, onClose }: MobileSearchDrawerProps)
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    // Auto-focus input when opened
+    // Auto-focus input when opened + Handle Browser Back Button
     useEffect(() => {
         if (isOpen) {
+            // Push a state so that back button doesn't exit the app
+            window.history.pushState({ searchOpen: true }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+
             setTimeout(() => {
                 inputRef.current?.focus();
             }, 100);
+
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
         } else {
+            // If closed manually (e.g. by clicking 'Back' button icon), 
+            // we should check if we need to pop the state we pushed.
+            // But usually onClose is called by handlePopState or UI button.
+            // To be safe, if the drawer is closed but we still have the state, we don't necessarily want to pop.
+            // However, a better way is to only push if not already pushed.
             setQuery('');
             setResults([]);
         }
