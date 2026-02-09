@@ -250,7 +250,7 @@ export async function getCategoryProducts(categoryId: string) {
         console.error('Error fetching category products:', error);
         return [];
     }
-    return data.map(p => ({ ...p, image: p.image_url }));
+    return data.map((p: any) => ({ ...p, image: p.image_url }));
 }
 
 
@@ -326,7 +326,7 @@ export async function getSalesAnalytics() {
         salesMap.set(d.toLocaleDateString('en-US'), 0);
     }
 
-    orders.forEach(order => {
+    orders.forEach((order: any) => {
         const date = new Date(order.created_at).toLocaleDateString('en-US');
         const current = salesMap.get(date) || 0;
         salesMap.set(date, current + order.total_amount);
@@ -346,7 +346,7 @@ export async function getCategoryStats() {
             .order('total_items_sold', { ascending: false });
 
         if (!viewError && viewData) {
-            const total = viewData.reduce((sum, item) => sum + item.total_items_sold, 0);
+            const total = viewData.reduce((sum: number, item: any) => sum + item.total_items_sold, 0);
             return viewData.map((item: any) => ({
                 name: item.category,
                 count: item.total_items_sold,
@@ -1097,7 +1097,7 @@ export async function getUserOrders(userId: string) {
 
     console.log(`Found ${data?.length || 0} orders for user ${userId}`);
 
-    return data.map(order => ({
+    return data.map((order: any) => ({
         ...order,
         item_count: order.order_items.length
     }));
@@ -1124,14 +1124,14 @@ export async function getAllOrders(searchQuery?: string) {
     }
 
     // Fetch profiles for these users to show dynamic names
-    const userIds = Array.from(new Set((data || []).map(o => o.user_id)));
+    const userIds = Array.from(new Set((data || []).map((o: any) => o.user_id)));
     const { data: profiles } = await supabase
         .from('User')
         .select('id, name, phone, image')
         .in('id', userIds);
 
-    return (data || []).map(order => {
-        const profile = profiles?.find(p => p.id === order.user_id);
+    return (data || []).map((order: any) => {
+        const profile = profiles?.find((p: any) => p.id === order.user_id);
         const customerName = profile?.name || order.shipping_name || 'Guest';
         const customerPhone = profile?.phone || order.shipping_phone || '';
 

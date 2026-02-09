@@ -108,7 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         if (itemsError) throw itemsError;
 
                         if (cartItems) {
-                            const mappedItems: CartItem[] = cartItems.map(item => ({
+                            const mappedItems: CartItem[] = cartItems.map((item: any) => ({
                                 id: item.product_id,
                                 name: item.name,
                                 price: item.price,
