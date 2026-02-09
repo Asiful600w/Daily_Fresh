@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { signOutAdmin as signOutAdminAction } from '@/actions/auth';
 
 export interface AdminUser {
     id: string;
@@ -161,9 +162,25 @@ export function AdminAuthProvider({ children, initialUser = null }: { children: 
     }, []);
 
     const signOutAdmin = useCallback(async () => {
-        await supabase.auth.signOut();
-        // Use window.location for hard redirect to clear all state
-        window.location.href = '/admin/login';
+        try {
+            // 1. Optimistically clear local state
+            setAdminUser(null);
+
+            // 2. Clear client-side session flow WITHOUT waiting
+            supabase.auth.signOut();
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                // ignore
+            }
+
+            // 3. Navigate to Server-side Logout Route
+            window.location.href = '/api/auth/signout';
+        } catch (error) {
+            console.error("Sign out error", error);
+            window.location.href = '/api/auth/signout';
+        }
     }, [supabase]);
 
     const value = {

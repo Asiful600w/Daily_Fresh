@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { signOutWeb } from '@/actions/auth';
 
 type AuthContextType = {
     user: User | null;
@@ -98,12 +99,24 @@ export function AuthProvider({ children, initialUser = null }: { children: React
     const signOut = async () => {
         setIsSigningOut(true);
         try {
-            await supabase.auth.signOut();
-            // Use window.location for hard redirect to clear all state
-            window.location.href = '/';
+            // 1. Optimistically clear local state
+            setUser(null);
+            setSession(null);
+
+            // 2. Clear client-side session WITHOUT waiting
+            supabase.auth.signOut();
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                // ignore
+            }
+
+            // 3. Navigate to Server-side Logout Route
+            window.location.href = '/api/auth/signout';
         } catch (error) {
             console.error('Error signing out:', error);
-            setIsSigningOut(false);
+            window.location.href = '/api/auth/signout';
         }
     };
 

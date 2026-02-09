@@ -2,6 +2,7 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
@@ -85,5 +86,37 @@ export async function loginWeb(
         }
     }
 
+    return { success: true };
+}
+
+export async function signOutWeb() {
+    const cookieStore = await cookies();
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookieOptions: {
+                name: 'web-auth-token',
+            },
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll();
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            cookieStore.set(name, value, options);
+                        });
+                    } catch {
+                        // The `setAll` method was called from a Server Component.
+                    }
+                },
+            },
+        }
+    );
+
+    await supabase.auth.signOut();
+    // redirect('/'); // Let client handle hard navigation to avoid stuck loading states
     return { success: true };
 }

@@ -7,44 +7,46 @@
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
   Creating an optimized production build ...
-✓ Compiled successfully in 5.3s
+✓ Compiled successfully in 7.3s
   Running TypeScript ...
   Collecting page data using 11 workers ...
-  Generating static pages using 11 workers (0/24) ...
-  Generating static pages using 11 workers (6/24) 
-  Generating static pages using 11 workers (12/24) 
-  Generating static pages using 11 workers (18/24) 
-✓ Generating static pages using 11 workers (24/24) in 601.1ms
+  Generating static pages using 11 workers (0/26) ...
+  Generating static pages using 11 workers (6/26) 
+  Generating static pages using 11 workers (12/26) 
+  Generating static pages using 11 workers (19/26) 
+✓ Generating static pages using 11 workers (26/26) in 510.2ms
   Finalizing page optimization ...
 
 Route (app)
 ┌ ○ /
 ├ ○ /_not-found
 ├ ○ /403
-├ ○ /admin
-├ ○ /admin/categories
+├ ƒ /admin
+├ ƒ /admin/categories
 ├ ƒ /admin/categories/[id]
-├ ○ /admin/categories/new
-├ ○ /admin/customers
+├ ƒ /admin/categories/new
+├ ƒ /admin/customers
 ├ ƒ /admin/customers/[id]
-├ ○ /admin/documentation
-├ ○ /admin/login
-├ ○ /admin/low-stock
-├ ○ /admin/merchants
-├ ○ /admin/orders
+├ ƒ /admin/documentation
+├ ƒ /admin/login
+├ ƒ /admin/low-stock
+├ ƒ /admin/merchants
+├ ƒ /admin/orders
 ├ ƒ /admin/orders/[id]
-├ ○ /admin/products
+├ ƒ /admin/products
 ├ ƒ /admin/products/[id]/edit
-├ ○ /admin/products/new
-├ ○ /admin/register
-├ ○ /admin/reviews
-├ ○ /admin/settings
-├ ○ /admin/special-categories
+├ ƒ /admin/products/new
+├ ƒ /admin/register
+├ ƒ /admin/reviews
+├ ƒ /admin/settings
+├ ƒ /admin/special-categories
 ├ ƒ /api/admin/dashboard-stats
 ├ ƒ /api/admin/merchants
 ├ ƒ /api/admin/register
 ├ ƒ /api/admin/verify
-└ ƒ /api/debug/env
+├ ƒ /api/auth/signout
+├ ƒ /api/debug/env
+└ ○ /settings/hero
 
 
 ƒ Proxy (Middleware)
