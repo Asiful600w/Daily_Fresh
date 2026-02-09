@@ -21,25 +21,17 @@ interface ProfileClientProps {
 export default function ProfileClient({ initialStats, initialOrders, error: serverError }: ProfileClientProps) {
     const { user, loading: authLoading } = useAuth();
     const { wishlistIds } = useWishlist();
-    const [orders, setOrders] = useState<any[]>(initialOrders);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [orders, setOrders] = useState<any[]>(initialOrders);
 
-    // Stats State - sync with initial props
-    const [stats, setStats] = useState({
+    // Derived stats - sync with initial props and wishlist
+    const stats = {
         pendingOrders: initialStats?.pendingOrders || 0,
         activeOrders: initialStats?.activeOrders || 0,
         completedOrders: initialStats?.completedOrders || 0,
         totalSpent: initialStats?.totalSpent || 0,
-        savedItems: initialStats?.savedItems || 0
-    });
-
-    // Update stats when wishlistIds changes
-    useEffect(() => {
-        setStats(prev => ({
-            ...prev,
-            savedItems: wishlistIds.length
-        }));
-    }, [wishlistIds]);
+        savedItems: wishlistIds.length || initialStats?.savedItems || 0
+    };
 
     if (authLoading) {
         return (
