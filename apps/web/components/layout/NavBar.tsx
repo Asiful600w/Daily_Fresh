@@ -54,12 +54,18 @@ function SearchBar() {
             <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 transition-all outline-none text-slate-900 dark:text-white"
+                className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-2 focus:ring-primary/20 transition-all outline-none text-slate-900 dark:text-white"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => query.length > 1 && setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Delay to allow click
             />
+
+            {isSearching && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                </div>
+            )}
 
             {/* Suggestions Dropdown */}
             {showDropdown && results.length > 0 && (
