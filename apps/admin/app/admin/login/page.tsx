@@ -22,6 +22,7 @@ export default function LoginPage() {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
+    const [showPassword, setShowPassword] = useState(false);
     const [showTwoFactor] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
     const { adminUser, adminLoading } = useAdminAuth()
@@ -130,13 +131,24 @@ export default function LoginPage() {
                                         Forgot Password?
                                     </Link>
                                 </div>
-                                <input
-                                    {...form.register("password")}
-                                    type="password"
-                                    disabled={isPending}
-                                    className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
-                                    placeholder="••••••••"
-                                />
+                                <div className="relative">
+                                    <input
+                                        {...form.register("password")}
+                                        type={showPassword ? "text" : "password"}
+                                        disabled={isPending}
+                                        className="w-full px-4 py-3 pr-12 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                                    >
+                                        <span className="material-icons-round text-lg">
+                                            {showPassword ? 'visibility_off' : 'visibility'}
+                                        </span>
+                                    </button>
+                                </div>
                                 {form.formState.errors.password && (
                                     <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
                                 )}

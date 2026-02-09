@@ -59,18 +59,15 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: -10;
-    /* Behind content (0), but above background (-50) */
+    z-index: 9999;
+    /* On top of everything */
     clip-path: circle(0% at var(--origin-x, 50%) var(--origin-y, 50%));
     opacity: 0;
-    /* No transition here to allow instant origin reset */
   }
 
   .theme-transition.active {
     clip-path: circle(150% at var(--origin-x, 50%) var(--origin-y, 50%));
-    transition: clip-path 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: clip-path 0.8s cubic-bezier(0.65, 0, 0.35, 1);
     opacity: 1;
-    z-index: -10;
-    /* Keep it behind content */
   }
 }

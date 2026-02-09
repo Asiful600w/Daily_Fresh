@@ -144,15 +144,15 @@ export function NavBar({ categories }: { categories: Category[] }) {
             });
         });
 
-        // Change theme early (25% through) so navbar changes first
+        // Change theme slightly early (40% through) for best visual sync
         setTimeout(() => {
             setTheme(newTheme);
         }, 300);
 
-        // End animation
+        // End animation (matches 0.8s in CSS)
         setTimeout(() => {
             setIsAnimating(false);
-        }, 1200);
+        }, 850); // Extra 50ms for safety
     };
 
     const { openSearch } = useUI();
