@@ -17,7 +17,7 @@ export default function CartPage() {
     }, []);
 
     return (
-        <main className="flex-1 w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 xl:px-40 py-8">
+        <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-10 lg:px-20 xl:px-40 py-8">
             <CheckoutStepper currentStep={1} />
 
             {/* Breadcrumbs */}

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import NextImage from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/lib/api';
@@ -40,6 +40,26 @@ export function ProductInfo({ product }: { product: Product }) {
 
     const isOutOfStock = product.stockQuantity === 0;
 
+    // Sticky Action Bar logic
+    const mainButtonRef = useRef<HTMLButtonElement>(null);
+    const [isStickyVisible, setIsStickyVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // Show sticky bar when main button is NOT visible
+                setIsStickyVisible(!entry.isIntersecting);
+            },
+            { threshold: 0 }
+        );
+
+        if (mainButtonRef.current) {
+            observer.observe(mainButtonRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
     const handleAddToCart = (e: React.MouseEvent<HTMLElement>) => {
         addItem({
             id: product.id,
@@ -57,11 +77,11 @@ export function ProductInfo({ product }: { product: Product }) {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery Section */}
             <div className="space-y-4">
                 {/* Main Image */}
-                <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm relative group overflow-hidden h-[500px] flex items-center justify-center">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-slate-100 dark:border-slate-700 shadow-sm relative group overflow-hidden h-[350px] md:h-[500px] flex items-center justify-center">
                     {/* Discount Badge */}
                     {product.discountPercent && product.discountPercent > 0 && (
                         <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm">
@@ -121,12 +141,12 @@ export function ProductInfo({ product }: { product: Product }) {
                 {/* Thumbnails */}
                 {/* Ensure we only show thumbnails if we actually have > 1 VALID images */}
                 {product.images && product.images.length > 1 && (
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide py-2 px-1">
+                    <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 scrollbar-hide py-1 md:py-2 px-1">
                         {product.images.filter(img => img).map((img, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setSelectedImage(img)}
-                                className={`relative w-20 h-20 rounded-xl border-2 p-1 flex-shrink-0 transition-all overflow-hidden bg-white dark:bg-slate-800 ${selectedImage === img
+                                className={`relative w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 p-1 flex-shrink-0 transition-all overflow-hidden bg-white dark:bg-slate-800 ${selectedImage === img
                                     ? 'border-primary ring-2 ring-primary/20'
                                     : 'border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                     }`}
@@ -263,7 +283,7 @@ export function ProductInfo({ product }: { product: Product }) {
                     </div>
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-slate-200 dark:border-slate-800">
+                <div className="mt-auto pt-6 md:pt-8 border-t border-slate-200 dark:border-slate-800">
                     <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 md:gap-6">
                         <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-full p-1 justify-between md:w-36">
                             <button
@@ -283,6 +303,7 @@ export function ProductInfo({ product }: { product: Product }) {
                             </button>
                         </div>
                         <button
+                            ref={mainButtonRef}
                             onClick={handleAddToCart}
                             disabled={isOutOfStock}
                             className="flex-1 bg-primary text-white font-bold py-4 px-8 rounded-xl md:rounded-full shadow-xl shadow-green-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg md:text-base"
@@ -291,6 +312,27 @@ export function ProductInfo({ product }: { product: Product }) {
                             {isOutOfStock ? 'Out of Stock' : 'Add to cart'}
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {/* Mobile Sticky Action Bar */}
+            <div className={`fixed bottom-0 left-0 right-0 z-[100] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 pb-safe md:hidden transition-all duration-300 transform shadow-[0_-5px_20px_rgba(0,0,0,0.05)] ${isStickyVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+                <div className="flex items-center gap-4 max-w-xl mx-auto">
+                    <div className="flex-1">
+                        <div className="flex items-baseline gap-1.5">
+                            <span className="text-xl font-bold text-primary">{formatPrice(product.price)}</span>
+                            <span className="text-slate-400 text-xs font-medium">/{product.quantity || 'unit'}</span>
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{product.name}</h4>
+                    </div>
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={isOutOfStock}
+                        className="flex-[1.5] bg-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-green-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    >
+                        <span className="material-icons-round text-base">shopping_basket</span>
+                        {isOutOfStock ? 'Out of Stock' : 'Add to cart'}
+                    </button>
                 </div>
             </div>
         </div>

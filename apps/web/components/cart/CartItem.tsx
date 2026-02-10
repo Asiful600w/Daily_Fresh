@@ -24,9 +24,9 @@ export function CartItem({ item }: CartItemProps) {
             {/* Remove Button Mobile (Absolute Top Right) */}
             <button
                 onClick={() => removeItem(item.id)}
-                className="absolute top-4 right-4 p-1 text-slate-300 hover:text-red-500 md:hidden"
+                className="absolute top-2 right-2 p-3 text-slate-300 hover:text-red-500 md:hidden active:text-red-500"
             >
-                <span className="material-icons-round text-lg">close</span>
+                <span className="material-icons-round text-xl">close</span>
             </button>
 
             <div className="flex items-center gap-4 w-full md:w-auto">

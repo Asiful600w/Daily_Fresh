@@ -49,10 +49,10 @@ export function ProductGrid({ products, title = "Best selling 🔥", subtitle = 
             {/* Slider Container */}
             <div
                 ref={scrollRef}
-                className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x"
+                className="flex gap-4 md:gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x"
             >
                 {products.map((product) => (
-                    <div key={product.id} className="min-w-[200px] w-[200px] md:min-w-[240px] md:w-[240px] snap-start">
+                    <div key={product.id} className="min-w-[170px] w-[170px] md:min-w-[240px] md:w-[240px] snap-start">
                         <ProductCard product={{ ...product, id: product.id }} />
                     </div>
                 ))}

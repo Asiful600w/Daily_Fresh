@@ -202,8 +202,8 @@ export function NavBar({ categories }: { categories: Category[] }) {
                 {/* Top Bar */}
                 <div className={`max-w-7xl mx-auto px-4 w-full flex items-center justify-between gap-4 transition-all duration-300 ${isScrolled ? 'h-14' : 'h-20'}`}>
                     {/* Logo */}
-                    <Link href="/" className={`flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-500 origin-left ${isScrolled ? 'scale-75' : 'scale-100'}`}>
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                    <Link href="/" className={`flex items-center gap-2 shrink-0 cursor-pointer transition-all duration-500 origin-left ${isScrolled ? 'scale-[0.85]' : 'scale-100'}`}>
+                        <div className="w-9 h-9 md:w-10 md:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                             <span className="material-icons-round text-white">eco</span>
                         </div>
                         <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -217,7 +217,7 @@ export function NavBar({ categories }: { categories: Category[] }) {
                     </div>
 
                     {/* Mobile Actions (Search & DarkMode) */}
-                    <div className="flex items-center gap-2 md:hidden">
+                    <div className="flex items-center gap-1.5 md:hidden">
                         <button
                             className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                             onClick={openSearch}
