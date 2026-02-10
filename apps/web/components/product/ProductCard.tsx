@@ -136,42 +136,47 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                         </span>
                     </div>
                 )}
-
-                {/* Wishlist Button: Persistent on mobile, sliding hover animation on desktop */}
-                <div className="absolute top-2 right-2 z-20 transition-all duration-300 transform md:translate-x-4 md:-translate-y-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-                    {variant === 'wishlist' ? (
-                        <button
-                            onClick={handleDeleteClick}
-                            className="p-2 rounded-xl transition-all text-red-500 hover:text-red-600 cursor-pointer"
-                            title="Remove from wishlist"
-                        >
-                            <span className="material-icons-round text-sm">delete_outline</span>
-                        </button>
-                    ) : (
-                        <button
-                            onClick={handleWishlistClick}
-                            className={`p-2 transition-all cursor-pointer ${isWishlisted ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}
-                        >
-                            <span className={`material-icons-round text-sm ${isWishlisted ? '' : 'material-icons-outlined'}`}>
-                                {isWishlisted ? 'favorite' : 'favorite_border'}
-                            </span>
-                        </button>
-                    )}
-                </div>
             </div>
 
             {/* Content Section */}
             <div className="space-y-2 flex-1 flex flex-col relative px-1">
                 <Link href={`/product/${product.id}`} className="absolute inset-0 z-0" />
 
+                <div className="relative z-10 pointer-events-none flex justify-between items-start gap-2">
+                    <div className="flex-1">
+                        {product.category && (
+                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mb-0.5">{product.category}</p>
+                        )}
+                        <h3 className="font-bold text-slate-900 dark:text-white line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                            {product.name}
+                        </h3>
+                    </div>
+
+                    {/* Relocated Wishlist Button: Persistent on mobile, sliding hover animation on desktop */}
+                    <div className="transition-all duration-300 transform md:translate-x-2 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 pointer-events-auto shrink-0">
+                        {variant === 'wishlist' ? (
+                            <button
+                                onClick={handleDeleteClick}
+                                className="p-1 rounded-lg transition-all text-red-500 hover:text-red-600 cursor-pointer"
+                                title="Remove from wishlist"
+                            >
+                                <span className="material-icons-round text-lg">delete_outline</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleWishlistClick}
+                                className={`p-1 transition-all cursor-pointer ${isWishlisted ? 'text-red-500 scale-110' : 'text-slate-300 dark:text-slate-600 hover:text-red-500'}`}
+                            >
+                                <span className={`material-icons-round text-lg ${isWishlisted ? '' : 'material-icons-outlined'}`}>
+                                    {isWishlisted ? 'favorite' : 'favorite_border'}
+                                </span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 <div className="relative z-10 pointer-events-none">
-                    {product.category && (
-                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mb-0.5">{product.category}</p>
-                    )}
-                    <h3 className="font-bold text-slate-900 dark:text-white line-clamp-2 leading-tight group-hover:text-primary transition-colors pr-2">
-                        {product.name}
-                    </h3>
-                    {product.quantity && <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-1">{product.quantity}</p>}
+                    {product.quantity && <p className="text-xs font-semibold text-slate-400 dark:text-slate-500">{product.quantity}</p>}
                 </div>
 
                 <div className="mt-auto pt-3 space-y-4 relative z-20">
