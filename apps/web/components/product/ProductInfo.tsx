@@ -81,7 +81,7 @@ export function ProductInfo({ product }: { product: Product }) {
     return (
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Mobile Floating Cart Indicator */}
-            <div className="fixed top-20 right-4 z-[60] md:hidden">
+            <div className="fixed top-20 right-4 z-[60] md:hidden" id="mobile-cart-icon-container">
                 <Link href="/cart" className="relative group">
                     <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-primary active:scale-90 transition-all">
                         <span className="material-icons-round text-2xl">shopping_cart</span>

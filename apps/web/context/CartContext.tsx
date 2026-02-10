@@ -47,118 +47,63 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // Initial load
+    // 1. Immediate LocalStorage load (Instant UI)
+    useEffect(() => {
+        const storedCart = localStorage.getItem('cart');
+        if (storedCart) {
+            try {
+                setItems(JSON.parse(storedCart));
+            } catch (error) {
+                console.error('Failed to parse cart from local storage:', error);
+            }
+        }
+        setLoading(false);
+    }, []);
+
+    // 2. Supabase Sync (Source of truth for logged-in users)
     useEffect(() => {
         if (authLoading) return;
 
-        const loadCart = async () => {
-            setLoading(true);
-            if (user) {
-                // Ensure session is valid before making DB calls
-                if (refreshSession) {
-                    await refreshSession();
-                }
-
-                // Load from Supabase
-                try {
-                    // Get cart_id for user, or create if not exists
-                    const { data: initialCart, error: cartError } = await supabase
-                        .from('carts')
-                        .select('id')
-                        .eq('user_id', user.id)
-                        .single();
-
-                    let cart = initialCart;
-
-                    if (cartError && cartError.code === 'PGRST116') {
-                        // Cart doesn't exist, create it
-                        const { data: newCart, error: createError } = await supabase
-                            .from('carts')
-                            .insert([{ user_id: user.id }])
-                            .select('id')
-                            .single();
-
-                        if (createError) {
-                            // If unique violation (23505), it means it was created concurrently or hidden
-                            if (createError.code === '23505') {
-                                const { data: existingCart, error: retryError } = await supabase
-                                    .from('carts')
-                                    .select('id')
-                                    .eq('user_id', user.id)
-                                    .single();
-
-                                if (retryError) throw retryError;
-                                cart = existingCart;
-                            } else {
-                                throw createError;
-                            }
-                        } else {
-                            cart = newCart;
-                        }
-                    } else if (cartError) {
-                        throw cartError;
-                    }
-
-                    if (cart) {
-                        const { data: cartItems, error: itemsError } = await supabase
-                            .from('cart_items')
-                            .select('*')
-                            .eq('cart_id', cart.id);
-
-                        if (itemsError) throw itemsError;
-
-                        if (cartItems) {
-                            const mappedItems: CartItem[] = cartItems.map((item: any) => ({
-                                id: item.product_id,
-                                name: item.name,
-                                price: item.price,
-                                images: [item.image], // Map legacy stored image string to array
-                                quantity: item.quantity,
-                                category: item.category,
-                                pack: item.pack,
-                                color: item.color
-                            }));
-                            setItems(mappedItems);
-                        }
-                    }
-
-                } catch (error: any) {
-                    // If error is empty or RLS-related, silently fall back to empty cart
-                    const isRLSError = !error?.message || error?.code === '42501' || error?.code === 'PGRST301';
-
-                    if (isRLSError) {
-                        console.warn("Cart access blocked (likely RLS policies not set up). Using empty cart.");
-                        setItems([]);
-                    } else {
-                        console.error("Error loading cart from Supabase:", JSON.stringify(error, null, 2));
-                        console.error("Error details:", {
-                            message: (error as any)?.message,
-                            code: (error as any)?.code,
-                            details: (error as any)?.details,
-                            hint: (error as any)?.hint,
-                            stack: (error as any)?.stack
-                        });
-                    }
-                }
-            } else {
-                // Load from LocalStorage
-                const storedCart = localStorage.getItem('cart');
-                if (storedCart) {
-                    try {
-                        setItems(JSON.parse(storedCart));
-                    } catch (error) {
-                        console.error('Failed to parse cart from local storage:', error);
-                        setItems([]);
-                    }
-                } else {
-                    setItems([]);
-                }
+        const syncWithSupabase = async () => {
+            if (!user) {
+                setIsInitialized(true);
+                return;
             }
-            setLoading(false);
-            setIsInitialized(true);
+
+            try {
+                if (refreshSession) await refreshSession();
+
+                const { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
+
+                if (cart) {
+                    const { data: cartItems } = await supabase
+                        .from('cart_items')
+                        .select('*')
+                        .eq('cart_id', cart.id);
+
+                    if (cartItems && cartItems.length > 0) {
+                        const mappedItems: CartItem[] = cartItems.map((item: any) => ({
+                            id: item.product_id,
+                            name: item.name,
+                            price: item.price,
+                            images: [item.image],
+                            quantity: item.quantity,
+                            category: item.category,
+                            pack: item.pack,
+                            color: item.color,
+                            size: item.size
+                        }));
+                        setItems(mappedItems);
+                    }
+                }
+            } catch (error) {
+                console.warn("CartContext: Supabase sync failed, staying with local data", error);
+            } finally {
+                setIsInitialized(true);
+            }
         };
 
-        loadCart();
+        syncWithSupabase();
     }, [user, authLoading]);
 
     // Save to LocalStorage (Always sync as backup/cache)
