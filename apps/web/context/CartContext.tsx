@@ -63,20 +63,13 @@ function writeLocalCart(items: CartItem[]) {
 export function CartProvider({ children }: { children: ReactNode }) {
     const { user, loading: authLoading } = useAuth();
     const [supabase] = useState(() => createClient());
-    const [items, setItems] = useState<CartItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [items, setItems] = useState<CartItem[]>(() => {
+        // Lazy initializer: read from LocalStorage on first render (SSR-safe)
+        if (typeof window === 'undefined') return [];
+        return readLocalCart();
+    });
+    const [loading] = useState(false);
     const [dbCartId, setDbCartId] = useState<string | null>(null);
-
-    // ─────────────────────────────────────────────
-    // STEP 1: Instantly load from LocalStorage (runs once)
-    // ─────────────────────────────────────────────
-    useEffect(() => {
-        const localItems = readLocalCart();
-        if (localItems.length > 0) {
-            setItems(localItems);
-        }
-        setLoading(false);
-    }, []);
 
     // ─────────────────────────────────────────────
     // STEP 2: Sync with Supabase once auth is ready
