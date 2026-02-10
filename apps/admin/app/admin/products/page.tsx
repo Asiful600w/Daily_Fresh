@@ -73,18 +73,26 @@ export default function AdminProductsPage() {
         }
     }, [adminUser, queryMerchantId, searchQuery, selectedCategory, sortBy, minPrice, maxPrice]);
 
+    // 1. Initial Load & Filter Changes - RESET to Page 1
     useEffect(() => {
         const timer = setTimeout(() => {
-            // Reset to page 1 when filters change
             setCurrentPage(1);
             fetchData(1);
         }, 500);
         return () => clearTimeout(timer);
-    }, [fetchData]);
+    }, [searchQuery, selectedCategory, sortBy, minPrice, maxPrice, fetchData]);
+
+    // 2. Page Changes - RE-FETCH without resetting to 1
+    useEffect(() => {
+        if (currentPage > 1) {
+            fetchData(currentPage);
+        }
+    }, [currentPage, fetchData]);
 
     const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= totalPages) {
+        if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
             setCurrentPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 

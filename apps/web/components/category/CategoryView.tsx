@@ -111,13 +111,10 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const ITEMS_PER_PAGE = 12;
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Reset page when filters change
+    // Reset page when filters change (but NOT when currentPage itself changes)
     useEffect(() => {
-        if (currentPage !== 1) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setCurrentPage(1);
-        }
-    }, [priceRange, currentSort, slug, currentPage]);
+        setCurrentPage(1);
+    }, [priceRange, currentSort, slug]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
 
@@ -132,7 +129,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
         // Simulate network delay for smooth feel or just instant
         setTimeout(() => {
             setCurrentPage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 300, behavior: 'smooth' });
             setIsUpdating(false);
         }, 300);
     };
@@ -141,6 +138,8 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const updateUrl = (updates: Record<string, string>) => {
         const params = new URLSearchParams(searchParams.toString());
         Object.entries(updates).forEach(([key, value]) => params.set(key, value));
+        // When updating filters via URL, reset page to 1
+        if (!updates.page) params.delete('page');
         window.history.pushState(null, '', `?${params.toString()}`);
     };
 
