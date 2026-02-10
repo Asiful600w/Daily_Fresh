@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import NextImage from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/lib/api';
@@ -10,6 +11,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useFlyToCart } from '@/context/FlyToCartContext';
 
 export function ProductInfo({ product }: { product: Product }) {
+    const { totalItems } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState<string | null>(product.colors && product.colors.length > 0 ? product.colors[0] : null);
     const [selectedSize, setSelectedSize] = useState<string | null>(product.sizes && product.sizes.length > 0 ? product.sizes[0] : null);
@@ -77,7 +79,21 @@ export function ProductInfo({ product }: { product: Product }) {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Mobile Floating Cart Indicator */}
+            <div className="fixed top-20 right-4 z-[60] md:hidden">
+                <Link href="/cart" className="relative group">
+                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-primary active:scale-90 transition-all">
+                        <span className="material-icons-round text-2xl">shopping_cart</span>
+                    </div>
+                    {totalItems > 0 && (
+                        <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-slate-800 shadow-sm animate-bounce-in">
+                            {totalItems > 99 ? '99+' : totalItems}
+                        </span>
+                    )}
+                </Link>
+            </div>
+
             {/* Image Gallery Section */}
             <div className="space-y-4">
                 {/* Main Image */}
