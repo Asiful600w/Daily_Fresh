@@ -219,9 +219,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
                     if (updateError) console.warn("CartContext: Update item error (UI already updated):", updateError);
                 } else {
-                    const { error: insertError } = await supabase.from('cart_items').insert([{
+                    const insertPayload = {
                         cart_id: cart.id,
-                        product_id: String(newItem.id), // Ensure string
+                        product_id: String(newItem.id),
                         name: newItem.name,
                         price: newItem.price,
                         image: newItem.images[0] || '',
@@ -230,15 +230,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         pack: pack,
                         color: color,
                         size: size
-                    }]);
+                    };
 
-                    if (insertError) console.warn("CartContext: Insert item error (UI already updated):", insertError);
+                    console.log('CartContext: Attempting to insert cart item:', insertPayload);
+
+                    const { data: insertedData, error: insertError } = await supabase
+                        .from('cart_items')
+                        .insert([insertPayload])
+                        .select();
+
+                    if (insertError) {
+                        console.error("CartContext: CRITICAL - Failed to insert cart item:", insertError);
+                        console.error("CartContext: Insert payload was:", insertPayload);
+                        console.error("CartContext: Error details:", {
+                            message: insertError.message,
+                            code: insertError.code,
+                            details: insertError.details,
+                            hint: insertError.hint
+                        });
+                    } else {
+                        console.log('CartContext: Successfully inserted cart item:', insertedData);
+                    }
                 }
 
-            } catch (error) {
-                // Silently log errors - optimistic update already happened
-                // Only log to console for debugging, don't show to user
-                console.warn("CartContext: Error syncing item to database (item already added to UI):", error);
+            } catch (error: any) {
+                console.error("CartContext: CRITICAL ERROR syncing item to database:", error);
+                console.error("CartContext: Error stack:", error?.stack);
+                console.error("CartContext: Error details:", {
+                    message: error?.message,
+                    code: error?.code,
+                    details: error?.details
+                });
             }
 
         } else {
