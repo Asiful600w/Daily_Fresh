@@ -138,7 +138,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                 )}
 
                 {/* Wishlist Button */}
-                <div className="absolute top-2 right-2 z-20">
+                {/* Wishlist Button: Sliding hover animation */}
+                <div className="absolute top-2 right-2 z-20 transition-all duration-300 transform translate-x-4 -translate-y-4 opacity-0 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100">
                     {variant === 'wishlist' ? (
                         <button
                             onClick={handleDeleteClick}
