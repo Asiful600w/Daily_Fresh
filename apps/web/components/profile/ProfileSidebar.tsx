@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 
 interface ProfileSidebarProps {
@@ -22,7 +23,7 @@ export function ProfileSidebar({ activeTab = 'overview', onEditProfile }: Profil
                     <div className="flex gap-3 items-center">
                         <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 border-2 border-primary overflow-hidden">
                             {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                <NextImage src={user.user_metadata.avatar_url} alt="Profile" className="object-cover" fill sizes="48px" />
                             ) : (
                                 <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
                                     <span className="material-icons-round text-slate-400">person</span>

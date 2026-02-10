@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
@@ -42,27 +42,27 @@ export default function CheckoutPage() {
         }
     }, [user]);
 
-    useEffect(() => {
-        const fetchAddresses = async () => {
-            if (!user) return;
-            try {
-                const data = await getUserAddresses();
-                setAddresses(data);
-                // Auto-select default
-                const defaultAddr = data.find(a => a.isDefault) || data[0];
-                if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-                else setIsNewAddress(true); // No addresses, force new
-            } catch (error) {
-                console.error(error);
-            }
-        };
+    const fetchAddresses = useCallback(async () => {
+        if (!user) return;
+        try {
+            const data = await getUserAddresses();
+            setAddresses(data);
+            // Auto-select default
+            const defaultAddr = data.find(a => a.isDefault) || data[0];
+            if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+            else setIsNewAddress(true); // No addresses, force new
+        } catch (error) {
+            console.error(error);
+        }
+    }, [user]);
 
+    useEffect(() => {
         if (!authLoading && !user) {
             router.push('/login?redirect=/checkout');
         } else if (user) {
             fetchAddresses();
         }
-    }, [user, authLoading, router]);
+    }, [user, authLoading, router, fetchAddresses]);
 
     const [checkoutState, setCheckoutState] = useState<'idle' | 'processing' | 'success'>('idle');
 

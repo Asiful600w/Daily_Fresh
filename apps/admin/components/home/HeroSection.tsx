@@ -1,10 +1,8 @@
-import Link from 'next/link';
-
-const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-[#14532D] dark:to-[#064E3B]";
+import NextImage from 'next/image';
 
 export function HeroSection({ settings }: { settings?: any }) {
     return (
-        <section className={`relative min-h-[480px] rounded-3xl overflow-hidden ${bannerGradient} flex items-center py-12`}>
+        <section className={`relative min-h-[480px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-[#14532D] dark:to-[#064E3B] flex items-center py-12`}>
             <div className="relative z-10 pl-16 max-w-xl space-y-6">
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest rounded-full">
                     {settings?.subtitle || 'New Season Freshness'}
@@ -26,10 +24,13 @@ export function HeroSection({ settings }: { settings?: any }) {
             </div>
 
             <div className="absolute right-0 top-0 bottom-0 w-1/2 overflow-hidden pointer-events-none">
-                <img
+                <NextImage
                     alt={settings?.title || "Fresh Vegetables"}
-                    className="w-full h-full object-cover opacity-90 mix-blend-multiply dark:mix-blend-overlay"
+                    className="object-cover opacity-90 mix-blend-multiply dark:mix-blend-overlay"
                     src={settings?.image_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuBX7x1HBOqMMI518qHW17jKGkryeaKonnXGEbdkBR4GvbEVZENLzYW_8cEKLeU3nLCoxfDxvRuzBWc2UMxkRlp8Qix2LgxHKpsToQHO10vMCHMKjOmg6ucwmqOZ7GIMiSBIxBw0qaqFeK63SiQ5EQ4C-LMvZy28P7MaNy4uzcV2DaK1H5zIykFWkZMYBE6Xh8ac9E1nba7cTZ14OBTrDW-wpN-j8lDq-VbvUaLl6OtViD2uWDMpEBWT1yXDZluirbsS6BEgrgXwzyI"}
+                    fill
+                    priority
+                    sizes="50vw"
                 />
             </div>
 

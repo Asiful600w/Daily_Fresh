@@ -2,8 +2,8 @@
 import { getProductsPaginated, deleteProduct, updateProduct, getCategories, Category, ProductFilterOptions, PaginatedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import NextImage from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { toggleFeaturedProduct } from '@/actions/products';
@@ -35,21 +35,7 @@ export default function AdminProductsPage() {
         getCategories().then(setCategories);
     }, []);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            // Reset to page 1 when filters change
-            setCurrentPage(1);
-            fetchData(1);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery, selectedCategory, sortBy, minPrice, maxPrice, adminUser, queryMerchantId]); // Added queryMerchantId dependency
-
-    // Fetch when page changes
-    useEffect(() => {
-        fetchData(currentPage);
-    }, [currentPage]);
-
-    const fetchData = async (pageToFetch: number) => {
+    const fetchData = useCallback(async (pageToFetch: number) => {
         // Wait for adminUser to check role, or proceed if loaded?
         // Actually, if adminUser is null but loading is false, it means not logged in?
         // useAdminAuth handles redirect usually?
@@ -85,7 +71,16 @@ export default function AdminProductsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [adminUser, queryMerchantId, searchQuery, selectedCategory, sortBy, minPrice, maxPrice]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            // Reset to page 1 when filters change
+            setCurrentPage(1);
+            fetchData(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [fetchData]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -224,9 +219,9 @@ export default function AdminProductsPage() {
                                     <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="p-6">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-700 p-1 shrink-0 overflow-hidden">
+                                                <div className="w-12 h-12 relative rounded-lg bg-slate-100 dark:bg-slate-700 p-1 shrink-0 overflow-hidden">
                                                     {product.images && product.images.length > 0 ? (
-                                                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain" />
+                                                        <NextImage src={product.images[0]} alt={product.name} className="object-contain" fill sizes="48px" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-slate-400">
                                                             <span className="material-icons-round text-sm">image_not_supported</span>
@@ -277,8 +272,8 @@ export default function AdminProductsPage() {
                                             <button
                                                 onClick={() => handleToggleFeatured(product.id, product.is_featured)}
                                                 className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${product.is_featured
-                                                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
-                                                        : 'text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-yellow-500'
+                                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
+                                                    : 'text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-yellow-500'
                                                     }`}
                                                 title={product.is_featured ? 'Remove from Featured' : 'Add to Featured'}
                                             >

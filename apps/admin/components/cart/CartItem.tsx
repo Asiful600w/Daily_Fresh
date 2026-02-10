@@ -3,6 +3,7 @@
 import { useCart, CartItem as CartItemType } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 interface CartItemProps {
     item: CartItemType;
@@ -20,12 +21,14 @@ export function CartItem({ item }: CartItemProps) {
     return (
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-slate-100 dark:border-slate-700 flex items-center gap-6 group transition-all hover:border-primary/20">
             {/* Image */}
-            <div className="w-24 h-24 rounded-lg bg-slate-50 dark:bg-slate-700 overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-600">
+            <div className="w-24 h-24 rounded-lg bg-slate-50 dark:bg-slate-700 overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-600 relative">
                 <Link href={`/product/${item.id}`}>
-                    <img
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    <NextImage
+                        className="object-contain group-hover:scale-105 transition-transform duration-500"
                         alt={item.name}
                         src={item.images && item.images.length > 0 ? item.images[0] : ''}
+                        fill
+                        sizes="96px"
                     />
                 </Link>
             </div>

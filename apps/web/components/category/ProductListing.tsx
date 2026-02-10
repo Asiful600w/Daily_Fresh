@@ -8,7 +8,6 @@ interface ProductListingProps {
     title: string;
     subtitle?: string;
     products: Product[];
-    totalProducts: number;
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
@@ -21,7 +20,6 @@ export function ProductListing({
     title,
     subtitle,
     products,
-    totalProducts,
     currentPage,
     totalPages,
     onPageChange,

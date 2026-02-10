@@ -1,21 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { getCustomers } from '@/lib/api';
+import { useCallback } from 'react';
 
 export default function AdminCustomersPage() {
     const [customers, setCustomers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchData();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const data = await getCustomers(searchQuery);
@@ -25,7 +20,14 @@ export default function AdminCustomersPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchData();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [fetchData]);
 
     return (
         <div className="space-y-6">
@@ -75,7 +77,7 @@ export default function AdminCustomersPage() {
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                                                     {customer.avatar_url ? (
-                                                        <img src={customer.avatar_url} alt={customer.full_name || 'User'} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                                        <NextImage src={customer.avatar_url} alt={customer.full_name || 'User'} className="object-cover" fill sizes="40px" />
                                                     ) : (
                                                         <span className="material-symbols-outlined text-gray-400">person</span>
                                                     )}

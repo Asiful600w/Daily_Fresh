@@ -10,7 +10,6 @@ import { loginWeb } from '@/actions/auth';
 export default function LoginPage() {
 
     const [isPending, startTransition] = useTransition();
-    const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

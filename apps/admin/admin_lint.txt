@@ -1,0 +1,143 @@
+﻿
+> admin@0.1.0 lint
+> eslint
+
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\actions\auth.ts
+  5:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+  6:10  warning  'z' is defined but never used         @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\actions\update-credentials.ts
+   9:7   warning  'UpdateCredentialsSchema' is assigned a value but only used as a type  @typescript-eslint/no-unused-vars
+  24:51  warning  'values' is defined but never used                                     @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\customers\[id]\page.tsx
+   6:10  warning  'useRouter' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  60:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\customers\page.tsx
+  16:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                             react-hooks/exhaustive-deps
+  78:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\low-stock\page.tsx
+  62:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\orders\[id]\page.tsx
+  91:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\orders\page.tsx
+  302:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\products\ProductForm.tsx
+    4:66  warning  'createProduct' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    4:81  warning  'updateProduct' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  590:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\products\page.tsx
+    5:8   warning  'Image' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   45:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                             react-hooks/exhaustive-deps
+   50:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                             react-hooks/exhaustive-deps
+  229:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  328:74  warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\register\page.tsx
+  7:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\admin\special-categories\page.tsx
+   82:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   94:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  185:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  217:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\api\admin\dashboard-stats\route.ts
+  24:50  warning  'lowStockError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\api\auth\signout\route.ts
+  1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\api\debug\env\route.ts
+  16:13  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\app\global-error.tsx
+  4:5  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  5:5  warning  'reset' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\admin\AdminLayoutShell.tsx
+  116:17  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\admin\NoticeSettings.tsx
+  32:9  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\cart\OrderSummary.tsx
+   5:10  warning  'createOrder' is defined but never used                @typescript-eslint/no-unused-vars
+  12:32  warning  'clearCart' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  15:27  warning  'setIsCheckingOut' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\category\CategoryView.tsx
+  16:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\category\ProductListing.tsx
+  20:5  warning  'title' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\checkout\CheckoutStepper.tsx
+  28:32  warning  'index' is defined but never used               @typescript-eslint/no-unused-vars
+  31:27  warning  'isPending' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\home\AdvertiseScroller.tsx
+  4:10  warning  'useEffect' is defined but never used     @typescript-eslint/no-unused-vars
+  4:21  warning  'useRef' is defined but never used        @typescript-eslint/no-unused-vars
+  4:29  warning  'useState' is defined but never used      @typescript-eslint/no-unused-vars
+  6:7   warning  'ads' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\home\ProductGrid.tsx
+  4:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\product\ProductCard.tsx
+  6:19  warning  'CartItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\profile\AddressCard.tsx
+  23:8  warning  React Hook useEffect has a missing dependency: 'fetchAddress'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\profile\AddressManagerModal.tsx
+  44:8  warning  React Hook useEffect has a missing dependency: 'fetchAddresses'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\components\profile\ProfileStats.tsx
+  1:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\context\AdminAuthContext.tsx
+    6:26  warning  'signOutAdminAction' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+   38:11  warning  'router' is assigned a value but never used                                                                                       @typescript-eslint/no-unused-vars
+  162:8   warning  React Hook useEffect has missing dependencies: 'adminLoading' and 'supabase'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  174:22  warning  'e' is defined but never used                                                                                                     @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\context\AdminNotificationContext.tsx
+  64:5  warning  Unused eslint-disable directive (no problems were reported)
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\context\CartContext.tsx
+   59:46  warning  'cartError' is never reassigned. Use 'const' instead  prefer-const
+  214:55  warning  'searchError' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\context\WishlistContext.tsx
+  28:8  warning  React Hook useEffect has a missing dependency: 'fetchWishlistIds'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\lib\adminApi.ts
+  313:41  warning  'reviewError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\lib\api.ts
+  1535:13  warning  'data' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  1554:13  warning  'data' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  1575:13  warning  'data' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  1596:13  warning  'data' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  1660:9   warning  'usersMap' is never reassigned. Use 'const' instead     prefer-const
+  1670:9   warning  'productsMap' is never reassigned. Use 'const' instead  prefer-const
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\lib\supabase\middleware.ts
+   1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+  23:58  warning  'options' is defined but never used        @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\admin\lib\supabase\server.ts
+  2:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 65 problems (0 errors, 65 warnings)
+  0 errors and 4 warnings potentially fixable with the `--fix` option.
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Address, saveAddress, getUserAddresses, deleteAddress, setDefaultAddress } from '@/actions/address';
 
@@ -31,19 +31,7 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
         isDefault: false
     });
 
-    useEffect(() => {
-        if (isOpen && user) {
-            // Decision: If initialEditAddress is provided, jump straight to form
-            if (initialEditAddress) {
-                handleEdit(initialEditAddress);
-            } else {
-                fetchAddresses();
-                setView('list'); // Default to list
-            }
-        }
-    }, [isOpen, user, initialEditAddress]);
-
-    const fetchAddresses = async () => {
+    const fetchAddresses = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         try {
@@ -54,9 +42,9 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
-    const handleEdit = (address: Address) => {
+    const handleEdit = useCallback((address: Address) => {
         setEditingAddress(address);
         setFormData({
             label: address.label,
@@ -70,7 +58,19 @@ export function AddressManagerModal({ isOpen, onClose, onUpdate, initialEditAddr
             isDefault: address.isDefault
         });
         setView('form');
-    };
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && user) {
+            // Decision: If initialEditAddress is provided, jump straight to form
+            if (initialEditAddress) {
+                handleEdit(initialEditAddress);
+            } else {
+                fetchAddresses();
+                setView('list'); // Default to list
+            }
+        }
+    }, [isOpen, user, initialEditAddress, fetchAddresses, handleEdit]);
 
     const handleAddNew = () => {
         setEditingAddress(null);

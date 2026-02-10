@@ -1,0 +1,171 @@
+﻿
+> web@0.1.0 lint
+> eslint
+
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\actions\auth.ts
+  5:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\app\(auth)\login\page.tsx
+  6:10  warning  'useRouter' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\app\(shop)\checkout\page.tsx
+  21:21  warning  'setLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\app\(shop)\profile\ProfileClient.tsx
+  26:20  warning  'setOrders' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\app\global-error.tsx
+  4:5  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  5:5  warning  '_reset' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\home\ProductGrid.tsx
+  4:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\home\PromotionalBanners.tsx
+  75:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\layout\NavBar.tsx
+   95:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  279:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\product\ProductCard.tsx
+  6:19  warning  'CartItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\product\ProductInfo.tsx
+   96:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  131:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\product\Reviews.tsx
+  17:12  warning  '_stats' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\profile\ProfileSidebar.tsx
+  25:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\shop\ShopView.tsx
+  3:36  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\context\AuthContext.tsx
+    7:10  warning  'signOutWeb' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+   32:11  warning  'router' is assigned a value but never used                                                                                  @typescript-eslint/no-unused-vars
+   97:8   warning  React Hook useEffect has missing dependencies: 'loading' and 'supabase'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  111:22  warning  'e' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\context\CartContext.tsx
+  162:8  warning  React Hook useEffect has missing dependencies: 'refreshSession' and 'supabase'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\context\WishlistContext.tsx
+  19:11  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\api\products.ts
+  1:10  warning  'unstable_cache' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\api\user.ts
+  5:36  warning  'phoneQuery' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\client.ts
+  4:5  warning  'client' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\middleware.ts
+   1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+  23:58  warning  'options' is defined but never used        @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\server.ts
+  2:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\public\sw.js
+  1:24   warning  's' is never reassigned. Use 'const' instead                           prefer-const
+  1:156  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:209  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:250  warning  'e' is never reassigned. Use 'const' instead                           prefer-const
+  1:448  warning  'n' is never reassigned. Use 'const' instead                           prefer-const
+  1:626  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\public\workbox-b52a85cb.js
+  1:49     warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:87     warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:211    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:257    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:298    warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:381    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:642    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:813    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:989    warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:1093   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:1738   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:2263   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:3058   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:3102   warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:3598   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:3727   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:7052   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:7234   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:7954   warning  'i' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:7962   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:8066   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:8368   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:9440   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:9550   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:9566   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:9627   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:9962   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:10038  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:10065  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:10081  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:10163  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:10963  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11007  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:11122  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11194  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11301  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11382  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11623  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:11941  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:12060  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:12464  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:12684  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:13012  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:13272  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:13319  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:13367  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:14423  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:14555  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:14599  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:15097  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:15191  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:15404  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:15514  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:16025  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:16057  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:16165  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:16591  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:16958  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:17076  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:17178  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:17458  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:17719  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:17903  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:19089  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20040  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20129  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20260  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20317  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20514  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20635  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20768  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:20988  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:21080  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:21657  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:21768  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:21988  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:22227  warning  'e' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:22385  warning  's' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:22450  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:22748  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:22962  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  1:23349  warning  't' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1:23479  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+Γ£û 117 problems (0 errors, 117 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

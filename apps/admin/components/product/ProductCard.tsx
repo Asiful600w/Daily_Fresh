@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { useCart, CartItem } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -102,10 +103,12 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                 {/* Image & Badges */}
                 <div className="relative h-40 w-full mb-4 group-hover:scale-105 transition-transform duration-500 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden">
                     {product.images && product.images.length > 0 && product.images[0] ? (
-                        <img
+                        <NextImage
                             alt={product.name}
-                            className="w-full h-full object-contain"
+                            className="object-contain"
                             src={product.images[0]}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                     ) : (
                         <span className="material-symbols-outlined text-4xl text-gray-300">image</span>

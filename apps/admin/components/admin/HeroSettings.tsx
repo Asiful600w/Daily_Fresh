@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getHeroSettings, updateHeroSettings, uploadHeroImage } from '@/lib/api';
+import NextImage from 'next/image';
 
 export function HeroSettings() {
     const [loading, setLoading] = useState(true);
@@ -41,54 +42,7 @@ export function HeroSettings() {
         }
     };
 
-    useEffect(() => {
-        loadSettings();
-    }, []);
-
-    // Validate image whenever URL changes (debounce could be added but simpler here)
-    useEffect(() => {
-        if (!formData.image_url) {
-            setImageStatus({ type: 'idle', message: '' });
-            return;
-        }
-
-        const timeoutId = setTimeout(() => {
-            setImageStatus({ type: 'loading', message: 'Validating image...' });
-            const img = new Image();
-            img.onload = () => {
-                const ratio = img.width / img.height;
-                // Ideal ratio for hero is around 2:1 to 3:1 (landscape) or at least 1.5:1
-                // Warning if < 1 (portrait) or > 3 (too wide)
-                let type: 'valid' | 'warning' | 'error' = 'valid';
-                let msg = 'Image looks good!';
-
-                if (ratio < 1) {
-                    type = 'warning';
-                    msg = 'Image is Portrait (tall). It might be cropped significantly.';
-                } else if (ratio < 1.3) {
-                    type = 'warning';
-                    msg = 'Image is nearly square. Standard landscape (16:9) is recommended.';
-                } else if (ratio > 3.5) {
-                    type = 'warning';
-                    msg = 'Image is extremely wide/panoramic.';
-                }
-
-                setImageStatus({
-                    type,
-                    message: msg,
-                    details: `${img.width}x${img.height} (Ratio: ${ratio.toFixed(2)})`
-                });
-            };
-            img.onerror = () => {
-                setImageStatus({ type: 'error', message: 'Failed to load image. Check the URL.' });
-            };
-            img.src = formData.image_url;
-        }, 500); // 500ms debounce
-
-        return () => clearTimeout(timeoutId);
-    }, [formData.image_url]);
-
-    const loadSettings = async () => {
+    const loadSettings = useCallback(async () => {
         try {
             const data = await getHeroSettings();
             if (data) {
@@ -108,7 +62,11 @@ export function HeroSettings() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadSettings();
+    }, [loadSettings]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -262,7 +220,7 @@ export function HeroSettings() {
                             ) : null}
                             {formData.image_url && (
                                 <div className={`rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 relative group ${isEditing ? 'w-12 h-12' : 'w-full h-64 shadow-inner'}`}>
-                                    <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                                    <NextImage src={formData.image_url} alt="Preview" className="object-cover" fill sizes={isEditing ? '48px' : '100vw'} />
                                 </div>
                             )}
                         </div>

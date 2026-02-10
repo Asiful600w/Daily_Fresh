@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import NextImage from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Product, searchProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
@@ -45,7 +45,7 @@ export function MobileSearchDrawer({ isOpen, onClose }: MobileSearchDrawerProps)
             setQuery('');
             setResults([]);
         }
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     // Debounce search
     useEffect(() => {
@@ -128,11 +128,13 @@ export function MobileSearchDrawer({ isOpen, onClose }: MobileSearchDrawerProps)
                                 className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl active:scale-[0.98] transition-all cursor-pointer"
                                 onClick={() => handleSelect(product.id)}
                             >
-                                <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-xl p-1 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-700">
-                                    <img
+                                <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-xl p-1 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                                    <NextImage
                                         src={product.images && product.images.length > 0 ? product.images[0] : ''}
                                         alt={product.name}
-                                        className="w-full h-full object-contain"
+                                        className="object-contain"
+                                        fill
+                                        sizes="64px"
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">

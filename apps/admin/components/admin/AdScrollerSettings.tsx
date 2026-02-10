@@ -1,24 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AdScroll, getAds, createAd, updateAd, deleteAd, uploadAdImage } from '@/lib/api';
+import NextImage from 'next/image';
 
 export function AdScrollerSettings() {
     const [ads, setAds] = useState<AdScroll[]>([]);
     const [newAdUrl, setNewAdUrl] = useState('');
     const [loading, setLoading] = useState(true);
 
-    const loadAds = async () => {
+    const loadAds = useCallback(async () => {
         setLoading(true);
         const data = await getAds(false);
         setAds(data);
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         loadAds();
-    }, []);
+    }, [loadAds]);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -122,7 +123,7 @@ export function AdScrollerSettings() {
                                 }`}
                         >
                             <div className="w-24 h-16 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 relative border border-slate-200 dark:border-slate-700">
-                                <img src={ad.image_url} alt="Ad" className="w-full h-full object-cover" />
+                                <NextImage src={ad.image_url} alt="Ad" className="object-cover" fill sizes="96px" />
                             </div>
 
                             <div className="flex-1 min-w-0">

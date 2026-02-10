@@ -227,7 +227,6 @@ export function ShopView({ products, categories }: ShopViewProps) {
                     }
                     subtitle={`Showing ${filteredAndSortedProducts.length} results`}
                     products={paginatedProducts}
-                    totalProducts={filteredAndSortedProducts.length}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={handlePageChange}

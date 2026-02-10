@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -9,7 +8,7 @@ export async function GET(request: Request) {
     // const cookieStore = cookies();
     const supabase = await createClient();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
         .from('products')

@@ -94,7 +94,7 @@ export function AuthProvider({ children, initialUser = null }: { children: React
             clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
-    }, []);
+    }, [supabase]);
 
     const signOut = async () => {
         setIsSigningOut(true);

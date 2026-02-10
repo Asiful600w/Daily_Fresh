@@ -3,16 +3,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getLowStockProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
+import NextImage from 'next/image';
+import { useCallback } from 'react';
 
 export default function LowStockPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const data = await getLowStockProducts();
             setProducts(data);
@@ -21,7 +19,11 @@ export default function LowStockPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     return (
         <div className="space-y-6">
@@ -58,8 +60,8 @@ export default function LowStockPage() {
                                     <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                                <div className="w-10 h-10 relative bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                                                    {product.image && <NextImage src={product.image} alt={product.name} className="object-cover" fill sizes="40px" />}
                                                 </div>
                                                 <span className="text-sm font-bold text-text-main">{product.name}</span>
                                             </div>

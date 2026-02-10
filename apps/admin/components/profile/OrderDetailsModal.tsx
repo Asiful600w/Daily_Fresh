@@ -1,6 +1,7 @@
 'use client';
 
 import { formatPrice } from '@/lib/format';
+import NextImage from 'next/image';
 
 interface OrderDetailsModalProps {
     isOpen: boolean;
@@ -61,9 +62,9 @@ export function OrderDetailsModal({ isOpen, onClose, order, loading }: OrderDeta
                                 <div className="space-y-3">
                                     {order.items?.map((item: any) => (
                                         <div key={item.id} className="flex gap-4 p-3 rounded-xl border border-slate-100 dark:border-[#1e3a31] bg-slate-50/50 dark:bg-white/5">
-                                            <div className="size-16 rounded-lg bg-white dark:bg-black/20 shrink-0 overflow-hidden">
+                                            <div className="size-16 rounded-lg bg-white dark:bg-black/20 shrink-0 overflow-hidden relative">
                                                 {item.image ? (
-                                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                    <NextImage src={item.image} alt={item.name} className="object-cover" fill sizes="64px" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
                                                         <span className="material-icons-round text-slate-300">image</span>

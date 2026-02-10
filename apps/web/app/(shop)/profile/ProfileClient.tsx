@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
@@ -87,7 +88,7 @@ export default function ProfileClient({ initialStats, initialOrders, error: serv
                     <div className="lg:hidden flex items-center gap-4 mb-8 bg-white dark:bg-[#10221c] p-4 rounded-2xl border border-slate-100 dark:border-[#1e3a31] shadow-sm">
                         <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary">
                             {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <span className="material-icons-round text-slate-400 text-2xl">person</span>

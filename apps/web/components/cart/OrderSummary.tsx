@@ -2,17 +2,16 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { createOrder } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
 
 export function OrderSummary() {
-    const { totalPrice, items, clearCart } = useCart();
+    const { totalPrice, items } = useCart();
     const { user } = useAuth();
     const router = useRouter();
-    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [isCheckingOut] = useState(false);
 
     // Logic from HTML: Delivery Fee + Estimated Tax mocking
     const deliveryFee = 4.99;

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-[#14532D] dark:to-[#064E3B]";
 
 export function HeroSection({ settings }: { settings?: any }) {
     return (

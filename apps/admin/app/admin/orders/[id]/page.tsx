@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { getAdminOrder, updateAdminOrderStatus } from '@/lib/adminApi';
 import { formatPrice } from '@/lib/format';
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 export default function AdminOrderDetailsPage() {
     const { id } = useParams();
@@ -88,10 +89,12 @@ export default function AdminOrderDetailsPage() {
                                     <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-lg overflow-hidden shrink-0 relative">
                                         {/* Prioritize current product image (index 0), then snapshot image */}
                                         {(item.products?.images && item.products.images.length > 0) || item.image ? (
-                                            <img
+                                            <NextImage
                                                 src={item.products?.images?.[0] || item.image}
                                                 alt={item.name}
-                                                className="w-full h-full object-cover"
+                                                className="object-cover"
+                                                fill
+                                                sizes="64px"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-slate-300">

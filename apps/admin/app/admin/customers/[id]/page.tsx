@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getCustomerById, getUserOrders } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
+import { useCallback } from 'react';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -19,13 +21,7 @@ export default function CustomerDetailsPage({ params }: Props) {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (id) {
-            fetchData(id);
-        }
-    }, [id]);
-
-    const fetchData = async (userId: string) => {
+    const fetchData = useCallback(async (userId: string) => {
         try {
             const [custData, ordersData] = await Promise.all([
                 getCustomerById(userId),
@@ -38,7 +34,13 @@ export default function CustomerDetailsPage({ params }: Props) {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (id) {
+            fetchData(id);
+        }
+    }, [id, fetchData]);
 
     if (loading) return <div className="p-8 text-center text-text-muted">Loading details...</div>;
     if (!customer) return <div className="p-8 text-center text-text-muted">Customer not found.</div>;
@@ -55,9 +57,9 @@ export default function CustomerDetailsPage({ params }: Props) {
 
             {/* Profile Card */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-subtle p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 shrink-0 border-4 border-white dark:border-slate-700 shadow-lg">
+                <div className="w-32 h-32 relative rounded-full overflow-hidden bg-gray-100 shrink-0 border-4 border-white dark:border-slate-700 shadow-lg">
                     {customer.avatar_url ? (
-                        <img src={customer.avatar_url} alt={customer.full_name} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                        <NextImage src={customer.avatar_url} alt={customer.full_name} className="object-cover" fill sizes="128px" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
                             <span className="material-symbols-outlined text-5xl">person</span>

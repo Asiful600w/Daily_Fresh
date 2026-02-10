@@ -159,7 +159,7 @@ export function AdminAuthProvider({ children, initialUser = null }: { children: 
             clearTimeout(loadingTimer);
             subscription.unsubscribe();
         };
-    }, []);
+    }, [supabase]);
 
     const signOutAdmin = useCallback(async () => {
         try {

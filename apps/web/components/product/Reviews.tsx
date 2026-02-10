@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import {
     checkReviewEligibility,
@@ -10,12 +10,11 @@ import {
     type Review,
     type ReviewStats
 } from '@/actions/reviews';
-import Link from 'next/link';
 
 export function Reviews({ productId }: { productId: number | string }) {
     const { user } = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
-    const [stats, setStats] = useState<ReviewStats>({
+    const [_stats, setStats] = useState<ReviewStats>({
         averageRating: 0,
         totalReviews: 0,
         ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
@@ -28,14 +27,7 @@ export function Reviews({ productId }: { productId: number | string }) {
     const [checkingEligibility, setCheckingEligibility] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadReviews();
-        if (user) {
-            checkEligibility();
-        }
-    }, [productId, user]);
-
-    const checkEligibility = async () => {
+    const checkEligibility = useCallback(async () => {
         if (!user) return;
         setCheckingEligibility(true);
         try {
@@ -46,9 +38,9 @@ export function Reviews({ productId }: { productId: number | string }) {
         } finally {
             setCheckingEligibility(false);
         }
-    };
+    }, [user, productId]);
 
-    const loadReviews = async () => {
+    const loadReviews = useCallback(async () => {
         try {
             setLoading(true);
             const [reviewsData, statsData] = await Promise.all([
@@ -62,7 +54,14 @@ export function Reviews({ productId }: { productId: number | string }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [productId]);
+
+    useEffect(() => {
+        loadReviews();
+        if (user) {
+            checkEligibility();
+        }
+    }, [user, loadReviews, checkEligibility]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -213,12 +212,12 @@ export function Reviews({ productId }: { productId: number | string }) {
                     ) : (
                         <div className="text-center py-6">
                             <p className="text-slate-500 mb-4">Please log in to write a review.</p>
-                            <Link
-                                href="/login"
+                            <button
+                                onClick={() => window.location.href = '/login'}
                                 className="inline-block px-6 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold"
                             >
                                 Login
-                            </Link>
+                            </button>
                         </div>
                     )}
                 </div>

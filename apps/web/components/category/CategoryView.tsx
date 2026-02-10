@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Product, Category } from '@/lib/api';
 import { SidebarFilters } from './SidebarFilters';
 import { ProductListing } from './ProductListing';
@@ -16,7 +16,6 @@ interface CategoryViewProps {
 }
 
 export function CategoryView({ products, categoryData, slug }: CategoryViewProps) {
-    // const router = useRouter();
     const searchParams = useSearchParams();
 
     // -- Derived Initial State --
@@ -118,7 +117,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setCurrentPage(1);
         }
-    }, [priceRange, currentSort, slug]);
+    }, [priceRange, currentSort, slug, currentPage]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
 
@@ -194,7 +193,6 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
                 <ProductListing
                     title={categoryData.name}
                     products={paginatedProducts}
-                    totalProducts={filteredAndSortedProducts.length}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={handlePageChange}

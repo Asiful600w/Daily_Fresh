@@ -5,6 +5,7 @@ import { Product, getCategories, getSpecialCategories, Category, createProduct, 
 import { useRouter } from 'next/navigation';
 import { supabaseClient as supabase } from '@/lib/supabaseClient';
 import { useAdminAuth } from '@/context/AdminAuthContext';
+import NextImage from 'next/image';
 
 export function ProductForm({ initialData }: { initialData?: Partial<Product> }) {
     const { adminUser } = useAdminAuth();
@@ -587,7 +588,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                         <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                             {previewUrls.map((url, idx) => (
                                 <div key={idx} className="relative aspect-square bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 group">
-                                    <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                    <NextImage src={url} alt={`Preview ${idx}`} className="object-cover" fill sizes="150px" />
                                     <button
                                         type="button"
                                         onClick={() => removeImage(idx)}

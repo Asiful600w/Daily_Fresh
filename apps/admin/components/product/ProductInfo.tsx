@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
+import NextImage from 'next/image';
 
 import { useWishlist } from '@/context/WishlistContext';
 
@@ -84,12 +85,16 @@ export function ProductInfo({ product }: { product: Product }) {
                         </span>
                     </button>
 
-                    <img
-                        src={selectedImage || '/placeholder-food.png'}
-                        onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400?text=No+Image'; }}
-                        alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 animate-scale-up"
-                    />
+                    <div className="w-full h-full relative">
+                        <NextImage
+                            src={selectedImage || '/placeholder-food.png'}
+                            alt={product.name}
+                            className="object-contain group-hover:scale-105 transition-transform duration-500 animate-scale-up"
+                            fill
+                            priority
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                    </div>
 
                     {/* Image Dots Indicator */}
                     {product.images && product.images.length > 1 && (
@@ -119,11 +124,12 @@ export function ProductInfo({ product }: { product: Product }) {
                                     : 'border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                     }`}
                             >
-                                <img
+                                <NextImage
                                     src={img}
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                     alt={`View ${idx + 1}`}
-                                    className="w-full h-full object-contain rounded-lg"
+                                    className="object-contain rounded-lg"
+                                    fill
+                                    sizes="80px"
                                 />
                             </button>
                         ))}

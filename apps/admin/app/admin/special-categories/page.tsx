@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { getSpecialCategories, createSpecialCategory, updateSpecialCategory, deleteSpecialCategory, uploadSpecialOfferImage } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
+import { useCallback } from 'react';
 
 export default function SpecialCategoriesPage() {
     const router = useRouter();
@@ -13,7 +15,7 @@ export default function SpecialCategoriesPage() {
 
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         try {
             const data = await getSpecialCategories();
             setCategories(data);
@@ -22,11 +24,11 @@ export default function SpecialCategoriesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [loadData]);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -181,8 +183,8 @@ export default function SpecialCategoriesPage() {
                                         onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
                                     />
                                     {formData.imageUrl && (
-                                        <div className="mt-2 w-full h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-                                            <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="mt-2 w-full h-24 relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+                                            <NextImage src={formData.imageUrl} alt="Preview" className="object-cover" fill sizes="(max-width: 768px) 100vw, 300px" />
                                         </div>
                                     )}
                                 </div>
@@ -214,7 +216,9 @@ export default function SpecialCategoriesPage() {
                                 <div key={cat.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between group hover:shadow-md transition-all">
                                     <div className="flex items-center gap-4">
                                         {cat.image_url ? (
-                                            <img src={cat.image_url} alt={cat.name} className="w-16 h-10 object-cover rounded-lg bg-slate-100" />
+                                            <div className="w-16 h-10 relative rounded-lg overflow-hidden bg-slate-100">
+                                                <NextImage src={cat.image_url} alt={cat.name} className="object-cover" fill sizes="64px" />
+                                            </div>
                                         ) : (
                                             <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
                                                 <span className="material-icons-round">local_offer</span>

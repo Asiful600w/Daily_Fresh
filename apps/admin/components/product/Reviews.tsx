@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { checkReviewEligibility } from '@/lib/api';
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 interface Review {
     id: number;
@@ -28,14 +29,7 @@ export function Reviews({ productId }: { productId: number | string }) {
     const [canReview, setCanReview] = useState(false);
     const [checkingEligibility, setCheckingEligibility] = useState(false);
 
-    useEffect(() => {
-        fetchReviews();
-        if (user) {
-            checkEligibility();
-        }
-    }, [productId, user]);
-
-    const checkEligibility = async () => {
+    const checkEligibility = useCallback(async () => {
         if (!user) return;
         setCheckingEligibility(true);
         try {
@@ -46,9 +40,9 @@ export function Reviews({ productId }: { productId: number | string }) {
         } finally {
             setCheckingEligibility(false);
         }
-    };
+    }, [user, productId]);
 
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('reviews')
@@ -70,7 +64,14 @@ export function Reviews({ productId }: { productId: number | string }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [productId]);
+
+    useEffect(() => {
+        fetchReviews();
+        if (user) {
+            checkEligibility();
+        }
+    }, [user, fetchReviews, checkEligibility]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -121,9 +122,15 @@ export function Reviews({ productId }: { productId: number | string }) {
                     ) : (
                         reviews.map((review) => (
                             <div key={review.id} className="flex gap-4">
-                                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 relative">
                                     {review.profiles?.avatar_url ? (
-                                        <img src={review.profiles.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                        <NextImage
+                                            src={review.profiles.avatar_url}
+                                            alt="Avatar"
+                                            className="object-cover"
+                                            fill
+                                            sizes="48px"
+                                        />
                                     ) : (
                                         <span className="material-icons-round text-slate-400">person</span>
                                     )}

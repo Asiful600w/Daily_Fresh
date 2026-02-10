@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar';
 import { formatPrice } from '@/lib/format';
@@ -39,7 +40,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                     <div className="lg:hidden flex items-center gap-4 mb-8 bg-white dark:bg-[#10221c] p-4 rounded-2xl border border-slate-100 dark:border-[#1e3a31] shadow-sm">
                         <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary">
                             {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <span className="material-icons-round text-slate-400 text-2xl">person</span>
@@ -132,7 +133,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                                                 {order.order_items?.slice(0, 3).map((item: any, idx: number) => (
                                                     <div key={idx} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-700 overflow-hidden shadow-sm">
                                                         {item.image ? (
-                                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                            <Image src={item.image} alt={item.name} fill className="object-cover" />
                                                         ) : (
                                                             <span className="material-icons-round text-[10px] text-slate-400 flex items-center justify-center w-full h-full">image</span>
                                                         )}

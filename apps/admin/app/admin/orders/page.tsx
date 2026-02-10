@@ -10,6 +10,7 @@ import {
 } from '@/actions/orders';
 import { formatPrice } from '@/lib/format';
 import { createClient } from '@/lib/supabase/client';
+import NextImage from 'next/image';
 
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
@@ -299,7 +300,9 @@ export default function OrdersPage() {
                                     {selectedOrder.order_items?.map((item, idx) => (
                                         <div key={idx} className="flex gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-100 dark:border-slate-600">
                                             {item.image ? (
-                                                <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover bg-white" />
+                                                <div className="w-16 h-16 relative rounded-lg overflow-hidden shrink-0 bg-white">
+                                                    <NextImage src={item.image} alt={item.name} className="object-cover" fill sizes="64px" />
+                                                </div>
                                             ) : (
                                                 <div className="w-16 h-16 rounded-lg bg-slate-200 flex items-center justify-center">
                                                     <span className="material-icons-round text-slate-400">image</span>

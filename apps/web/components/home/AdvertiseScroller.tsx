@@ -3,14 +3,6 @@
 import Image from "next/image";
 // import { useEffect, useRef, useState } from "react";
 
-const ads = [
-    "/legacy_assets/images/card1.png",
-    "/legacy_assets/images/card2.png",
-    "/legacy_assets/images/card3.png",
-    "/legacy_assets/images/card1.png", // Duplicates for seamless looping if needed, or we just map twice
-    "/legacy_assets/images/card2.png",
-    "/legacy_assets/images/card3.png",
-];
 
 export function AdvertiseScroller({ ads = [] }: { ads?: string[] }) {
     // Fallback if no ads provided

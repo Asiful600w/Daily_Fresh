@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 interface Offer {
     id: number;
@@ -72,10 +73,12 @@ export function PromotionalBanners({ offers }: PromotionalBannersProps) {
                         className="relative min-w-[300px] md:min-w-[500px] h-[250px] rounded-3xl overflow-hidden group/card snap-center flex-shrink-0"
                     >
                         {/* Image */}
-                        <img
+                        <NextImage
                             alt={offer.name}
-                            src={offer.image_url}
-                            className="absolute inset-0 w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-700"
+                            src={offer.image_url || ''}
+                            className="object-cover group-hover/card:scale-105 transition-transform duration-700"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 500px"
                         />
 
                         {/* Overlay */}

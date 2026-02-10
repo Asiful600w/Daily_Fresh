@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { Category } from '@/lib/api';
 
 interface CategoryScrollerProps {
@@ -60,8 +61,8 @@ export function CategoryScroller({ categories }: CategoryScrollerProps) {
                         href={`/category/${cat.slug}`}
                         className="flex-shrink-0 flex items-center gap-4 bg-white dark:bg-slate-800 p-3 pr-6 rounded-2xl border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-primary transition-all group/item min-w-[220px]"
                     >
-                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0">
-                            <img alt={cat.name} className="w-10 h-10 object-contain" src={cat.img} />
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0 relative">
+                            <NextImage alt={cat.name} className="object-contain p-3" src={cat.img} fill sizes="64px" />
                         </div>
                         <div className="flex flex-col">
                             <span className="font-bold text-sm text-slate-900 dark:text-white">{cat.name}</span>
