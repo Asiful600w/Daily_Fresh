@@ -178,9 +178,9 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
 
                 <div className="mt-auto pt-2 space-y-3 relative z-20">
                     {/* Price Area */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                            <div className="flex items-baseline gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-3 min-h-[44px]">
+                        <div className="flex flex-col min-w-fit">
+                            <div className="flex items-baseline gap-2 flex-wrap">
                                 <span className={`font-bold text-lg ${product.discountPercent ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
                                     {formatPrice(product.price)}
                                 </span>
@@ -193,7 +193,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                         </div>
 
                         {/* Quantity Selector */}
-                        <div className={`flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1 transition-opacity ${isOutOfStock ? 'opacity-50' : ''}`}>
+                        <div className={`flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1 transition-opacity shrink-0 ${isOutOfStock ? 'opacity-50' : ''}`}>
                             <button
                                 onClick={handleDecrement}
                                 disabled={isOutOfStock}

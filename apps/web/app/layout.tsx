@@ -10,6 +10,7 @@ import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
 import { UIProvider } from "@/context/UIContext";
 import { createClient } from "@/lib/supabase/server";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -100,6 +101,7 @@ export default async function RootLayout({
                 <FlyToCartProvider>
                   <NextTopLoader color="#22C55E" showSpinner={false} shadow={false} height={2} />
                   <UIProvider>
+                    <CookieConsent />
                     {children}
                   </UIProvider>
                 </FlyToCartProvider>

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 // import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
 
 interface MobileCategoryDrawerProps {
     isOpen: boolean;
@@ -134,13 +135,17 @@ export function MobileCategoryDrawer({ isOpen, onClose, categories }: MobileCate
                                     onClick={() => setSelectedCategory(category)}
                                     className="flex flex-col items-center text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary/50 hover:shadow-md transition-all group"
                                 >
-                                    <div className="w-12 h-12 mb-3 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm text-2xl group-hover:scale-110 transition-transform">
-                                        {/* You might want to map category names to icons or image URLs if available */}
-                                        {/* For now using first letter or generic icon if no image */}
+                                    <div className="w-12 h-12 mb-3 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden group-hover:scale-110 transition-transform">
                                         {category.img ? (
-                                            <img src={category.img} alt={category.name} className="w-full h-full object-cover rounded-full" />
+                                            <NextImage
+                                                src={category.img}
+                                                alt={category.name}
+                                                fill
+                                                className="object-cover"
+                                                sizes="48px"
+                                            />
                                         ) : (
-                                            <span className="material-icons-round text-primary">category</span>
+                                            <span className="material-icons-round text-primary text-2xl">category</span>
                                         )}
                                     </div>
                                     <span className="font-bold text-slate-900 dark:text-white text-sm">{category.name}</span>
