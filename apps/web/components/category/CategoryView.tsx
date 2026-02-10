@@ -118,7 +118,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setCurrentPage(1);
         }
-    }, [priceRange, currentSort, slug, currentPage]);
+    }, [priceRange, currentSort, slug]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
 

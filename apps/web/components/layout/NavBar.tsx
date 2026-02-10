@@ -18,26 +18,42 @@ function SearchBar() {
     const [showDropdown, setShowDropdown] = React.useState(false);
 
     // Debounce search
+    // Debounce search
     React.useEffect(() => {
+        let active = true;
+
         const timer = setTimeout(async () => {
             if (query.trim().length > 1) {
                 setIsSearching(true);
                 try {
                     const data = await searchProducts(query);
-                    setResults(data);
-                    setShowDropdown(true);
-                } catch (error) {
-                    console.error(error);
+                    if (active) {
+                        setResults(data);
+                        setShowDropdown(true);
+                    }
+                } catch (error: any) {
+                    if (error.name === 'AbortError') {
+                        // Ignore abort errors
+                    } else {
+                        console.error(error);
+                    }
                 } finally {
-                    setIsSearching(false);
+                    if (active) {
+                        setIsSearching(false);
+                    }
                 }
             } else {
-                setResults([]);
-                setShowDropdown(false);
+                if (active) {
+                    setResults([]);
+                    setShowDropdown(false);
+                }
             }
         }, 300);
 
-        return () => clearTimeout(timer);
+        return () => {
+            active = false;
+            clearTimeout(timer);
+        };
     }, [query]);
 
     const handleSelect = (productId: number | string) => {

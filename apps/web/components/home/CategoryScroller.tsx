@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Category } from '@/lib/api';
 
 interface CategoryScrollerProps {
@@ -94,8 +95,14 @@ export function CategoryScroller({ categories }: CategoryScrollerProps) {
                         draggable={false} // Prevent default ghost image drag
                         className="flex-shrink-0 flex items-center gap-4 bg-white dark:bg-slate-800 p-3 pr-6 rounded-2xl border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-primary transition-all group/item min-w-[220px] select-none"
                     >
-                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0 pointer-events-none">
-                            <img alt={cat.name} className="w-10 h-10 object-contain pointer-events-none" src={cat.img} draggable={false} />
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0 pointer-events-none relative">
+                            <Image
+                                alt={cat.name}
+                                width={40}
+                                height={40}
+                                className="object-contain pointer-events-none"
+                                src={cat.img}
+                            />
                         </div>
                         <div className="flex flex-col pointer-events-none">
                             <span className="font-bold text-sm text-slate-900 dark:text-white">{cat.name}</span>

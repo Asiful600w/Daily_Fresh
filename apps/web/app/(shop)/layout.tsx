@@ -1,4 +1,6 @@
 import { NavBar } from "@/components/layout/NavBar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { getCategories } from "@/lib/api";
 
 export const dynamic = 'force-dynamic';
@@ -12,10 +14,12 @@ export default async function MainLayout({
 
     return (
         <>
+            <GlobalSearch />
             <NavBar categories={categories} />
-            <div className="pt-[120px] lg:pt-[130px]">
+            <div className="pt-[120px] lg:pt-[130px] pb-24 md:pb-0">
                 {children}
             </div>
+            <MobileNav categories={categories} />
         </>
     );
 }

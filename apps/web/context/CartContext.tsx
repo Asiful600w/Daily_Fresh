@@ -124,23 +124,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
                 } catch (error: any) {
                     // If error is empty or RLS-related, silently fall back to empty cart
-                    // This happens when RLS policies haven't been set up yet
                     const isRLSError = !error?.message || error?.code === '42501' || error?.code === 'PGRST301';
 
                     if (isRLSError) {
                         console.warn("Cart access blocked (likely RLS policies not set up). Using empty cart.");
                         setItems([]);
                     } else {
-                        console.error("Error loading cart from Supabase:", error);
+                        console.error("Error loading cart from Supabase:", JSON.stringify(error, null, 2));
                         console.error("Error details:", {
-                            message: error?.message,
-                            code: error?.code,
-                            details: error?.details,
-                            hint: error?.hint
+                            message: (error as any)?.message,
+                            code: (error as any)?.code,
+                            details: (error as any)?.details,
+                            hint: (error as any)?.hint,
+                            stack: (error as any)?.stack
                         });
                     }
                 }
-
             } else {
                 // Load from LocalStorage
                 const storedCart = localStorage.getItem('cart');
@@ -152,7 +151,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
                         setItems([]);
                     }
                 } else {
-                    // Explicitly clear items if no local cart found (e.g. after logout)
                     setItems([]);
                 }
             }

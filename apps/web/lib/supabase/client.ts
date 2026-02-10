@@ -26,6 +26,11 @@ export function createClient() {
         {
             cookieOptions: {
                 name: 'web-auth-token',
+            },
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: false // Handled by middleware/server
             }
         }
     );

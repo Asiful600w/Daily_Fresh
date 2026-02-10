@@ -1,14 +1,8 @@
 import type { NextConfig } from "next";
 
-const withPWA = require("@ducanh2912/next-pwa").default({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-});
-
 const nextConfig: NextConfig = {
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -30,6 +24,24 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  compress: true,
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|png)',
+        locale: false,
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+  experimental: {
+    optimizePackageImports: ['recharts', 'date-fns', 'lucide-react', 'react-icons', 'lodash'],
+  },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;

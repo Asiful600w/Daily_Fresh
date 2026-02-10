@@ -8,10 +8,7 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 
 import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
-import { MobileNav } from "@/components/layout/MobileNav";
-import { getCategories } from "@/lib/api";
 import { UIProvider } from "@/context/UIContext";
-import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { createClient } from "@/lib/supabase/server";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -49,7 +46,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const categories = await getCategories();
 
   // Server-side Auth Check for Session Sync
   const supabase = await createClient();
@@ -84,6 +80,8 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
         <meta name="theme-color" content="#22c55e" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://vaohkfonpifdvwarsnac.supabase.co" />
       </head>
       <body
         suppressHydrationWarning={true}
@@ -102,9 +100,7 @@ export default async function RootLayout({
                 <FlyToCartProvider>
                   <NextTopLoader color="#22C55E" showSpinner={false} shadow={false} height={2} />
                   <UIProvider>
-                    <GlobalSearch />
                     {children}
-                    <MobileNav categories={categories} />
                   </UIProvider>
                 </FlyToCartProvider>
               </CartProvider>

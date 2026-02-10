@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/format';
-import { getOrder } from '@/lib/api';
+// import { getOrder } from '@/lib/api'; // Deprecated client-side call
+import { getOrderDetails } from '@/actions/orders';
 import { OrderDetailsModal } from './OrderDetailsModal';
 
 export function RecentOrders({ orders }: { orders: any[] }) {
@@ -15,7 +16,7 @@ export function RecentOrders({ orders }: { orders: any[] }) {
         setIsModalOpen(true);
         setIsLoading(true);
         try {
-            const data = await getOrder(orderId);
+            const data = await getOrderDetails(orderId);
             setSelectedOrder(data);
         } catch (error) {
             console.error('Failed to fetch order details:', error);

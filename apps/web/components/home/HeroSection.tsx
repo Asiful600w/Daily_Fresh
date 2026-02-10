@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const bannerGradient = "bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] dark:from-[#14532D] dark:to-[#064E3B]";
 
@@ -7,9 +8,12 @@ export function HeroSection({ settings }: { settings?: any }) {
         <section className="relative min-h-[500px] md:min-h-[600px] rounded-3xl overflow-hidden flex items-center py-12 md:py-20 group border border-slate-200 dark:border-slate-700 transition-colors">
             {/* Background Image with Zoom Effect */}
             <div className="absolute inset-0 z-0">
-                <img
+                <Image
                     alt={settings?.title || "Fresh Vegetables"}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 dark:brightness-[0.85]"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-105 dark:brightness-[0.85]"
                     src={settings?.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop"}
                 />
                 {/* Premium Gradient Overlay */}

@@ -228,7 +228,12 @@ export async function getRecentOrders(userId: string, limit: number = 5) {
         }
 
         console.log('getRecentOrders: Request Successful. Rows:', data ? data.length : 0);
-        return data || [];
+
+        return (data || []).map((order: any) => ({
+            ...order,
+            item_count: order.order_items ? order.order_items.length : 0
+        }));
+
     } catch (error: any) {
         console.error('Error fetching recent orders:', error);
         console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
@@ -243,7 +248,7 @@ export async function getOrderDetails(orderId: number | string) {
     try {
         const supabase = await createClient();
 
-        const { data, error } = await supabase
+        const { data: order, error } = await supabase
             .from('orders')
             .select(`
                 *,
@@ -259,7 +264,31 @@ export async function getOrderDetails(orderId: number | string) {
             return null;
         }
 
-        return data;
+        // Fetch User Profile for consistent display (Customer Name/Phone)
+        let customer = null;
+        if (order.user_id) {
+            const { data: profile } = await supabase
+                .from('User')
+                .select('name, phone, image')
+                .eq('id', order.user_id)
+                .single();
+            customer = profile;
+        }
+
+        const customerName = customer?.name || order.shipping_name || 'Guest';
+        const customerPhone = customer?.phone || order.shipping_phone || '';
+
+        return {
+            ...order,
+            items: order.order_items || [],
+            customer: {
+                name: customerName,
+                phone: customerPhone,
+                avatar: customer?.image,
+                id: order.user_id
+            }
+        };
+
     } catch (error) {
         console.error('Exception fetching order details:', error);
         return null;

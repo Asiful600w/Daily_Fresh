@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart, CartItem } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -107,9 +108,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                 <Link href={`/product/${product.id}`} className="absolute inset-0 z-0" aria-label={`View ${product.name}`} />
 
                 {product.images && product.images.length > 0 && product.images[0] ? (
-                    <img
+                    <Image
                         alt={product.name}
-                        className="w-full h-full object-contain relative z-0 pointer-events-none"
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-contain relative z-0 pointer-events-none p-2"
                         src={product.images[0]}
                     />
                 ) : (
