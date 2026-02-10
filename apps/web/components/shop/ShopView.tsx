@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Product, Category } from '@/lib/api';
 import { ProductListing } from '@/components/category/ProductListing';
@@ -41,6 +41,18 @@ export function ShopView({ products, categories }: ShopViewProps) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const filterChangeRef = useRef(false);
+
+    // Clear skeleton after URL params change & products re-compute
+    useEffect(() => {
+        if (filterChangeRef.current) {
+            const timer = setTimeout(() => {
+                setIsUpdating(false);
+                filterChangeRef.current = false;
+            }, 400);
+            return () => clearTimeout(timer);
+        }
+    }, [selectedCategorySlug, selectedSubcategoryName]);
 
     // -- Handlers --
     const handleSortChange = (sort: string) => {
@@ -57,6 +69,10 @@ export function ShopView({ products, categories }: ShopViewProps) {
     };
 
     const handleCategoryChange = (categorySlug: string | undefined, subcategoryName?: string) => {
+        // Show skeleton immediately
+        setIsUpdating(true);
+        filterChangeRef.current = true;
+
         // Reset pagination
         setCurrentPage(1);
 
