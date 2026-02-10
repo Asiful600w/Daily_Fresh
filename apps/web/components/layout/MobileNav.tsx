@@ -35,8 +35,8 @@ export function MobileNav({ categories }: MobileNavProps) {
         setIsLoading(null);
     }, [pathname]);
 
-    // Hide on login/signup pages
-    if (pathname === '/login' || pathname === '/signup') {
+    // Hide on login/signup/product pages
+    if (pathname === '/login' || pathname === '/signup' || pathname?.startsWith('/product/')) {
         return null;
     }
 
