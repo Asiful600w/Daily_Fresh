@@ -70,6 +70,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
+            console.log('CartContext: Starting Supabase sync for user:', user.id);
+
             try {
                 if (refreshSession) await refreshSession();
 
@@ -77,23 +79,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 let { data: cart, error: cartError } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
 
                 if (cartError && cartError.code === 'PGRST116') {
-                    // Create if doesn't exist
+                    console.log('CartContext: No cart found, creating new cart');
                     const { data: newCart, error: createError } = await supabase
                         .from('carts')
                         .insert([{ user_id: user.id }])
                         .select('id')
                         .single();
-                    if (!createError) cart = newCart;
+                    if (createError) {
+                        console.error('CartContext: Failed to create cart:', createError);
+                    } else {
+                        cart = newCart;
+                        console.log('CartContext: Created new cart:', cart);
+                    }
                 }
 
                 if (cart) {
+                    console.log('CartContext: Fetching cart items for cart:', cart.id);
                     const { data: cartItems, error: itemsError } = await supabase
                         .from('cart_items')
                         .select('*')
                         .eq('cart_id', cart.id);
 
-                    if (!itemsError && cartItems) {
-                        if (cartItems.length > 0) {
+                    if (itemsError) {
+                        console.error('CartContext: Error fetching cart items:', itemsError);
+                    } else {
+                        console.log('CartContext: Fetched cart items from DB:', cartItems);
+                        console.log('CartContext: Current local items count:', items.length);
+
+                        if (cartItems && cartItems.length > 0) {
                             const mappedItems: CartItem[] = cartItems.map((item: any) => ({
                                 id: item.product_id,
                                 name: item.name,
@@ -105,29 +118,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
                                 color: item.color,
                                 size: item.size
                             }));
+                            console.log('CartContext: Overwriting local items with DB items');
                             setItems(mappedItems);
-                        } else if (items.length > 0) {
-                            // If DB is empty but we have local items, push them!
-                            for (const item of items) {
-                                await supabase.from('cart_items').insert([{
-                                    cart_id: cart.id,
-                                    product_id: String(item.id),
-                                    name: item.name,
-                                    price: item.price,
-                                    image: item.images[0] || '',
-                                    quantity: item.quantity,
-                                    category: item.category,
-                                    color: item.color,
-                                    size: item.size,
-                                    pack: item.pack
-                                }]);
-                            }
+                        } else {
+                            console.log('CartContext: DB cart is empty, keeping local items');
+                            // DON'T overwrite local items with empty DB - let addItem handle syncing
                         }
                     }
                 }
             } catch (error) {
-                console.warn("CartContext: Supabase sync failed, staying with local data", error);
+                console.error("CartContext: Supabase sync failed:", error);
             } finally {
+                console.log('CartContext: Sync complete, setting initialized');
                 setIsInitialized(true);
             }
         };
@@ -188,27 +190,45 @@ export function CartProvider({ children }: { children: ReactNode }) {
             });
 
             try {
-                // Fetch cart ID or create if missing
-                let { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
+                console.log('CartContext: Fetching or creating cart for user:', user.id);
 
-                if (!cart) {
-                    const { data: newCart, error: createError } = await supabase
-                        .from('carts')
-                        .insert([{ user_id: user.id }])
-                        .select('id')
-                        .single();
-                    if (createError) throw createError;
-                    cart = newCart;
+                // Fetch cart ID or create if missing
+                let { data: cart, error: fetchError } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
+
+                if (fetchError) {
+                    console.log('CartContext: Cart fetch error:', fetchError);
+                    if (fetchError.code === 'PGRST116') {
+                        console.log('CartContext: Creating new cart');
+                        const { data: newCart, error: createError } = await supabase
+                            .from('carts')
+                            .insert([{ user_id: user.id }])
+                            .select('id')
+                            .single();
+                        if (createError) {
+                            console.error('CartContext: CRITICAL - Failed to create cart:', createError);
+                            throw createError;
+                        }
+                        cart = newCart;
+                        console.log('CartContext: Created cart:', cart);
+                    } else {
+                        throw fetchError;
+                    }
                 }
 
-                if (!cart) return;
+                if (!cart) {
+                    console.error('CartContext: CRITICAL - No cart available after fetch/create');
+                    return;
+                }
+
+                console.log('CartContext: Using cart:', cart.id);
 
                 // Check dependencies using specific filters matching the sanitization
+                console.log('CartContext: Checking for existing cart item');
                 let query = supabase
                     .from('cart_items')
                     .select('*')
                     .eq('cart_id', cart.id)
-                    .eq('product_id', newItem.id);
+                    .eq('product_id', String(newItem.id));
 
                 // Add explicit filters for optional attributes
                 if (color) query = query.eq('color', color);
