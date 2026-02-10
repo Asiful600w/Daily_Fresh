@@ -50,6 +50,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
         setIsUpdating(true);
         setTimeout(() => {
             setCurrentSort(sort);
+            setCurrentPage(1); // Reset page on sort change
             updateUrl({ sort });
             setIsUpdating(false);
         }, 500);
@@ -58,6 +59,7 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const handlePriceChange = (min: number, max: number) => {
         // Immediate UI update for the numbers/slider
         setPriceRange({ min, max });
+        setCurrentPage(1); // Reset page on price change
     };
 
     // Debounced URL/Filter update for Price to avoid crazy re-renders?
@@ -111,10 +113,10 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     const ITEMS_PER_PAGE = 12;
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Reset page when filters change (but NOT when currentPage itself changes)
+    // Reset page when slug (category) changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [priceRange, currentSort, slug]);
+    }, [slug]);
 
     const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
 

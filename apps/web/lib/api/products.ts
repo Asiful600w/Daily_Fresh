@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache';
 import { supabase, mapProduct, Product } from './common';
 
 export interface ProductFilterOptions {

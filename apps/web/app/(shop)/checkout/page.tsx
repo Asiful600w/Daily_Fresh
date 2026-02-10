@@ -18,7 +18,6 @@ export default function CheckoutPage() {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [isNewAddress, setIsNewAddress] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     // New Address Form
     const [newAddress, setNewAddress] = useState({
@@ -194,9 +193,9 @@ export default function CheckoutPage() {
         );
     }
 
-    if (authLoading || (!user && loading)) return null;
+    if (authLoading || !user) return null;
 
-    if (cart.length === 0 && !loading) {
+    if (cart.length === 0) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4">
                 <div className="text-center">
@@ -380,10 +379,9 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handlePlaceOrder}
-                                disabled={loading || checkoutState !== 'idle'}
                                 className="w-full py-4 bg-[#4c9a80] hover:bg-[#3d8b72] text-white font-bold rounded-2xl shadow-lg shadow-[#4c9a80]/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                {(loading || checkoutState !== 'idle') && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                                {checkoutState !== 'idle' && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                 Place Your Order <span className="material-icons-round">arrow_forward</span>
                             </button>
 

@@ -2,7 +2,7 @@ import { supabase, Address, mapAddress } from './common';
 
 // -- CUSTOMERS --
 
-export async function getCustomers(phoneQuery?: string) {
+export async function getCustomers() {
     const { data, error } = await supabase
         .from('User')
         .select('*');

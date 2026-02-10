@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useRef } from 'react';
-import Link from 'next/link';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Product } from '@/lib/api';
 

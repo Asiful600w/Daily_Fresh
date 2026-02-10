@@ -23,7 +23,7 @@ export default function ProfileClient({ initialStats, initialOrders, error: serv
     const { user, loading: authLoading } = useAuth();
     const { wishlistIds } = useWishlist();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [orders, setOrders] = useState<any[]>(initialOrders);
+    const orders = initialOrders;
 
     // Derived stats - sync with initial props and wishlist
     const stats = {

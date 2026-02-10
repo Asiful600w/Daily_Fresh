@@ -2,9 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { signOutWeb } from '@/actions/auth';
 
 type AuthContextType = {
     user: User | null;
@@ -29,7 +27,6 @@ export function AuthProvider({ children, initialUser = null }: { children: React
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(!initialUser);
     const [isSigningOut, setIsSigningOut] = useState(false);
-    const router = useRouter();
     const supabase = createClient();
 
     useEffect(() => {
@@ -94,7 +91,7 @@ export function AuthProvider({ children, initialUser = null }: { children: React
             clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
-    }, [supabase]);
+    }, [supabase, loading]);
 
     const signOut = async () => {
         setIsSigningOut(true);
@@ -108,7 +105,7 @@ export function AuthProvider({ children, initialUser = null }: { children: React
             try {
                 localStorage.clear();
                 sessionStorage.clear();
-            } catch (e) {
+            } catch {
                 // ignore
             }
 
