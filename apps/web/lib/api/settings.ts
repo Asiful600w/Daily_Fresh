@@ -25,7 +25,6 @@ const fetchHeroSettings = async () => {
 
     return {
         ...data,
-        description: data.subtitle
     };
 };
 
