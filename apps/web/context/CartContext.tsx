@@ -149,12 +149,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     const addItem = async (newItem: CartItem) => {
+        // DIAGNOSTIC: Log auth state
+        console.log('=== ADD ITEM DIAGNOSTICS ===');
+        console.log('User object:', user);
+        console.log('User ID:', user?.id);
+        console.log('Auth loading:', authLoading);
+        console.log('Is initialized:', isInitialized);
+        console.log('Item to add:', newItem);
+
         // Normalize new item attributes
         const color = sanitizeAttr(newItem.color);
         const size = sanitizeAttr(newItem.size);
         const pack = sanitizeAttr(newItem.pack);
 
         if (user) {
+            console.log('CartContext: User is authenticated, proceeding with DB sync');
+
             // Optimistic UI update
             setItems(currentItems => {
                 const existingItem = currentItems.find(item =>
