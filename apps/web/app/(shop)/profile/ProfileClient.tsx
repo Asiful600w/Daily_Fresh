@@ -86,7 +86,7 @@ export default function ProfileClient({ initialStats, initialOrders, error: serv
                 <main className="flex flex-col flex-1 p-4 md:p-8 w-full">
                     {/* Mobile Header (Hidden on Desktop) */}
                     <div className="lg:hidden flex items-center gap-4 mb-8 bg-white dark:bg-[#10221c] p-4 rounded-2xl border border-slate-100 dark:border-[#1e3a31] shadow-sm">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-2 border-primary relative">
                             {user?.user_metadata?.avatar_url ? (
                                 <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" />
                             ) : (
