@@ -239,7 +239,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                             <span className="material-icons-round text-sm sm:text-lg">
                                 {isOutOfStock ? 'block' : 'add_shopping_cart'}
                             </span>
-                            <span className="hidden xs:inline sm:inline">Add</span>
                         </button>
                     </div>
                 </div>

@@ -70,7 +70,7 @@ export function PromotionalBanners({ offers }: PromotionalBannersProps) {
                 {activeOffers.map((offer) => (
                     <div
                         key={offer.id}
-                        className="relative min-w-[300px] md:min-w-[500px] h-[250px] rounded-3xl overflow-hidden group/card snap-center flex-shrink-0"
+                        className="relative min-w-[280px] md:min-w-[500px] h-[220px] md:h-[320px] rounded-3xl overflow-hidden group/card snap-center flex-shrink-0"
                     >
                         {/* Image */}
                         <NextImage
@@ -82,15 +82,15 @@ export function PromotionalBanners({ offers }: PromotionalBannersProps) {
                         />
 
                         {/* Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/40 to-transparent flex flex-col justify-center p-8 md:p-12 space-y-4">
-                            <span className="text-white/80 text-sm font-bold uppercase tracking-wider bg-primary/20 backdrop-blur w-fit px-3 py-1 rounded-full border border-primary/30">
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/50 to-transparent flex flex-col justify-center p-6 md:p-12 space-y-3 md:space-y-4">
+                            <span className="text-white/80 text-xs md:text-sm font-bold uppercase tracking-wider bg-primary/20 backdrop-blur w-fit px-2.5 py-0.5 md:px-3 md:py-1 rounded-full border border-primary/30">
                                 Limited Time
                             </span>
-                            <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+                            <h3 className="text-xl md:text-3xl font-extrabold text-white leading-tight">
                                 {offer.name}
                             </h3>
                             {offer.description && (
-                                <p className="text-slate-200 text-sm md:text-base max-w-[80%] line-clamp-2">
+                                <p className="text-slate-200 text-xs md:text-base max-w-[80%] line-clamp-2">
                                     {offer.description}
                                 </p>
                             )}

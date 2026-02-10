@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Product, Category } from '@/lib/api';
 import { ProductListing } from '@/components/category/ProductListing';
@@ -59,30 +59,26 @@ export function ShopView({ products, categories }: ShopViewProps) {
     const handleCategoryChange = (categorySlug: string | undefined, subcategoryName?: string) => {
         // Reset pagination
         setCurrentPage(1);
-        setIsUpdating(true);
 
-        setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString());
-            if (categorySlug) {
-                params.set('category', categorySlug);
-            } else {
-                params.delete('category');
-            }
+        const params = new URLSearchParams(searchParams.toString());
+        if (categorySlug) {
+            params.set('category', categorySlug);
+        } else {
+            params.delete('category');
+        }
 
-            if (subcategoryName) {
-                params.set('subcategory', subcategoryName);
-            } else {
-                params.delete('subcategory');
-            }
+        if (subcategoryName) {
+            params.set('subcategory', subcategoryName);
+        } else {
+            params.delete('subcategory');
+        }
 
-            // Clean up sort if default
-            if (currentSort === 'newest') params.delete('sort');
-            else params.set('sort', currentSort);
+        // Clean up sort if default
+        if (currentSort === 'newest') params.delete('sort');
+        else params.set('sort', currentSort);
 
-            router.push(`/shop?${params.toString()}`, { scroll: false });
-            setIsUpdating(false);
-            setIsMobileFiltersOpen(false);
-        }, 300);
+        router.push(`/shop?${params.toString()}`, { scroll: false });
+        setIsMobileFiltersOpen(false);
     };
 
     const handlePageChange = (page: number) => {
