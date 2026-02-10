@@ -73,27 +73,56 @@ export function CartProvider({ children }: { children: ReactNode }) {
             try {
                 if (refreshSession) await refreshSession();
 
-                const { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
+                // Get or create cart
+                let { data: cart, error: cartError } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
+
+                if (cartError && cartError.code === 'PGRST116') {
+                    // Create if doesn't exist
+                    const { data: newCart, error: createError } = await supabase
+                        .from('carts')
+                        .insert([{ user_id: user.id }])
+                        .select('id')
+                        .single();
+                    if (!createError) cart = newCart;
+                }
 
                 if (cart) {
-                    const { data: cartItems } = await supabase
+                    const { data: cartItems, error: itemsError } = await supabase
                         .from('cart_items')
                         .select('*')
                         .eq('cart_id', cart.id);
 
-                    if (cartItems && cartItems.length > 0) {
-                        const mappedItems: CartItem[] = cartItems.map((item: any) => ({
-                            id: item.product_id,
-                            name: item.name,
-                            price: item.price,
-                            images: [item.image],
-                            quantity: item.quantity,
-                            category: item.category,
-                            pack: item.pack,
-                            color: item.color,
-                            size: item.size
-                        }));
-                        setItems(mappedItems);
+                    if (!itemsError && cartItems) {
+                        if (cartItems.length > 0) {
+                            const mappedItems: CartItem[] = cartItems.map((item: any) => ({
+                                id: item.product_id,
+                                name: item.name,
+                                price: item.price,
+                                images: [item.image],
+                                quantity: item.quantity,
+                                category: item.category,
+                                pack: item.pack,
+                                color: item.color,
+                                size: item.size
+                            }));
+                            setItems(mappedItems);
+                        } else if (items.length > 0) {
+                            // If DB is empty but we have local items, push them!
+                            for (const item of items) {
+                                await supabase.from('cart_items').insert([{
+                                    cart_id: cart.id,
+                                    product_id: String(item.id),
+                                    name: item.name,
+                                    price: item.price,
+                                    image: item.images[0] || '',
+                                    quantity: item.quantity,
+                                    category: item.category,
+                                    color: item.color,
+                                    size: item.size,
+                                    pack: item.pack
+                                }]);
+                            }
+                        }
                     }
                 }
             } catch (error) {
