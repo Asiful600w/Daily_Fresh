@@ -104,16 +104,6 @@ export function OrderDetailsModal({ isOpen, onClose, order, loading }: OrderDeta
                         </div>
                     )}
                 </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t border-slate-100 dark:border-[#1e3a31] bg-slate-50/50 dark:bg-white/5 flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors"
-                    >
-                        Close
-                    </button>
-                </div>
             </div>
         </div >
     );
