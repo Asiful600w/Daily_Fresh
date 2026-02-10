@@ -142,7 +142,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                     {variant === 'wishlist' ? (
                         <button
                             onClick={handleDeleteClick}
-                            className="p-2 rounded-xl transition-all bg-red-50 text-red-500 hover:bg-red-100 shadow-sm cursor-pointer"
+                            className="p-2 rounded-xl transition-all text-red-500 hover:text-red-600 cursor-pointer"
                             title="Remove from wishlist"
                         >
                             <span className="material-icons-round text-sm">delete_outline</span>
@@ -150,7 +150,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                     ) : (
                         <button
                             onClick={handleWishlistClick}
-                            className={`p-2 rounded-xl transition-all shadow-sm cursor-pointer ${isWishlisted ? 'bg-red-500 text-white' : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700'}`}
+                            className={`p-2 transition-all cursor-pointer ${isWishlisted ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}
                         >
                             <span className={`material-icons-round text-sm ${isWishlisted ? '' : 'material-icons-outlined'}`}>
                                 {isWishlisted ? 'favorite' : 'favorite_border'}
@@ -222,7 +222,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                             <span className="material-icons-round text-lg">
                                 {isOutOfStock ? 'block' : 'add_shopping_cart'}
                             </span>
-                            <span className="text-[10px] font-black uppercase tracking-wider">{isOutOfStock ? 'OUT' : 'ADD'}</span>
                         </button>
                     </div>
                 </div>
