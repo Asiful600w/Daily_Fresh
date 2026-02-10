@@ -32,7 +32,7 @@ const fetchHeroSettings = async () => {
 export const getHeroSettings = unstable_cache(
     fetchHeroSettings,
     ['hero-settings'],
-    { revalidate: 3600, tags: ['settings'] }
+    { revalidate: 60, tags: ['settings'] }
 );
 
 // -- NOTICES --
@@ -56,7 +56,7 @@ const fetchNotices = async (onlyActive = true): Promise<Notice[]> => {
 export const getNotices = unstable_cache(
     fetchNotices,
     ['notices-list'],
-    { revalidate: 3600, tags: ['notices'] }
+    { revalidate: 60, tags: ['notices'] }
 );
 
 export async function createNotice(text: string) {
@@ -95,7 +95,7 @@ const fetchAds = async (onlyActive = true): Promise<AdScroll[]> => {
 export const getAds = unstable_cache(
     fetchAds,
     ['ads-list'],
-    { revalidate: 3600, tags: ['ads'] }
+    { revalidate: 60, tags: ['ads'] }
 );
 
 export async function createAd(imageUrl: string) {
@@ -131,7 +131,7 @@ const fetchSpecialCategories = async (): Promise<{ id: number; name: string; des
 export const getSpecialCategories = unstable_cache(
     fetchSpecialCategories,
     ['special-categories'],
-    { revalidate: 3600, tags: ['categories'] }
+    { revalidate: 60, tags: ['categories'] }
 );
 
 export async function createSpecialCategory(name: string, description?: string, imageUrl?: string) {
