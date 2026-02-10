@@ -79,8 +79,12 @@ export function AuthProvider({ children, initialUser = null }: { children: React
                     if (mounted) setUser(session.user);
                 }
             } else {
-                setSession(null);
-                setUser(null);
+                // Only clear user if we don't have an initialUser from server
+                // This prevents flash when page first loads
+                if (!initialUser) {
+                    setSession(null);
+                    setUser(null);
+                }
             }
 
             if (mounted) setLoading(false);
@@ -91,7 +95,7 @@ export function AuthProvider({ children, initialUser = null }: { children: React
             clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
-    }, [supabase, loading]);
+    }, [supabase, initialUser]);
 
     const signOut = async () => {
         setIsSigningOut(true);

@@ -151,6 +151,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     const addItem = async (newItem: CartItem) => {
+        // CRITICAL GUARD: Do not allow cart operations until auth is initialized
+        // This prevents the race condition where user appears null during page load
+        if (authLoading) {
+            console.warn('CartContext: Cannot add item - auth still loading');
+            console.log('CartContext: Queuing item for later...', newItem);
+            // Store in LocalStorage immediately for UX
+            const current = JSON.parse(localStorage.getItem('cart') || '[]');
+            localStorage.setItem('cart', JSON.stringify([...current, newItem]));
+            return;
+        }
+
         // DIAGNOSTIC: Log auth state
         console.log('=== ADD ITEM DIAGNOSTICS ===');
         console.log('User object:', user);
@@ -158,6 +169,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.log('Auth loading:', authLoading);
         console.log('Is initialized:', isInitialized);
         console.log('Item to add:', newItem);
+
 
         // Normalize new item attributes
         const color = sanitizeAttr(newItem.color);
