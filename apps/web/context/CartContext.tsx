@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { createClient } from '@/lib/supabase/client';
 
@@ -40,365 +40,361 @@ const defaultContext: CartContextType = {
 
 const CartContext = createContext<CartContextType>(defaultContext);
 
+// Helper: Read cart from LocalStorage
+function readLocalCart(): CartItem[] {
+    try {
+        const raw = localStorage.getItem('cart');
+        if (raw) return JSON.parse(raw);
+    } catch (e) {
+        console.error('CartContext: Failed to read localStorage cart', e);
+    }
+    return [];
+}
+
+// Helper: Write cart to LocalStorage
+function writeLocalCart(items: CartItem[]) {
+    try {
+        localStorage.setItem('cart', JSON.stringify(items));
+    } catch (e) {
+        console.error('CartContext: Failed to write localStorage cart', e);
+    }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-    const { user, loading: authLoading, refreshSession } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [supabase] = useState(() => createClient());
     const [items, setItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isInitialized, setIsInitialized] = useState(false);
+    const [dbCartId, setDbCartId] = useState<string | null>(null);
 
-    // 1. Immediate LocalStorage load (Instant UI)
+    // ─────────────────────────────────────────────
+    // STEP 1: Instantly load from LocalStorage (runs once)
+    // ─────────────────────────────────────────────
     useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
-        if (storedCart) {
-            try {
-                setItems(JSON.parse(storedCart));
-            } catch (error) {
-                console.error('Failed to parse cart from local storage:', error);
-            }
+        const localItems = readLocalCart();
+        if (localItems.length > 0) {
+            setItems(localItems);
         }
         setLoading(false);
     }, []);
 
-    // 2. Supabase Sync (Source of truth for logged-in users)
+    // ─────────────────────────────────────────────
+    // STEP 2: Sync with Supabase once auth is ready
+    // ─────────────────────────────────────────────
     useEffect(() => {
         if (authLoading) return;
+        if (!user) return; // Guest user - LocalStorage is enough
 
-        const syncWithSupabase = async () => {
-            if (!user) {
-                setIsInitialized(true);
-                return;
-            }
-
-            console.log('CartContext: Starting Supabase sync for user:', user.id);
-
+        const sync = async () => {
             try {
-                if (refreshSession) await refreshSession();
-
-                // Get or create cart
-                let { data: cart, error: cartError } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
-
-                if (cartError && cartError.code === 'PGRST116') {
-                    console.log('CartContext: No cart found, creating new cart');
-                    const { data: newCart, error: createError } = await supabase
-                        .from('carts')
-                        .insert([{ user_id: user.id }])
-                        .select('id')
-                        .single();
-                    if (createError) {
-                        console.error('CartContext: Failed to create cart:', createError);
-                    } else {
-                        cart = newCart;
-                        console.log('CartContext: Created new cart:', cart);
-                    }
+                // 2a. Ensure we have a valid session
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    console.warn('CartContext: No session found, skipping DB sync');
+                    return;
                 }
 
-                if (cart) {
-                    console.log('CartContext: Fetching cart items for cart:', cart.id);
-                    const { data: cartItems, error: itemsError } = await supabase
-                        .from('cart_items')
-                        .select('*')
-                        .eq('cart_id', cart.id);
+                // 2b. Get or create the user's cart
+                let cartId: string | null = null;
 
-                    if (itemsError) {
-                        console.error('CartContext: Error fetching cart items:', itemsError);
-                    } else {
-                        console.log('CartContext: Fetched cart items from DB:', cartItems);
-                        console.log('CartContext: Current local items count:', items.length);
+                const { data: existingCart, error: cartErr } = await supabase
+                    .from('carts')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
 
-                        if (cartItems && cartItems.length > 0) {
-                            const mappedItems: CartItem[] = cartItems.map((item: any) => ({
-                                id: item.product_id,
-                                name: item.name,
-                                price: item.price,
-                                images: [item.image],
-                                quantity: item.quantity,
-                                category: item.category,
-                                pack: item.pack,
-                                color: item.color,
-                                size: item.size
-                            }));
-                            console.log('CartContext: Overwriting local items with DB items');
-                            setItems(mappedItems);
-                        } else {
-                            console.log('CartContext: DB cart is empty, keeping local items');
-                            // DON'T overwrite local items with empty DB - let addItem handle syncing
+                if (cartErr) {
+                    console.error('CartContext: Error fetching cart:', cartErr);
+                    return;
+                }
+
+                if (existingCart) {
+                    cartId = existingCart.id;
+                } else {
+                    // Create new cart
+                    const { data: newCart, error: createErr } = await supabase
+                        .from('carts')
+                        .insert({ user_id: user.id })
+                        .select('id')
+                        .single();
+
+                    if (createErr) {
+                        console.error('CartContext: Error creating cart:', createErr);
+                        return;
+                    }
+                    cartId = newCart?.id || null;
+                }
+
+                if (!cartId) return;
+                setDbCartId(cartId);
+
+                // 2c. Fetch cart items from DB
+                const { data: dbItems, error: itemsErr } = await supabase
+                    .from('cart_items')
+                    .select('*')
+                    .eq('cart_id', cartId);
+
+                if (itemsErr) {
+                    console.error('CartContext: Error fetching cart items:', itemsErr);
+                    return;
+                }
+
+                if (dbItems && dbItems.length > 0) {
+                    // DB has items → use those as the source of truth
+                    const mapped: CartItem[] = dbItems.map((item: any) => ({
+                        id: item.product_id,
+                        name: item.name,
+                        price: Number(item.price),
+                        images: [item.image || ''],
+                        quantity: item.quantity,
+                        category: item.category,
+                        pack: item.pack,
+                        color: item.color,
+                        size: item.size,
+                    }));
+                    setItems(mapped);
+                    writeLocalCart(mapped);
+                } else {
+                    // DB is empty - push local items to DB if we have any
+                    const localItems = readLocalCart();
+                    if (localItems.length > 0) {
+                        const rows = localItems.map(item => ({
+                            cart_id: cartId!,
+                            product_id: String(item.id),
+                            name: item.name,
+                            price: item.price,
+                            image: item.images?.[0] || '',
+                            quantity: item.quantity,
+                            category: item.category || null,
+                            pack: item.pack || null,
+                            color: item.color || null,
+                            size: item.size || null,
+                        }));
+
+                        const { error: pushErr } = await supabase
+                            .from('cart_items')
+                            .insert(rows);
+
+                        if (pushErr) {
+                            console.error('CartContext: Error pushing local items to DB:', pushErr);
                         }
                     }
                 }
             } catch (error) {
-                console.error("CartContext: Supabase sync failed:", error);
-            } finally {
-                console.log('CartContext: Sync complete, setting initialized');
-                setIsInitialized(true);
+                console.error('CartContext: Sync error:', error);
             }
         };
 
-        syncWithSupabase();
-    }, [user, authLoading]);
+        sync();
+    }, [user, authLoading, supabase]);
 
-    // Save to LocalStorage (Always sync as backup/cache)
+    // ─────────────────────────────────────────────
+    // STEP 3: Save to LocalStorage whenever items change
+    // ─────────────────────────────────────────────
     useEffect(() => {
-        if (!authLoading && isInitialized) {
-            localStorage.setItem('cart', JSON.stringify(items));
+        if (!loading) {
+            writeLocalCart(items);
         }
-    }, [items, authLoading, isInitialized]);
+    }, [items, loading]);
 
+    // ─────────────────────────────────────────────
+    // Helper: Get or create the DB cart ID
+    // ─────────────────────────────────────────────
+    const getCartId = useCallback(async (): Promise<string | null> => {
+        if (dbCartId) return dbCartId;
+        if (!user) return null;
 
-    // Helper to sanitize optional fields for DB equality checks
-    const sanitizeAttr = (val: string | undefined): string | null => {
-        return val ? val : null;
-    };
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return null;
 
+            const { data: existingCart } = await supabase
+                .from('carts')
+                .select('id')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (existingCart) {
+                setDbCartId(existingCart.id);
+                return existingCart.id;
+            }
+
+            const { data: newCart, error: createErr } = await supabase
+                .from('carts')
+                .insert({ user_id: user.id })
+                .select('id')
+                .single();
+
+            if (createErr) {
+                console.error('CartContext: Error creating cart in getCartId:', createErr);
+                return null;
+            }
+
+            if (newCart) {
+                setDbCartId(newCart.id);
+                return newCart.id;
+            }
+        } catch (e) {
+            console.error('CartContext: getCartId error:', e);
+        }
+        return null;
+    }, [user, dbCartId, supabase]);
+
+    // ─────────────────────────────────────────────
+    // ADD ITEM
+    // ─────────────────────────────────────────────
     const addItem = async (newItem: CartItem) => {
-        // CRITICAL GUARD: Do not allow cart operations until auth is initialized
-        // This prevents the race condition where user appears null during page load
-        if (authLoading) {
-            console.warn('CartContext: Cannot add item - auth still loading');
-            console.log('CartContext: Queuing item for later...', newItem);
-            // Store in LocalStorage immediately for UX
-            const current = JSON.parse(localStorage.getItem('cart') || '[]');
-            localStorage.setItem('cart', JSON.stringify([...current, newItem]));
-            return;
-        }
+        // 1. Always update UI immediately
+        setItems(prev => {
+            const idx = prev.findIndex(i =>
+                String(i.id) === String(newItem.id) &&
+                (i.color || null) === (newItem.color || null)
+            );
+            if (idx >= 0) {
+                const updated = [...prev];
+                updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + newItem.quantity };
+                return updated;
+            }
+            return [...prev, newItem];
+        });
 
-        // DIAGNOSTIC: Log auth state
-        console.log('=== ADD ITEM DIAGNOSTICS ===');
-        console.log('User object:', user);
-        console.log('User ID:', user?.id);
-        console.log('Auth loading:', authLoading);
-        console.log('Is initialized:', isInitialized);
-        console.log('Item to add:', newItem);
-
-
-        // Normalize new item attributes
-        const color = sanitizeAttr(newItem.color);
-        const size = sanitizeAttr(newItem.size);
-        const pack = sanitizeAttr(newItem.pack);
-
+        // 2. If user is logged in, sync to DB
         if (user) {
-            console.log('CartContext: User is authenticated, proceeding with DB sync');
-
-            // Optimistic UI update
-            setItems(currentItems => {
-                const existingItem = currentItems.find(item =>
-                    String(item.id) === String(newItem.id) &&
-                    sanitizeAttr(item.color) === color &&
-                    sanitizeAttr(item.size) === size &&
-                    sanitizeAttr(item.pack) === pack
-                );
-
-                if (existingItem) {
-                    return currentItems.map(item =>
-                        (String(item.id) === String(newItem.id) &&
-                            sanitizeAttr(item.color) === color &&
-                            sanitizeAttr(item.size) === size &&
-                            sanitizeAttr(item.pack) === pack)
-                            ? { ...item, quantity: item.quantity + newItem.quantity }
-                            : item
-                    );
-                }
-                return [...currentItems, newItem];
-            });
-
             try {
-                console.log('CartContext: Fetching or creating cart for user:', user.id);
-
-                // Fetch cart ID or create if missing
-                let { data: cart, error: fetchError } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
-
-                if (fetchError) {
-                    console.log('CartContext: Cart fetch error:', fetchError);
-                    if (fetchError.code === 'PGRST116') {
-                        console.log('CartContext: Creating new cart');
-                        const { data: newCart, error: createError } = await supabase
-                            .from('carts')
-                            .insert([{ user_id: user.id }])
-                            .select('id')
-                            .single();
-                        if (createError) {
-                            console.error('CartContext: CRITICAL - Failed to create cart:', createError);
-                            throw createError;
-                        }
-                        cart = newCart;
-                        console.log('CartContext: Created cart:', cart);
-                    } else {
-                        throw fetchError;
-                    }
-                }
-
-                if (!cart) {
-                    console.error('CartContext: CRITICAL - No cart available after fetch/create');
+                const cartId = await getCartId();
+                if (!cartId) {
+                    console.error('CartContext: addItem - could not get cartId');
                     return;
                 }
 
-                console.log('CartContext: Using cart:', cart.id);
-
-                // Check dependencies using specific filters matching the sanitization
-                console.log('CartContext: Checking for existing cart item');
-                let query = supabase
+                // Check if this product already exists in DB cart
+                const { data: existing } = await supabase
                     .from('cart_items')
-                    .select('*')
-                    .eq('cart_id', cart.id)
-                    .eq('product_id', String(newItem.id));
+                    .select('id, quantity')
+                    .eq('cart_id', cartId)
+                    .eq('product_id', String(newItem.id))
+                    .eq('color', newItem.color || '')
+                    .maybeSingle();
 
-                // Add explicit filters for optional attributes
-                if (color) query = query.eq('color', color);
-                else query = query.is('color', null);
-
-                // Note: unique constraint is (cart_id, product_id, color). 
-                // We trust the constraint but need to find the specific row to update.
-                const { data: existingDbItems } = await query;
-
-                // Manual filtering if needed (to be extra safe against DB weirdness) or just take first
-                const existingDbItem = existingDbItems && existingDbItems.length > 0 ? existingDbItems[0] : null;
-
-                if (existingDbItem) {
-                    const { error: updateError } = await supabase
+                if (existing) {
+                    // Update quantity
+                    const { error } = await supabase
                         .from('cart_items')
-                        .update({ quantity: existingDbItem.quantity + newItem.quantity })
-                        .eq('id', existingDbItem.id);
+                        .update({ quantity: existing.quantity + newItem.quantity })
+                        .eq('id', existing.id);
 
-                    if (updateError) console.warn("CartContext: Update item error (UI already updated):", updateError);
+                    if (error) console.error('CartContext: Error updating cart item:', error);
                 } else {
-                    const insertPayload = {
-                        cart_id: cart.id,
-                        product_id: String(newItem.id),
-                        name: newItem.name,
-                        price: newItem.price,
-                        image: newItem.images[0] || '',
-                        quantity: newItem.quantity,
-                        category: newItem.category,
-                        pack: pack,
-                        color: color,
-                        size: size
-                    };
-
-                    console.log('CartContext: Attempting to insert cart item:', insertPayload);
-
-                    const { data: insertedData, error: insertError } = await supabase
+                    // Insert new item
+                    const { error } = await supabase
                         .from('cart_items')
-                        .insert([insertPayload])
-                        .select();
-
-                    if (insertError) {
-                        console.error("CartContext: CRITICAL - Failed to insert cart item:", insertError);
-                        console.error("CartContext: Insert payload was:", insertPayload);
-                        console.error("CartContext: Error details:", {
-                            message: insertError.message,
-                            code: insertError.code,
-                            details: insertError.details,
-                            hint: insertError.hint
+                        .insert({
+                            cart_id: cartId,
+                            product_id: String(newItem.id),
+                            name: newItem.name,
+                            price: newItem.price,
+                            image: newItem.images?.[0] || '',
+                            quantity: newItem.quantity,
+                            category: newItem.category || null,
+                            pack: newItem.pack || null,
+                            color: newItem.color || null,
+                            size: newItem.size || null,
                         });
-                    } else {
-                        console.log('CartContext: Successfully inserted cart item:', insertedData);
-                    }
-                }
 
-            } catch (error: any) {
-                console.error("CartContext: CRITICAL ERROR syncing item to database:", error);
-                console.error("CartContext: Error stack:", error?.stack);
-                console.error("CartContext: Error details:", {
-                    message: error?.message,
-                    code: error?.code,
-                    details: error?.details
-                });
+                    if (error) console.error('CartContext: Error inserting cart item:', error);
+                }
+            } catch (error) {
+                console.error('CartContext: addItem DB sync error:', error);
             }
-
-        } else {
-            // Guest Logic
-            setItems(currentItems => {
-                const existingItem = currentItems.find(item =>
-                    String(item.id) === String(newItem.id) &&
-                    item.color === newItem.color // Simple check for guest
-                );
-                if (existingItem) {
-                    return currentItems.map(item =>
-                        (String(item.id) === String(newItem.id) && item.color === newItem.color)
-                            ? { ...item, quantity: item.quantity + newItem.quantity }
-                            : item
-                    );
-                }
-                return [...currentItems, newItem];
-            });
         }
     };
 
+    // ─────────────────────────────────────────────
+    // REMOVE ITEM
+    // ─────────────────────────────────────────────
     const removeItem = async (id: number | string, color?: string) => {
-        const normColor = sanitizeAttr(color);
+        setItems(prev => prev.filter(item => !(
+            String(item.id) === String(id) &&
+            (item.color || null) === (color || null)
+        )));
 
-        setItems(currentItems => currentItems.filter(item => {
-            const isSameId = String(item.id) === String(id);
-            const isSameColor = sanitizeAttr(item.color) === normColor;
-            return !(isSameId && isSameColor);
+        if (user) {
+            try {
+                const cartId = await getCartId();
+                if (!cartId) return;
+
+                let q = supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('cart_id', cartId)
+                    .eq('product_id', String(id));
+
+                if (color) q = q.eq('color', color);
+                else q = q.is('color', null);
+
+                const { error } = await q;
+                if (error) console.error('CartContext: Error removing cart item:', error);
+            } catch (error) {
+                console.error('CartContext: removeItem DB sync error:', error);
+            }
+        }
+    };
+
+    // ─────────────────────────────────────────────
+    // UPDATE QUANTITY
+    // ─────────────────────────────────────────────
+    const updateQuantity = async (id: number | string, delta: number, color?: string) => {
+        let newQty = 0;
+
+        setItems(prev => prev.map(item => {
+            if (String(item.id) === String(id) && (item.color || null) === (color || null)) {
+                newQty = Math.max(1, item.quantity + delta);
+                return { ...item, quantity: newQty };
+            }
+            return item;
         }));
 
         if (user) {
             try {
-                const { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
-                if (cart) {
-                    let query = supabase
-                        .from('cart_items')
-                        .delete()
-                        .eq('cart_id', cart.id)
-                        .eq('product_id', id);
+                const cartId = await getCartId();
+                if (!cartId) return;
 
-                    if (normColor) query = query.eq('color', normColor);
-                    else query = query.is('color', null);
+                let q = supabase
+                    .from('cart_items')
+                    .update({ quantity: newQty })
+                    .eq('cart_id', cartId)
+                    .eq('product_id', String(id));
 
-                    await query;
-                }
+                if (color) q = q.eq('color', color);
+                else q = q.is('color', null);
+
+                const { error } = await q;
+                if (error) console.error('CartContext: Error updating quantity:', error);
             } catch (error) {
-                console.warn("CartContext: Error removing item from database (UI already updated):", error);
+                console.error('CartContext: updateQuantity DB sync error:', error);
             }
         }
     };
 
-    const updateQuantity = async (id: number | string, delta: number, color?: string) => {
-        const normColor = sanitizeAttr(color);
-        let newQuantity = 0;
-
-        setItems(currentItems =>
-            currentItems.map(item => {
-                if (String(item.id) === String(id) && sanitizeAttr(item.color) === normColor) {
-                    newQuantity = Math.max(1, item.quantity + delta);
-                    return { ...item, quantity: newQuantity };
-                }
-                return item;
-            })
-        );
-
-        if (user) {
-            try {
-                const { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
-                if (cart) {
-                    let query = supabase
-                        .from('cart_items')
-                        .update({ quantity: newQuantity })
-                        .eq('cart_id', cart.id)
-                        .eq('product_id', id);
-
-                    if (normColor) query = query.eq('color', normColor);
-                    else query = query.is('color', null);
-
-                    await query;
-                }
-            } catch (error) {
-                console.warn("CartContext: Error updating quantity in database (UI already updated):", error);
-            }
-        }
-    };
-
+    // ─────────────────────────────────────────────
+    // CLEAR CART
+    // ─────────────────────────────────────────────
     const clearCart = async () => {
         setItems([]);
+
         if (user) {
             try {
-                const { data: cart } = await supabase.from('carts').select('id').eq('user_id', user.id).single();
-                if (cart) {
-                    await supabase.from('cart_items').delete().eq('cart_id', cart.id);
-                }
+                const cartId = await getCartId();
+                if (!cartId) return;
+
+                const { error } = await supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('cart_id', cartId);
+
+                if (error) console.error('CartContext: Error clearing cart:', error);
             } catch (error) {
-                console.warn("CartContext: Error clearing database cart (UI already updated):", error);
+                console.error('CartContext: clearCart DB sync error:', error);
             }
         }
     };
