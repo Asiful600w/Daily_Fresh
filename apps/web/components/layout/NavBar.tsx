@@ -224,6 +224,16 @@ export function NavBar({ categories }: { categories: Category[] }) {
                         >
                             <span className="material-icons-round text-xl">search</span>
                         </button>
+                        <Link href="/cart" className="relative cursor-pointer">
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <span className="material-icons-round text-xl">shopping_cart</span>
+                            </div>
+                            {totalItems > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm animate-bounce-in">
+                                    {totalItems > 99 ? '99+' : totalItems}
+                                </span>
+                            )}
+                        </Link>
                         <button
                             className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                             onClick={toggleTheme}
