@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 import { CURRENCY_SYMBOL } from '@/lib/format';
 
@@ -30,6 +30,9 @@ export function MobileShopFilterDrawer({
     currentMax,
     onPriceChange
 }: MobileShopFilterDrawerProps) {
+    // Track which category is expanded in the drawer
+    const [expandedCategory, setExpandedCategory] = useState<string | null>(selectedCategory || null);
+
     const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = Math.min(Number(e.target.value), currentMax - 1);
         onPriceChange(val, currentMax);
@@ -42,6 +45,20 @@ export function MobileShopFilterDrawer({
 
     const minPercent = ((currentMin - minPrice) / (maxPrice - minPrice)) * 100;
     const maxPercent = ((currentMax - minPrice) / (maxPrice - minPrice)) * 100;
+
+    const handleCategoryClick = (categorySlug: string) => {
+        // Toggle expand/collapse — don't filter yet
+        if (expandedCategory === categorySlug) {
+            setExpandedCategory(null);
+        } else {
+            setExpandedCategory(categorySlug);
+        }
+    };
+
+    const handleSubcategoryClick = (categorySlug: string, subcategoryName?: string) => {
+        // Now filter and close drawer
+        onCategoryChange(categorySlug, subcategoryName);
+    };
 
     return (
         <div className={`fixed inset-0 z-[100] transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
@@ -68,32 +85,54 @@ export function MobileShopFilterDrawer({
                     <section>
                         <h4 className="font-bold mb-4 text-slate-900 dark:text-white">Categories</h4>
                         <div className="space-y-2">
+                            {/* All Products */}
                             <div
-                                className={`cursor-pointer px-4 py-3 rounded-xl transition-colors text-sm font-bold border ${!selectedCategory ? 'bg-primary/10 border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'}`}
-                                onClick={() => onCategoryChange(undefined)}
+                                className={`cursor-pointer px-4 py-3 rounded-xl transition-colors text-sm font-bold border flex items-center gap-2 ${!selectedCategory ? 'bg-primary/10 border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'}`}
+                                onClick={() => {
+                                    setExpandedCategory(null);
+                                    onCategoryChange(undefined);
+                                }}
                             >
+                                <span className="material-icons-round text-sm">grid_view</span>
                                 All Products
                             </div>
+
                             {categories.map(category => {
-                                const isSelected = selectedCategory === category.slug;
+                                const isExpanded = expandedCategory === category.slug;
+                                const isActive = selectedCategory === category.slug;
+
                                 return (
-                                    <div key={category.id} className="space-y-2">
+                                    <div key={category.id} className="space-y-1">
+                                        {/* Category Header — toggles dropdown */}
                                         <div
-                                            className={`flex items-center justify-between cursor-pointer px-4 py-3 rounded-xl transition-colors text-sm font-bold border ${isSelected ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent' : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'}`}
-                                            onClick={() => onCategoryChange(category.slug)}
+                                            className={`flex items-center justify-between cursor-pointer px-4 py-3 rounded-xl transition-all text-sm font-bold border
+                                                ${isActive
+                                                    ? 'bg-primary/10 border-primary text-primary'
+                                                    : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'
+                                                }`}
+                                            onClick={() => handleCategoryClick(category.slug)}
                                         >
                                             <span>{category.name}</span>
-                                            {isSelected && <span className="material-icons-round text-sm">expand_more</span>}
+                                            <span className={`material-icons-round text-sm transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                                                expand_more
+                                            </span>
                                         </div>
 
-                                        {/* Subcategories (Mobile) */}
-                                        {isSelected && (
-                                            <div className="pl-4 grid grid-cols-2 gap-2 animate-fade-in">
+                                        {/* Subcategories dropdown */}
+                                        <div
+                                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
+                                        >
+                                            <div className="pl-2 grid grid-cols-2 gap-1.5 py-1">
+                                                {/* All [Category] */}
                                                 <div
-                                                    className={`cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-center border ${!selectedSubcategory ? 'border-primary text-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700 text-slate-500'}`}
+                                                    className={`cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold text-center border transition-all
+                                                        ${isActive && !selectedSubcategory
+                                                            ? 'border-primary text-primary bg-primary/5'
+                                                            : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary/50 hover:text-primary'
+                                                        }`}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onCategoryChange(category.slug, undefined);
+                                                        handleSubcategoryClick(category.slug, undefined);
                                                     }}
                                                 >
                                                     All
@@ -101,17 +140,21 @@ export function MobileShopFilterDrawer({
                                                 {category.subcategories.map(sub => (
                                                     <div
                                                         key={sub.name}
-                                                        className={`cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold text-center border ${selectedSubcategory === sub.name ? 'border-primary text-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700 text-slate-500'}`}
+                                                        className={`cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold text-center border transition-all
+                                                            ${selectedSubcategory === sub.name
+                                                                ? 'border-primary text-primary bg-primary/5'
+                                                                : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary/50 hover:text-primary'
+                                                            }`}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            onCategoryChange(category.slug, sub.name);
+                                                            handleSubcategoryClick(category.slug, sub.name);
                                                         }}
                                                     >
                                                         {sub.name}
                                                     </div>
                                                 ))}
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
                                 );
                             })}

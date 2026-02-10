@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 import { CURRENCY_SYMBOL } from '@/lib/format';
 
@@ -26,6 +26,9 @@ export function SidebarShopFilters({
     currentMax,
     onPriceChange
 }: SidebarShopFiltersProps) {
+    // Track which category drawer is expanded (separate from actual filter)
+    const [expandedCategory, setExpandedCategory] = useState<string | null>(selectedCategory || null);
+
     const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = Math.min(Number(e.target.value), currentMax - 1);
         onPriceChange(val, currentMax);
@@ -39,6 +42,20 @@ export function SidebarShopFilters({
     const minPercent = ((currentMin - minPrice) / (maxPrice - minPrice)) * 100;
     const maxPercent = ((currentMax - minPrice) / (maxPrice - minPrice)) * 100;
 
+    const handleCategoryClick = (categorySlug: string) => {
+        // Toggle the drawer open/close — don't filter products yet
+        if (expandedCategory === categorySlug) {
+            setExpandedCategory(null);
+        } else {
+            setExpandedCategory(categorySlug);
+        }
+    };
+
+    const handleSubcategoryClick = (categorySlug: string, subcategoryName?: string) => {
+        // NOW actually filter products
+        onCategoryChange(categorySlug, subcategoryName);
+    };
+
     return (
         <aside className="w-full space-y-8">
             {/* Categories */}
@@ -47,51 +64,81 @@ export function SidebarShopFilters({
                     <span className="material-icons-round text-primary">category</span>
                     Categories
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <div
-                        className={`cursor-pointer px-3 py-2 rounded-lg transition-colors text-sm font-medium ${!selectedCategory ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-                        onClick={() => onCategoryChange(undefined)}
+                        className={`cursor-pointer px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${!selectedCategory ? 'bg-primary/10 text-primary font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                        onClick={() => {
+                            setExpandedCategory(null);
+                            onCategoryChange(undefined);
+                        }}
                     >
-                        All Products
+                        <span className="flex items-center gap-2">
+                            <span className="material-icons-round text-sm">grid_view</span>
+                            All Products
+                        </span>
                     </div>
+
                     {categories.map(category => {
-                        const isSelected = selectedCategory === category.slug;
+                        const isExpanded = expandedCategory === category.slug;
+                        const isActive = selectedCategory === category.slug;
+
                         return (
-                            <div key={category.id} className="space-y-1">
+                            <div key={category.id}>
+                                {/* Category Header - clicking only expands, doesn't filter */}
                                 <div
-                                    className={`flex items-center justify-between cursor-pointer px-3 py-2 rounded-lg transition-colors text-sm font-medium ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-                                    onClick={() => onCategoryChange(category.slug)}
+                                    className={`flex items-center justify-between cursor-pointer px-3 py-2.5 rounded-lg transition-all text-sm font-medium
+                                        ${isActive
+                                            ? 'bg-primary/10 text-primary font-bold'
+                                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                    onClick={() => handleCategoryClick(category.slug)}
                                 >
                                     <span>{category.name}</span>
-                                    {isSelected && <span className="material-icons-round text-sm">expand_more</span>}
+                                    <span className={`material-icons-round text-sm transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                                        expand_more
+                                    </span>
                                 </div>
 
-                                {/* Subcategories Accordion */}
-                                {isSelected && (
-                                    <div className="pl-4 space-y-1 pt-1 animate-fade-in">
+                                {/* Subcategories Drawer */}
+                                <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                                >
+                                    <div className="pl-3 pr-1 py-1 space-y-0.5">
+                                        {/* "All [Category]" option */}
                                         <div
-                                            className={`cursor-pointer px-3 py-1.5 rounded-md transition-colors text-xs font-medium ${!selectedSubcategory ? 'text-primary' : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                            className={`cursor-pointer px-3 py-2 rounded-md transition-all text-xs font-semibold flex items-center gap-2
+                                                ${isActive && !selectedSubcategory
+                                                    ? 'text-primary bg-primary/5'
+                                                    : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                }`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                onCategoryChange(category.slug, undefined);
+                                                handleSubcategoryClick(category.slug, undefined);
                                             }}
                                         >
+                                            <span className="material-icons-round text-xs">apps</span>
                                             All {category.name}
                                         </div>
+
                                         {category.subcategories.map(sub => (
                                             <div
                                                 key={sub.name}
-                                                className={`cursor-pointer px-3 py-1.5 rounded-md transition-colors text-xs font-medium ${selectedSubcategory === sub.name ? 'text-primary bg-primary/5' : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                                className={`cursor-pointer px-3 py-2 rounded-md transition-all text-xs font-semibold flex items-center gap-2
+                                                    ${selectedSubcategory === sub.name
+                                                        ? 'text-primary bg-primary/5'
+                                                        : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                    }`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onCategoryChange(category.slug, sub.name);
+                                                    handleSubcategoryClick(category.slug, sub.name);
                                                 }}
                                             >
+                                                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-40 shrink-0"></span>
                                                 {sub.name}
                                             </div>
                                         ))}
                                     </div>
-                                )}
+                                </div>
                             </div>
                         );
                     })}
@@ -152,7 +199,7 @@ export function SidebarShopFilters({
                     border: 2px solid #22c55e;
                     cursor: pointer;
                     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                    margin-top: -8px; /* Correct vertical alignment */
+                    margin-top: -8px;
                 }
                 input[type=range]::-moz-range-thumb {
                     pointer-events: auto;

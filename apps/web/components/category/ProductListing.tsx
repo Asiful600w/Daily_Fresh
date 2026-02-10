@@ -16,6 +16,30 @@ interface ProductListingProps {
     isUpdating: boolean;
 }
 
+// Skeleton card for loading state
+function ProductCardSkeleton() {
+    return (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 border border-slate-100 dark:border-slate-700/50 h-full flex flex-col animate-pulse">
+            {/* Image skeleton */}
+            <div className="aspect-square w-full mb-2 sm:mb-4 bg-slate-200 dark:bg-slate-700 rounded-xl sm:rounded-2xl" />
+            {/* Content skeleton */}
+            <div className="flex-1 flex flex-col px-0.5 sm:px-1 space-y-2">
+                <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+                <div className="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                <div className="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded w-12 mt-1" />
+                <div className="mt-auto pt-2 sm:pt-3 space-y-2">
+                    <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-20" />
+                    <div className="flex gap-1.5 sm:gap-2">
+                        <div className="h-8 sm:h-10 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg sm:rounded-xl" />
+                        <div className="h-8 sm:h-10 flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg sm:rounded-xl" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function ProductListing({
     title,
     subtitle,
@@ -33,7 +57,7 @@ export function ProductListing({
     };
 
     return (
-        <div className={`transition-opacity duration-300 ${isUpdating ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+        <div>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white leading-tight">{title}</h1>
@@ -57,21 +81,27 @@ export function ProductListing({
 
             {/* Grid */}
             <div className="relative min-h-[400px]">
-                {/* Loading State Overlay */}
-                {isUpdating && (
-                    <div className="absolute inset-0 z-10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm flex items-center justify-center rounded-xl transition-all duration-300 animate-fade-in">
-                        <div className="flex flex-col items-center gap-3">
-                            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                            <span className="text-sm font-bold text-primary animate-pulse">Updating...</span>
-                        </div>
+                {isUpdating ? (
+                    /* Skeleton Loading Grid */
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 mb-12">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <ProductCardSkeleton key={`skeleton-${i}`} />
+                        ))}
+                    </div>
+                ) : (
+                    /* Actual Products with staggered fade-in */
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 mb-12">
+                        {products.map((product, index) => (
+                            <div
+                                key={product.id}
+                                className="animate-fade-in-up"
+                                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
+                            >
+                                <ProductCard product={{ ...product, id: product.id }} />
+                            </div>
+                        ))}
                     </div>
                 )}
-
-                <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-12 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={{ ...product, id: product.id }} />
-                    ))}
-                </div>
 
                 {products.length === 0 && !isUpdating && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -115,6 +145,22 @@ export function ProductListing({
                     </button>
                 </div>
             )}
+
+            <style jsx>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(16px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .animate-fade-in-up {
+                    animation: fadeInUp 0.4s ease-out;
+                }
+            `}</style>
         </div>
     );
 }
