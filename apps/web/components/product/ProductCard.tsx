@@ -34,6 +34,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const { triggerFly } = useFlyToCart();
     const isOutOfStock = product.stockQuantity === 0;
+    const MAX_QUANTITY = 99; // Prevent abuse
 
     // Local state for quantity
     const [quantity, setQuantity] = React.useState(1);
@@ -65,8 +66,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     const handleIncrement = React.useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setQuantity(prev => prev + 1);
-    }, []);
+        setQuantity(prev => {
+            const stockMax = product.stockQuantity !== undefined ? product.stockQuantity : MAX_QUANTITY;
+            return Math.min(prev + 1, stockMax, MAX_QUANTITY);
+        });
+    }, [product.stockQuantity]);
 
     const handleDecrement = React.useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -215,7 +219,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                             <span className="w-5 sm:w-8 text-center text-xs sm:text-sm font-black text-slate-900 dark:text-white tabular-nums">{quantity}</span>
                             <button
                                 onClick={handleIncrement}
-                                disabled={isOutOfStock || (product.stockQuantity !== undefined && quantity >= product.stockQuantity)}
+                                disabled={isOutOfStock || quantity >= MAX_QUANTITY || (product.stockQuantity !== undefined && quantity >= product.stockQuantity)}
                                 className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md sm:rounded-lg bg-white dark:bg-slate-600 shadow-sm text-slate-500 dark:text-slate-200 hover:text-primary active:scale-90 transition-all cursor-pointer disabled:cursor-not-allowed"
                                 aria-label="Increase quantity"
                             >

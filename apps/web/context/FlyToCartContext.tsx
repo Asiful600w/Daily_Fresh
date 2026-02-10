@@ -23,6 +23,10 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
     const countRef = useRef(0);
 
     const triggerFly = (srcElement: HTMLElement, image: string, quantity: number = 1) => {
+        // Cap animation items to prevent performance abuse
+        const MAX_FLY_ITEMS = 10;
+        const flyCount = Math.min(quantity, MAX_FLY_ITEMS);
+
         let cartIcon: HTMLElement | null = null;
 
         // Try to find both icons
@@ -54,7 +58,7 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
 
         const newItems: FlyingItem[] = [];
 
-        for (let i = 0; i < quantity; i++) {
+        for (let i = 0; i < flyCount; i++) {
             const id = countRef.current++;
 
             // Adjust start to be center of button/image
@@ -75,7 +79,7 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
         setItems(prev => [...prev, ...newItems]);
 
         // Clean up after animation (max delay + duration)
-        const maxDelay = (quantity - 1) * 100;
+        const maxDelay = (flyCount - 1) * 100;
         setTimeout(() => {
             setItems(prev => prev.filter(item => !newItems.find(ni => ni.id === item.id)));
         }, 1000 + maxDelay);
