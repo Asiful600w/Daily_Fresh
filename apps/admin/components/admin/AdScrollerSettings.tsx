@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AdScroll, getAds, createAd, updateAd, deleteAd, uploadAdImage } from '@/lib/api';
 import NextImage from 'next/image';
+import { processImageForBanner } from '@/lib/imageProcessor';
 
 export function AdScrollerSettings() {
     const [ads, setAds] = useState<AdScroll[]>([]);
     const [newAdUrl, setNewAdUrl] = useState('');
     const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
 
     const loadAds = useCallback(async () => {
         setLoading(true);
@@ -46,16 +48,17 @@ export function AdScrollerSettings() {
         if (!file) return;
 
         try {
-            setLoading(true); // Re-use loading state or create a specific one
-            const publicUrl = await uploadAdImage(file);
+            setUploading(true);
+            const processedFile = await processImageForBanner(file, 800, 440);
+            const publicUrl = await uploadAdImage(processedFile);
             await createAd(publicUrl);
-            loadAds(); // Reload list to show new image
-            // Reset input
+            loadAds();
             e.target.value = '';
         } catch (error) {
             console.error('Upload failed:', error);
             alert('Failed to upload image.');
-            setLoading(false);
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -68,15 +71,15 @@ export function AdScrollerSettings() {
             {/* Add New Ad */}
             <div className="mb-8 space-y-4">
                 <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-600 dark:text-slate-300 font-bold text-sm">
-                        <span className="material-icons-round">cloud_upload</span>
-                        Upload Image
+                    <label className={`flex items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-600 dark:text-slate-300 font-bold text-sm ${uploading ? 'cursor-wait opacity-60' : 'cursor-pointer'}`}>
+                        <span className={`material-icons-round ${uploading ? 'animate-spin' : ''}`}>{uploading ? 'refresh' : 'cloud_upload'}</span>
+                        {uploading ? 'Optimizing...' : 'Upload Image'}
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileUpload}
                             className="hidden"
-                            disabled={loading}
+                            disabled={loading || uploading}
                         />
                     </label>
                     <span className="text-slate-400 text-sm">or</span>

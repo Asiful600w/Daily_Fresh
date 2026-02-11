@@ -91,3 +91,42 @@ export async function processImages(
         previewUrls: results.map((r) => r.previewUrl),
     };
 }
+
+/**
+ * Process a banner/hero image:
+ * 1. Scale to fit within maxWidth × maxHeight (no upscale)
+ * 2. Preserve original aspect ratio
+ * 3. Export as WebP
+ */
+export async function processImageForBanner(
+    file: File,
+    maxWidth: number = 960,
+    maxHeight: number = 600
+): Promise<File> {
+    const img = await loadImage(file);
+
+    // Scale to fit within max dimensions, never upscale
+    const scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+    const scaledWidth = Math.round(img.width * scale);
+    const scaledHeight = Math.round(img.height * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = scaledWidth;
+    canvas.height = scaledHeight;
+
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+
+    URL.revokeObjectURL(img.src);
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error('Canvas toBlob failed'))),
+            'image/webp',
+            QUALITY
+        );
+    });
+
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+}

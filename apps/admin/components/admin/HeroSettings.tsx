@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getHeroSettings, updateHeroSettings, uploadHeroImage } from '@/lib/api';
 import NextImage from 'next/image';
+import { processImageForBanner } from '@/lib/imageProcessor';
 
 export function HeroSettings() {
     const [loading, setLoading] = useState(true);
@@ -32,13 +33,15 @@ export function HeroSettings() {
         if (!file) return;
 
         try {
+            setImageStatus({ type: 'loading', message: 'Optimizing image...' });
+            const processedFile = await processImageForBanner(file, 960, 600);
             setImageStatus({ type: 'loading', message: 'Uploading image...' });
-            const publicUrl = await uploadHeroImage(file);
+            const publicUrl = await uploadHeroImage(processedFile);
             setFormData(prev => ({ ...prev, image_url: publicUrl }));
-            setImageStatus({ type: 'valid', message: 'Image uploaded successfully!', details: 'You must save changes to apply.' });
+            setImageStatus({ type: 'valid', message: 'Image optimized & uploaded!', details: 'You must save changes to apply.' });
         } catch (error) {
             console.error('Upload failed:', error);
-            setImageStatus({ type: 'error', message: 'Failed to upload image.' });
+            setImageStatus({ type: 'error', message: 'Failed to process or upload image.' });
         }
     };
 
