@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabaseClient as supabase } from '@/lib/supabaseClient';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import NextImage from 'next/image';
+import { processImages } from '@/lib/imageProcessor';
 
 export function ProductForm({ initialData }: { initialData?: Partial<Product> }) {
     const { adminUser } = useAdminAuth();
@@ -18,6 +19,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>(initialData?.images || []);
     const [uploading, setUploading] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
     // We store the 'specialCategoryId' in the formData. 
     // Note: The API requires resolved IDs usually, but for updateProduct we might need to handle this.
@@ -139,18 +141,26 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
     const [colorInput, setColorInput] = useState('');
 
     // Image Handling
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
             if (files.length + previewUrls.length > 6) {
                 alert("You can only have up to 6 images per product.");
                 return;
             }
-            setSelectedFiles(prev => [...prev, ...files]);
 
-            // Generate preview URLs
-            const newPreviews = files.map(file => URL.createObjectURL(file));
-            setPreviewUrls(prev => [...prev, ...newPreviews]);
+            // Process images: resize to 800x800, center, compress to WebP
+            setProcessing(true);
+            try {
+                const { processedFiles, previewUrls: newPreviews } = await processImages(files);
+                setSelectedFiles(prev => [...prev, ...processedFiles]);
+                setPreviewUrls(prev => [...prev, ...newPreviews]);
+            } catch (err) {
+                console.error('Image processing failed:', err);
+                alert('Failed to process one or more images. Please try again.');
+            } finally {
+                setProcessing(false);
+            }
         }
     };
 
@@ -601,16 +611,26 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
 
                             {/* Upload Button */}
                             {previewUrls.length < 6 && (
-                                <label className="aspect-square bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <label className={`aspect-square bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center transition-colors ${processing ? 'cursor-wait opacity-60' : 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                     <input
                                         type="file"
                                         multiple
                                         accept="image/*"
                                         className="hidden"
                                         onChange={handleFileSelect}
+                                        disabled={processing}
                                     />
-                                    <span className="material-icons-round text-slate-400 mb-1">add_photo_alternate</span>
-                                    <span className="text-xs font-bold text-slate-500">Add Image</span>
+                                    {processing ? (
+                                        <>
+                                            <span className="material-icons-round text-primary animate-spin mb-1">refresh</span>
+                                            <span className="text-xs font-bold text-primary">Optimizing...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="material-icons-round text-slate-400 mb-1">add_photo_alternate</span>
+                                            <span className="text-xs font-bold text-slate-500">Add Image</span>
+                                        </>
+                                    )}
                                 </label>
                             )}
                         </div>

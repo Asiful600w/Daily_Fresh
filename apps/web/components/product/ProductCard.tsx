@@ -111,7 +111,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                         alt={product.name}
                         fill
                         sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-contain relative z-0 pointer-events-none p-3 sm:p-4"
+                        className="object-cover relative z-0 pointer-events-none"
                         src={product.images[0]}
                     />
                 ) : (
