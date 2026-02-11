@@ -32,15 +32,23 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
 
     // -- State --
     const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'newest');
-    // Filter State
-    const [priceRange, setPriceRange] = useState({ min: globalMinPrice, max: globalMaxPrice });
-    // Reset price range if category changes
+
+    // Initialize price from URL or globals
+    const urlMin = Number(searchParams.get('minPrice')) || globalMinPrice;
+    const urlMax = Number(searchParams.get('maxPrice')) || globalMaxPrice;
+
+    const [priceRange, setPriceRange] = useState({
+        min: urlMin >= globalMinPrice ? urlMin : globalMinPrice,
+        max: urlMax <= globalMaxPrice ? urlMax : globalMaxPrice
+    });
+
+    // Handle Category/Subcategory switch - ONLY reset if bounds are exceeded
     useEffect(() => {
-        if (priceRange.min !== globalMinPrice || priceRange.max !== globalMaxPrice) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPriceRange({ min: globalMinPrice, max: globalMaxPrice });
-        }
-    }, [globalMinPrice, globalMaxPrice, priceRange.min, priceRange.max]);
+        setPriceRange(prev => ({
+            min: Math.max(prev.min, globalMinPrice),
+            max: Math.min(prev.max, globalMaxPrice)
+        }));
+    }, [globalMinPrice, globalMaxPrice]);
 
     // Loading State
     const [isUpdating, setIsUpdating] = useState(false);
@@ -57,9 +65,12 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     };
 
     const handlePriceChange = (min: number, max: number) => {
-        // Immediate UI update for the numbers/slider
         setPriceRange({ min, max });
-        setCurrentPage(1); // Reset page on price change
+        setCurrentPage(1);
+        updateUrl({
+            minPrice: min.toString(),
+            maxPrice: max.toString()
+        });
     };
 
     // Debounced URL/Filter update for Price to avoid crazy re-renders?

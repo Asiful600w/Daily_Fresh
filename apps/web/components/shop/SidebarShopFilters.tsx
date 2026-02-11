@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 import { CURRENCY_SYMBOL } from '@/lib/format';
+import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface SidebarShopFiltersProps {
     categories: Category[];
@@ -152,67 +153,14 @@ export function SidebarShopFilters({
                     Price Range
                 </h3>
 
-                <div className="px-2 relative h-10 mb-6">
-                    <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full -translate-y-1/2 z-0"></div>
-                    <div
-                        className="absolute top-1/2 h-1.5 bg-primary rounded-full -translate-y-1/2 z-10"
-                        style={{ left: `${minPercent}%`, right: `${100 - maxPercent}%` }}
-                    ></div>
-                    <input
-                        type="range"
-                        min={minPrice}
-                        max={maxPrice}
-                        value={currentMin}
-                        onChange={handleMinChange}
-                        className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-20 slider-thumb-pointer"
-                        style={{ zIndex: currentMin > maxPrice - 100 ? 50 : 20 }}
-                    />
-                    <input
-                        type="range"
-                        min={minPrice}
-                        max={maxPrice}
-                        value={currentMax}
-                        onChange={handleMaxChange}
-                        className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-30 slider-thumb-pointer"
-                    />
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300">
-                        {CURRENCY_SYMBOL}{currentMin}
-                    </div>
-                    <span className="text-slate-400">-</span>
-                    <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300">
-                        {CURRENCY_SYMBOL}{currentMax}
-                    </div>
-                </div>
+                <PriceRangeSlider
+                    min={minPrice}
+                    max={maxPrice}
+                    currentMin={currentMin}
+                    currentMax={currentMax}
+                    onChange={onPriceChange}
+                />
             </div>
-
-            <style jsx>{`
-                input[type=range]::-webkit-slider-thumb {
-                    pointer-events: auto;
-                    -webkit-appearance: none;
-                    height: 20px;
-                    width: 20px;
-                    border-radius: 50%;
-                    background: #ffffff;
-                    border: 2px solid #22c55e;
-                    cursor: pointer;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                    margin-top: -8px;
-                }
-                input[type=range]::-moz-range-thumb {
-                    pointer-events: auto;
-                    height: 20px;
-                    width: 20px;
-                    border-radius: 50%;
-                    background: #ffffff;
-                    border: 2px solid #22c55e;
-                    cursor: pointer;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                    border: none;
-                }
-            `}</style>
         </aside>
     );
 }

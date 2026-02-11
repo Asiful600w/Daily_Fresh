@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 import { CURRENCY_SYMBOL } from '@/lib/format';
+import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface SidebarFiltersProps {
     subcategories: { name: string; count?: number }[];
@@ -74,71 +75,15 @@ export function SidebarFilters({
             <section>
                 <div className="flex justify-between items-end mb-6">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Price Range</h3>
-                    <span className="text-primary font-bold text-sm">
-                        {CURRENCY_SYMBOL}{currentMin} - {CURRENCY_SYMBOL}{currentMax}
-                    </span>
-                </div>
-                <div className="px-2 relative h-10">
-                    {/* Track Background */}
-                    <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full -translate-y-1/2 z-0"></div>
-
-                    {/* Active Range Track */}
-                    <div
-                        className="absolute top-1/2 h-1.5 bg-primary rounded-full -translate-y-1/2 z-10"
-                        style={{ left: `${minPercent}%`, right: `${100 - maxPercent}%` }}
-                    ></div>
-
-                    {/* Range Inputs */}
-                    <input
-                        type="range"
-                        min={minPrice}
-                        max={maxPrice}
-                        value={currentMin}
-                        onChange={handleMinChange}
-                        className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-20 slider-thumb-pointer"
-                        style={{ zIndex: currentMin > maxPrice - 100 ? 50 : 20 }}
-                    />
-                    <input
-                        type="range"
-                        min={minPrice}
-                        max={maxPrice}
-                        value={currentMax}
-                        onChange={handleMaxChange}
-                        className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-30 slider-thumb-pointer"
-                    />
                 </div>
 
-                <div className="flex justify-between mt-1 text-xs font-semibold text-slate-400 uppercase tracking-tighter">
-                    <span>{CURRENCY_SYMBOL}{minPrice}</span>
-                    <span>{CURRENCY_SYMBOL}{maxPrice}</span>
-                </div>
-
-                <style jsx>{`
-                    input[type=range]::-webkit-slider-thumb {
-                        pointer-events: auto;
-                        -webkit-appearance: none;
-                        height: 20px;
-                        width: 20px;
-                        border-radius: 50%;
-                        background: #ffffff;
-                        border: 2px solid #22c55e;
-                        cursor: pointer;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                        margin-top: -8px; /* Offset for vertical alignment/centering if needed, usually browser handles it */
-                    }
-                    /* Firefox thumb */
-                    input[type=range]::-moz-range-thumb {
-                        pointer-events: auto;
-                        height: 20px;
-                        width: 20px;
-                        border-radius: 50%;
-                        background: #ffffff;
-                        border: 2px solid #22c55e;
-                        cursor: pointer;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                        border: none;
-                    } 
-                `}</style>
+                <PriceRangeSlider
+                    min={minPrice}
+                    max={maxPrice}
+                    currentMin={currentMin}
+                    currentMax={currentMax}
+                    onChange={onPriceChange}
+                />
             </section>
 
             <section className="space-y-4">

@@ -30,8 +30,15 @@ export function ShopView({ products, categories }: ShopViewProps) {
 
     // -- State --
     const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'newest');
-    // Initialize price range directly from computed globals
-    const [priceRange, setPriceRange] = useState({ min: globalMinPrice, max: globalMaxPrice });
+
+    // Initialize price range from URL or globals
+    const urlMin = Number(searchParams.get('minPrice')) || globalMinPrice;
+    const urlMax = Number(searchParams.get('maxPrice')) || globalMaxPrice;
+
+    const [priceRange, setPriceRange] = useState({
+        min: urlMin >= globalMinPrice ? urlMin : globalMinPrice,
+        max: urlMax <= globalMaxPrice ? urlMax : globalMaxPrice
+    });
 
     // Category State (URL Sync)
     // We treat URL as source of truth for Category/Subcategory to allow sharing links
@@ -66,6 +73,10 @@ export function ShopView({ products, categories }: ShopViewProps) {
 
     const handlePriceChange = (min: number, max: number) => {
         setPriceRange({ min, max });
+        updateUrl({
+            minPrice: min.toString(),
+            maxPrice: max.toString()
+        });
     };
 
     const handleCategoryChange = (categorySlug: string | undefined, subcategoryName?: string) => {

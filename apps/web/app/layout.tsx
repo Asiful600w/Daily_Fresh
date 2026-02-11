@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
@@ -11,6 +11,7 @@ import NextTopLoader from 'nextjs-toploader';
 import { UIProvider } from "@/context/UIContext";
 import { createClient } from "@/lib/supabase/server";
 import { LazyCookieConsent } from "@/components/layout/LazyCookieConsent";
+import { PWAInstallBanner } from "@/components/pwa/PWAInstallBanner";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -18,7 +19,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-/*
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -26,7 +26,6 @@ export const viewport: Viewport = {
   userScalable: false,
   themeColor: "#22c55e",
 };
-*/
 
 export const metadata: Metadata = {
   title: "Daily Fresh | Premium Grocery Shopping",
@@ -39,7 +38,7 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
+  }
 };
 
 export default async function RootLayout({
@@ -103,6 +102,7 @@ export default async function RootLayout({
                   <NextTopLoader color="#22C55E" showSpinner={false} shadow={false} height={2} />
                   <UIProvider>
                     <LazyCookieConsent />
+                    <PWAInstallBanner />
                     {children}
                   </UIProvider>
                 </FlyToCartProvider>

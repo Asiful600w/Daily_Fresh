@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
 import { CURRENCY_SYMBOL } from '@/lib/format';
+import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface MobileShopFilterDrawerProps {
     isOpen: boolean;
@@ -163,40 +164,15 @@ export function MobileShopFilterDrawer({
 
                     {/* Price Range */}
                     <section>
-                        <div className="flex justify-between items-end mb-6">
-                            <h4 className="font-bold text-slate-900 dark:text-white">Price Range</h4>
-                            <span className="text-primary font-bold text-base">
-                                {CURRENCY_SYMBOL}{currentMin} - {CURRENCY_SYMBOL}{currentMax}
-                            </span>
-                        </div>
-                        <div className="px-2 relative h-10">
-                            <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full -translate-y-1/2 z-0"></div>
-                            <div
-                                className="absolute top-1/2 h-1.5 bg-primary rounded-full -translate-y-1/2 z-10"
-                                style={{ left: `${minPercent}%`, right: `${100 - maxPercent}%` }}
-                            ></div>
-                            <input
-                                type="range"
-                                min={minPrice}
-                                max={maxPrice}
-                                value={currentMin}
-                                onChange={handleMinChange}
-                                className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-20 slider-thumb-pointer"
-                                style={{ zIndex: currentMin > maxPrice - 100 ? 50 : 20 }}
-                            />
-                            <input
-                                type="range"
-                                min={minPrice}
-                                max={maxPrice}
-                                value={currentMax}
-                                onChange={handleMaxChange}
-                                className="absolute w-full top-1/2 -translate-y-1/2 h-1.5 appearance-none bg-transparent pointer-events-none z-30 slider-thumb-pointer"
-                            />
-                        </div>
-                        <div className="flex justify-between mt-1 text-xs font-semibold text-slate-400 uppercase tracking-tighter">
-                            <span>{CURRENCY_SYMBOL}{minPrice}</span>
-                            <span>{CURRENCY_SYMBOL}{maxPrice}</span>
-                        </div>
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-4">Price Range</h4>
+
+                        <PriceRangeSlider
+                            min={minPrice}
+                            max={maxPrice}
+                            currentMin={currentMin}
+                            currentMax={currentMax}
+                            onChange={onPriceChange}
+                        />
                     </section>
                 </div>
 
@@ -209,32 +185,6 @@ export function MobileShopFilterDrawer({
                         Show Results
                     </button>
                 </div>
-
-                <style jsx>{`
-                    input[type=range]::-webkit-slider-thumb {
-                        pointer-events: auto;
-                        -webkit-appearance: none;
-                        height: 24px;
-                        width: 24px;
-                        border-radius: 50%;
-                        background: #ffffff;
-                        border: 2px solid #22c55e;
-                        cursor: pointer;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                        margin-top: -9px;
-                    }
-                    input[type=range]::-moz-range-thumb {
-                        pointer-events: auto;
-                        height: 24px;
-                        width: 24px;
-                        border-radius: 50%;
-                        background: #ffffff;
-                        border: 2px solid #22c55e;
-                        cursor: pointer;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                        border: none;
-                    } 
-                `}</style>
             </div>
         </div>
     );
