@@ -379,26 +379,26 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
 
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
-            <div className="flex items-center gap-4 mb-6 border-b border-slate-200 dark:border-slate-700">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 max-w-5xl mx-auto pb-8">
+            <div className="flex items-center gap-2 sm:gap-4 mb-2 border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
                 <button
                     type="button"
                     onClick={() => setActiveTab('details')}
-                    className={`px-4 py-2 font-bold text-sm transition-colors border-b-2 ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                    className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 whitespace-nowrap shrink-0 ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
                 >
                     Product Details
                 </button>
                 <button
                     type="button"
                     onClick={() => setActiveTab('seo')}
-                    className={`px-4 py-2 font-bold text-sm transition-colors border-b-2 ${activeTab === 'seo' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                    className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 whitespace-nowrap shrink-0 ${activeTab === 'seo' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
                 >
                     SEO Settings
                 </button>
             </div>
 
-            <div className={activeTab === 'details' ? 'block space-y-8' : 'hidden'}>
-                <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+            <div className={activeTab === 'details' ? 'block space-y-6 sm:space-y-8' : 'hidden'}>
+                <div className="bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
 
                     {/* Header */}
                     <div className="border-b border-slate-100 dark:border-slate-700 pb-4 mb-4">
@@ -772,18 +772,18 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                 </div>
             </div>
 
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 mt-8">
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="order-2 sm:order-1 px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full sm:w-auto"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-green-500/30 hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="order-1 sm:order-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-green-500/30 hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                     {uploading && <span className="material-icons-round animate-spin text-sm">refresh</span>}
                     {loading ? (uploading ? 'Uploading...' : 'Saving...') : 'Save Product'}

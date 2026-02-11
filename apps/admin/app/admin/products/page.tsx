@@ -144,62 +144,67 @@ export default function AdminProductsPage() {
             </div>
 
             {/* Filter Toolbar */}
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 flex flex-wrap gap-4 items-center">
-                <div className="relative w-full sm:w-64">
-                    <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm"
-                    />
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 flex flex-col lg:flex-row gap-4 lg:items-center">
+                <div className="flex-1 flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm"
+                        />
+                    </div>
+
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full sm:w-48 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
+                    >
+                        <option value="">All Categories</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                    </select>
                 </div>
 
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
-                >
-                    <option value="">All Categories</option>
-                    {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                </select>
+                <div className="flex flex-wrap items-center gap-4">
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
+                    >
+                        <option value="newest">Newest First</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="stock_asc">Stock: Low to High</option>
+                        <option value="stock_desc">Stock: High to Low</option>
+                    </select>
 
-                <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
-                >
-                    <option value="newest">Newest First</option>
-                    <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
-                    <option value="stock_asc">Stock: Low to High</option>
-                    <option value="stock_desc">Stock: High to Low</option>
-                </select>
-
-                <div className="flex items-center gap-2">
-                    <input
-                        type="number"
-                        placeholder="Min Price"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
-                    />
-                    <span className="text-slate-400">-</span>
-                    <input
-                        type="number"
-                        placeholder="Max Price"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
-                    />
+                    <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                        <input
+                            type="number"
+                            placeholder="Min Price"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            className="w-full sm:w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
+                        />
+                        <span className="text-slate-400">-</span>
+                        <input
+                            type="number"
+                            placeholder="Max Price"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            className="w-full sm:w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-primary focus:border-primary shadow-sm outline-none"
+                        />
+                    </div>
                 </div>
             </div>
 
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
-                <div className="overflow-x-auto">
+                {/* Desktop View (Table) */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
@@ -229,7 +234,7 @@ export default function AdminProductsPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 relative rounded-lg bg-slate-100 dark:bg-slate-700 p-1 shrink-0 overflow-hidden">
                                                     {product.images && product.images.length > 0 ? (
-                                                        <NextImage src={product.images[0]} alt={product.name} className="object-contain" fill sizes="48px" />
+                                                        <NextImage src={product.images[0]} alt={product.name} className="object-cover" fill sizes="48px" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-slate-400">
                                                             <span className="material-icons-round text-sm">image_not_supported</span>
@@ -348,29 +353,122 @@ export default function AdminProductsPage() {
                     </table>
                 </div>
 
-                {/* Pagination Controls */}
-                <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Showing page <span className="font-bold text-slate-900 dark:text-white">{currentPage}</span> of <span className="font-bold text-slate-900 dark:text-white">{totalPages}</span>
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Previous
-                        </button>
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Next
-                        </button>
-                    </div>
+                {/* Mobile View (Cards) */}
+                <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700">
+                    {loading ? (
+                        <div className="p-8 text-center text-slate-500">Loading products...</div>
+                    ) : products.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500">No products found.</div>
+                    ) : (
+                        products.map((product) => (
+                            <div key={product.id} className="p-4 space-y-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-20 h-20 relative rounded-xl bg-slate-100 dark:bg-slate-700 p-1 shrink-0 overflow-hidden">
+                                        {product.images && product.images.length > 0 ? (
+                                            <NextImage src={product.images[0]} alt={product.name} className="object-cover" fill sizes="80px" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                <span className="material-icons-round text-xl">image_not_supported</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <div>
+                                                <p className="font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">{product.name}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{product.quantity}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleToggleFeatured(product.id, product.is_featured)}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 ${product.is_featured
+                                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600'
+                                                    : 'text-slate-300 dark:text-slate-600'
+                                                    }`}
+                                            >
+                                                <span className="material-icons-round text-xl">
+                                                    {product.is_featured ? 'star' : 'star_outline'}
+                                                </span>
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-tight">
+                                                {product.category}
+                                            </span>
+                                            {product.is_approved ? (
+                                                <span className="px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold border border-green-200 dark:border-green-800 uppercase tracking-tight">
+                                                    Approved
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 rounded-md bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-bold border border-yellow-200 dark:border-yellow-800 uppercase tracking-tight">
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2">
+                                    <div>
+                                        <p className="text-lg font-bold text-primary">{formatPrice(product.price)}</p>
+                                        <p className={`text-xs mt-0.5 ${product.stockQuantity === 0 ? 'text-red-500 font-bold' : product.stockQuantity < 10 ? 'text-orange-500 font-bold' : 'text-slate-500'}`}>
+                                            {product.stockQuantity === 0 ? 'Out of Stock' : `${product.stockQuantity} units in stock`}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Link
+                                            href={`/admin/products/${product.id}/edit`}
+                                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                        >
+                                            <span className="material-icons-round">edit</span>
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm('Are you sure you want to delete this product?')) {
+                                                    const handleDelete = async () => {
+                                                        try {
+                                                            await deleteProduct(product.id);
+                                                            fetchData(currentPage);
+                                                        } catch (e) {
+                                                            alert('Failed to delete product');
+                                                        }
+                                                    };
+                                                    handleDelete();
+                                                }
+                                            }}
+                                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500"
+                                        >
+                                            <span className="material-icons-round">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
-        </div >
+
+            {/* Pagination Controls */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Showing page <span className="font-bold text-slate-900 dark:text-white">{currentPage}</span> of <span className="font-bold text-slate-900 dark:text-white">{totalPages}</span>
+                </p>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Previous
+                    </button>
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
