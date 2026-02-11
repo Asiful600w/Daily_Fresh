@@ -1,4 +1,5 @@
 
+import { Suspense } from 'react';
 import { ProductInfo } from '@/components/product/ProductInfo';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
 import Link from 'next/link';
@@ -96,9 +97,13 @@ export default async function ProductPage(props: ProductPageProps) {
                 <ProductInfo product={product} />
             </div>
 
-            <Reviews productId={product.id} />
+            <Suspense fallback={<ReviewsSkeleton />}>
+                <Reviews productId={product.id} />
+            </Suspense>
 
-            <RelatedProducts productId={product.id} />
+            <Suspense fallback={<RelatedProductsSkeleton />}>
+                <RelatedProducts productId={product.id} />
+            </Suspense>
             {/* Structured Data */}
             <script
                 type="application/ld+json"
@@ -120,5 +125,46 @@ export default async function ProductPage(props: ProductPageProps) {
                 }}
             />
         </main>
+    );
+}
+
+function ReviewsSkeleton() {
+    return (
+        <section className="py-12 border-t border-slate-100 dark:border-slate-700 animate-pulse">
+            <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg mb-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="lg:col-span-2 space-y-6">
+                    {[1, 2].map(i => (
+                        <div key={i} className="flex gap-4">
+                            <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4" />
+                                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="h-64 bg-slate-100 dark:bg-slate-800/50 rounded-2xl" />
+            </div>
+        </section>
+    );
+}
+
+function RelatedProductsSkeleton() {
+    return (
+        <section className="mt-20 animate-pulse">
+            <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg mb-8" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                    <div key={i}>
+                        <div className="aspect-[3/4] bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+                        <div className="mt-4 space-y-2">
+                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }

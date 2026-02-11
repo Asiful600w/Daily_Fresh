@@ -10,7 +10,7 @@ import { FlyToCartProvider } from "@/context/FlyToCartContext";
 import NextTopLoader from 'nextjs-toploader';
 import { UIProvider } from "@/context/UIContext";
 import { createClient } from "@/lib/supabase/server";
-import { CookieConsent } from "@/components/layout/CookieConsent";
+import { LazyCookieConsent } from "@/components/layout/LazyCookieConsent";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -80,9 +80,10 @@ export default async function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
         <meta name="theme-color" content="#22c55e" />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://vaohkfonpifdvwarsnac.supabase.co" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round&display=swap" rel="stylesheet" />
       </head>
       <body
         suppressHydrationWarning={true}
@@ -101,7 +102,7 @@ export default async function RootLayout({
                 <FlyToCartProvider>
                   <NextTopLoader color="#22C55E" showSpinner={false} shadow={false} height={2} />
                   <UIProvider>
-                    <CookieConsent />
+                    <LazyCookieConsent />
                     {children}
                   </UIProvider>
                 </FlyToCartProvider>

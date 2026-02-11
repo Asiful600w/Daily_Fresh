@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/:all*(svg|jpg|png)',
+        source: '/:all*(svg|jpg|png|webp|avif|ico|woff|woff2)',
         locale: false,
         headers: [
           {
@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    optimizePackageImports: ['recharts', 'date-fns', 'lucide-react', 'react-icons', 'lodash'],
+    optimizePackageImports: ['recharts', 'date-fns', 'lucide-react', 'react-icons', 'lodash', '@supabase/supabase-js', 'zod', 'next-themes', 'clsx'],
   },
 };
 

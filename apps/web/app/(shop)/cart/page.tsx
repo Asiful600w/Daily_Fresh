@@ -4,7 +4,11 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/components/cart/CartItem';
 import { OrderSummary } from '@/components/cart/OrderSummary';
-import { RecentlyViewed } from '@/components/cart/RecentlyViewed';
+import dynamic from 'next/dynamic';
+const RecentlyViewed = dynamic(
+    () => import('@/components/cart/RecentlyViewed').then(m => ({ default: m.RecentlyViewed })),
+    { ssr: false }
+);
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 
 import { useEffect } from 'react';

@@ -11,7 +11,11 @@ import { RecentOrders } from '@/components/profile/RecentOrders';
 import { QuickActions } from '@/components/profile/QuickActions';
 import { AddressCard } from '@/components/profile/AddressCard';
 import { MembershipCard } from '@/components/profile/MembershipCard';
-import { ProfileEditModal } from '@/components/profile/ProfileEditModal';
+import dynamic from 'next/dynamic';
+const ProfileEditModal = dynamic(
+    () => import('@/components/profile/ProfileEditModal').then(m => ({ default: m.ProfileEditModal })),
+    { ssr: false }
+);
 
 interface ProfileClientProps {
     initialStats: any;
