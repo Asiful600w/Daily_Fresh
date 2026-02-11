@@ -157,12 +157,8 @@ export async function getUserStats(userId: string) {
         console.log('getUserStats: Starting for userId:', userId);
         const supabase = await createClient();
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) {
-            console.error('getUserStats: No authenticated user (server-side):', authError);
-        } else {
-            console.log('getUserStats: Authenticated user:', user.id);
-        }
+        // Auth check removed for performance. RLS enforces security.
+        // const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         // Use count queries for better performance
         // We can run these in parallel
@@ -196,12 +192,8 @@ export async function getRecentOrders(userId: string, limit: number = 5) {
         console.log('getRecentOrders: Starting for userId:', userId);
         const supabase = await createClient();
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) {
-            console.error('getRecentOrders: No authenticated user (server-side):', authError);
-        } else {
-            console.log('getRecentOrders: Authenticated user:', user.id);
-        }
+        // Auth check removed for performance. RLS enforces security.
+        // const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         // Fetch strictly what is needed for the list
         const { data, error } = await supabase
