@@ -1,6 +1,8 @@
 'use server'
 
 import { getSupabaseService } from "@/lib/supabaseService";
+import { createClient } from "@/lib/supabase/server";
+import { validateProduct } from "@/lib/productValidation";
 import { revalidatePath } from "next/cache";
 
 // Type definition for Product Payload (Subset of Product)
@@ -31,96 +33,135 @@ export type ProductPayload = {
     ogImage?: string;
 };
 
-export async function upsertProductAction(product: ProductPayload) {
-    const supabase = getSupabaseService();
+/**
+ * Verify the caller is an authenticated admin (SUPERADMIN or MERCHANT).
+ * Returns the user profile or throws.
+ */
+async function verifyAdminAuth() {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
+    if (authError || !user) {
+        throw new Error('Unauthorized: You must be logged in.');
+    }
+
+    // Fetch role from User table
+    const serviceSupabase = getSupabaseService();
+    const { data: profile, error: profileError } = await serviceSupabase
+        .from('User')
+        .select('id, role, name, shopName')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError || !profile) {
+        throw new Error('Unauthorized: User profile not found.');
+    }
+
+    if (profile.role !== 'SUPERADMIN' && profile.role !== 'MERCHANT') {
+        throw new Error('Forbidden: Only admins and merchants can manage products.');
+    }
+
+    return profile;
+}
+
+export async function upsertProductAction(product: ProductPayload) {
     try {
-        // 1. Resolve category name to ID
+        // 1. AUTH GUARD — verify caller
+        const caller = await verifyAdminAuth();
+
+        // 2. FORCE correct merchantId based on role
+        // Merchants can only create products under their own ID
+        if (caller.role === 'MERCHANT') {
+            product.merchantId = caller.id;
+            product.shopName = caller.shopName || caller.name;
+        }
+        // SUPERADMINs can set any merchantId (or none)
+
+        // 3. VALIDATE with Zod schema
+        const validation = validateProduct(product);
+        if (!validation.success) {
+            return { success: false, error: `Validation failed: ${validation.error}` };
+        }
+        const validated = validation.data;
+
+        // 4. Resolve category name to ID
+        const supabase = getSupabaseService();
+
         let categoryId: number | null = null;
-        if (product.category) {
+        if (validated.category) {
             const { data: catData } = await supabase
                 .from('categories')
                 .select('id')
-                .eq('name', product.category)
+                .eq('name', validated.category)
                 .single();
             categoryId = catData?.id || null;
         }
 
-        // 2. Resolve subcategory name to ID
+        // 5. Resolve subcategory name to ID
         let subcategoryId: number | null = null;
-        if (product.subcategory && categoryId) {
+        if (validated.subcategory && categoryId) {
             const { data: subData } = await supabase
                 .from('subcategories')
                 .select('id')
-                .eq('name', product.subcategory)
+                .eq('name', validated.subcategory)
                 .eq('category_id', categoryId)
                 .single();
             subcategoryId = subData?.id || null;
         }
 
-        // 3. Transform payload to snake_case for Supabase DB
+        // 6. Transform payload to snake_case for Supabase DB
         const dbPayload = {
-            name: product.name,
-            price: product.price,
-            original_price: product.originalPrice,
-            description: product.description,
-            category: product.category, // Keep text for display
-            subcategory: product.subcategory, // Keep text for display
-            category_id: categoryId, // Add ID for relations
-            subcategory_id: subcategoryId, // Add ID for relations
-            stock_quantity: product.stockQuantity,
-            quantity: product.quantity,
-            images: product.images,
-            colors: product.colors,
-            sizes: product.sizes,
-            discount_percent: product.discountPercent,
-            special_category_id: product.specialCategoryId,
-            merchant_id: product.merchantId,
-            shop_name: product.shopName,
-            meta_title: product.metaTitle,
-            meta_description: product.metaDescription,
-            keywords: product.keywords,
-            canonical_url: product.canonicalUrl,
-            no_index: product.noIndex,
-            og_image: product.ogImage
+            name: validated.name,
+            price: validated.price,
+            original_price: validated.originalPrice,
+            description: validated.description,
+            category: validated.category,
+            subcategory: validated.subcategory,
+            category_id: categoryId,
+            subcategory_id: subcategoryId,
+            stock_quantity: validated.stockQuantity,
+            quantity: validated.quantity,
+            images: validated.images,
+            colors: validated.colors,
+            sizes: validated.sizes,
+            discount_percent: validated.discountPercent,
+            special_category_id: validated.specialCategoryId,
+            merchant_id: validated.merchantId,
+            shop_name: validated.shopName,
+            meta_title: validated.metaTitle,
+            meta_description: validated.metaDescription,
+            keywords: validated.keywords,
+            canonical_url: validated.canonicalUrl,
+            no_index: validated.noIndex,
+            og_image: validated.ogImage
         };
 
-        console.log('DB Payload:', dbPayload);
-
         let result;
-        if (product.id) {
-            // Update
-            console.log('Updating product with ID:', product.id);
-            const { data, error } = await supabase
+        if (validated.id) {
+            // Update — merchants can only update their own products
+            const updateQuery = supabase
                 .from('products')
                 .update(dbPayload)
-                .eq('id', product.id)
-                .select();
+                .eq('id', validated.id);
 
-            if (error) {
-                console.error('Update error:', error);
-                throw error;
+            // Scope to merchant's own products
+            if (caller.role === 'MERCHANT') {
+                updateQuery.eq('merchant_id', caller.id);
             }
 
+            const { data, error } = await updateQuery.select();
+
+            if (error) throw error;
             result = Array.isArray(data) ? data[0] : data;
-            console.log('Update result:', result);
         } else {
             // Create
-            console.log('Creating new product');
-            const createPayload = product.id ? { ...dbPayload, id: product.id } : dbPayload;
-
             const { data, error } = await supabase
                 .from('products')
-                .insert(createPayload)
+                .insert(dbPayload)
                 .select();
 
-            if (error) {
-                console.error('Insert error:', error);
-                throw error;
-            }
-
+            if (error) throw error;
             result = Array.isArray(data) ? data[0] : data;
-            console.log('Insert result:', result);
         }
 
         revalidatePath('/admin/products');
@@ -129,15 +170,17 @@ export async function upsertProductAction(product: ProductPayload) {
         return { success: true, data: result };
 
     } catch (error: any) {
-        console.error("upsertProductAction Error:", error);
+        console.error("upsertProductAction Error:", error?.message);
         return { success: false, error: error.message || 'Unknown error occurred' };
     }
 }
 
 export async function toggleFeaturedProduct(productId: number, isFeatured: boolean) {
-    const supabase = getSupabaseService();
-
     try {
+        // Auth guard
+        await verifyAdminAuth();
+
+        const supabase = getSupabaseService();
         const { error } = await supabase
             .from('products')
             .update({ is_featured: isFeatured })
@@ -150,7 +193,7 @@ export async function toggleFeaturedProduct(productId: number, isFeatured: boole
 
         return { success: true };
     } catch (error: any) {
-        console.error("toggleFeaturedProduct Error:", error);
+        console.error("toggleFeaturedProduct Error:", error?.message);
         return { success: false, error: error.message || 'Unknown error occurred' };
     }
 }

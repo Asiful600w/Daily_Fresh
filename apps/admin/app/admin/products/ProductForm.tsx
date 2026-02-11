@@ -140,6 +140,10 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
 
     const [colorInput, setColorInput] = useState('');
 
+    // === Constants for validation ===
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
     // Image Handling
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -147,6 +151,18 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
             if (files.length + previewUrls.length > 6) {
                 alert("You can only have up to 6 images per product.");
                 return;
+            }
+
+            // Validate file size and type before processing
+            for (const file of files) {
+                if (!ALLOWED_TYPES.includes(file.type)) {
+                    alert(`"${file.name}" is not a supported image format. Use JPEG, PNG, WebP, or GIF.`);
+                    return;
+                }
+                if (file.size > MAX_FILE_SIZE) {
+                    alert(`"${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum is 5MB.`);
+                    return;
+                }
             }
 
             // Process images: resize to 800x800, center, compress to WebP
@@ -402,6 +418,8 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                                 <input
                                     type="number"
                                     step="0.01"
+                                    min="0.01"
+                                    max="999999"
                                     className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                     value={formData.originalPrice}
                                     onChange={e => handleOriginalPriceChange(e.target.value)}
@@ -442,6 +460,8 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                             <input
                                 type="text"
                                 required
+                                minLength={2}
+                                maxLength={200}
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -498,9 +518,12 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                             <input
                                 type="number"
                                 required
+                                min="0"
+                                max="99999"
+                                step="1"
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 value={formData.stockQuantity}
-                                onChange={e => setFormData({ ...formData, stockQuantity: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                                onChange={e => setFormData({ ...formData, stockQuantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) })}
                             />
                         </div>
                         <div className="space-y-2">
@@ -508,6 +531,7 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                             <input
                                 type="text"
                                 placeholder="e.g. 1kg, 500g, Pack"
+                                maxLength={50}
                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 value={formData.quantity}
                                 onChange={e => setFormData({ ...formData, quantity: e.target.value })}
@@ -520,10 +544,12 @@ export function ProductForm({ initialData }: { initialData?: Partial<Product> })
                         <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Description</label>
                         <textarea
                             rows={4}
+                            maxLength={5000}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
                         />
+                        <p className="text-xs text-slate-400 text-right">{formData.description?.length || 0}/5000</p>
                     </div>
 
                     {/* Colors */}
