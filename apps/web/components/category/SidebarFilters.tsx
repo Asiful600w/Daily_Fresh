@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
-import { CURRENCY_SYMBOL } from '@/lib/format';
 import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface SidebarFiltersProps {
@@ -26,20 +25,6 @@ export function SidebarFilters({
 }: SidebarFiltersProps) {
     const searchParams = useSearchParams();
     const currentSub = searchParams.get('subcategory');
-
-    const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.min(Number(e.target.value), currentMax - 1);
-        onPriceChange(val, currentMax);
-    };
-
-    const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.max(Number(e.target.value), currentMin + 1);
-        onPriceChange(currentMin, val);
-    };
-
-    // Calculate percentage for slider track positions
-    const minPercent = ((currentMin - minPrice) / (maxPrice - minPrice)) * 100;
-    const maxPercent = ((currentMax - minPrice) / (maxPrice - minPrice)) * 100;
 
     return (
         <aside className="w-full lg:w-72 flex-shrink-0 space-y-10">

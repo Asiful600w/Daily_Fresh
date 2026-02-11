@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { CURRENCY_SYMBOL } from '@/lib/format';
 
 interface PriceRangeSliderProps {
@@ -21,17 +21,21 @@ export function PriceRangeSlider({
     step = 1
 }: PriceRangeSliderProps) {
     const [isDragging, setIsDragging] = useState<'min' | 'max' | null>(null);
-    const rangeRef = useRef<HTMLDivElement>(null);
 
     // Provide immediate visual feedback while dragging
     const [localMin, setLocalMin] = useState(currentMin);
     const [localMax, setLocalMax] = useState(currentMax);
 
     // Sync with props when they change externally (e.g., URL or clear filters)
-    useEffect(() => {
+    const [prevCurrentMin, setPrevCurrentMin] = useState(currentMin);
+    const [prevCurrentMax, setPrevCurrentMax] = useState(currentMax);
+
+    if (currentMin !== prevCurrentMin || currentMax !== prevCurrentMax) {
+        setPrevCurrentMin(currentMin);
+        setPrevCurrentMax(currentMax);
         setLocalMin(currentMin);
         setLocalMax(currentMax);
-    }, [currentMin, currentMax]);
+    }
 
     const getPercent = useCallback(
         (value: number) => Math.round(((value - min) / (max - min)) * 100),

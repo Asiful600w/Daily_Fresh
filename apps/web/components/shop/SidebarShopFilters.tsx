@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
-import { CURRENCY_SYMBOL } from '@/lib/format';
 import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface SidebarShopFiltersProps {
@@ -29,19 +28,6 @@ export function SidebarShopFilters({
 }: SidebarShopFiltersProps) {
     // Track which category drawer is expanded (separate from actual filter)
     const [expandedCategory, setExpandedCategory] = useState<string | null>(selectedCategory || null);
-
-    const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.min(Number(e.target.value), currentMax - 1);
-        onPriceChange(val, currentMax);
-    };
-
-    const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.max(Number(e.target.value), currentMin + 1);
-        onPriceChange(currentMin, val);
-    };
-
-    const minPercent = ((currentMin - minPrice) / (maxPrice - minPrice)) * 100;
-    const maxPercent = ((currentMax - minPrice) / (maxPrice - minPrice)) * 100;
 
     const handleCategoryClick = (categorySlug: string) => {
         // Toggle the drawer open/close — don't filter products yet

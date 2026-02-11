@@ -1,21 +1,15 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
-import { CURRENCY_SYMBOL } from '@/lib/format';
 
 export function PWAInstallBanner() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     const [isVisible, setIsVisible] = useState(false);
-    const [isDismissed, setIsDismissed] = useState(false);
+    const [isDismissed, setIsDismissed] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return sessionStorage.getItem('pwa-banner-dismissed') === 'true';
+    });
 
     useEffect(() => {
-        // Check if already dismissed in this session
-        const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
-        if (dismissed) {
-            setIsDismissed(true);
-            return;
-        }
-
         const handleBeforeInstallPrompt = (e: any) => {
             // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();

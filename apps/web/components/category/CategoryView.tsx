@@ -43,12 +43,17 @@ export function CategoryView({ products, categoryData, slug }: CategoryViewProps
     });
 
     // Handle Category/Subcategory switch - ONLY reset if bounds are exceeded
-    useEffect(() => {
+    const [prevGlobalMin, setPrevGlobalMin] = useState(globalMinPrice);
+    const [prevGlobalMax, setPrevGlobalMax] = useState(globalMaxPrice);
+
+    if (globalMinPrice !== prevGlobalMin || globalMaxPrice !== prevGlobalMax) {
+        setPrevGlobalMin(globalMinPrice);
+        setPrevGlobalMax(globalMaxPrice);
         setPriceRange(prev => ({
             min: Math.max(prev.min, globalMinPrice),
             max: Math.min(prev.max, globalMaxPrice)
         }));
-    }, [globalMinPrice, globalMaxPrice]);
+    }
 
     // Loading State
     const [isUpdating, setIsUpdating] = useState(false);

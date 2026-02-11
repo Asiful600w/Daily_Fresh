@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { Category } from '@/lib/api';
-import { CURRENCY_SYMBOL } from '@/lib/format';
 import { PriceRangeSlider } from '../ui/PriceRangeSlider';
 
 interface MobileShopFilterDrawerProps {
@@ -34,21 +33,7 @@ export function MobileShopFilterDrawer({
     // Track which category is expanded in the drawer
     const [expandedCategory, setExpandedCategory] = useState<string | null>(selectedCategory || null);
 
-    const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.min(Number(e.target.value), currentMax - 1);
-        onPriceChange(val, currentMax);
-    };
-
-    const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = Math.max(Number(e.target.value), currentMin + 1);
-        onPriceChange(currentMin, val);
-    };
-
-    const minPercent = ((currentMin - minPrice) / (maxPrice - minPrice)) * 100;
-    const maxPercent = ((currentMax - minPrice) / (maxPrice - minPrice)) * 100;
-
     const handleCategoryClick = (categorySlug: string) => {
-        // Toggle expand/collapse — don't filter yet
         if (expandedCategory === categorySlug) {
             setExpandedCategory(null);
         } else {
@@ -57,7 +42,6 @@ export function MobileShopFilterDrawer({
     };
 
     const handleSubcategoryClick = (categorySlug: string, subcategoryName?: string) => {
-        // Now filter and close drawer
         onCategoryChange(categorySlug, subcategoryName);
     };
 
@@ -104,7 +88,6 @@ export function MobileShopFilterDrawer({
 
                                 return (
                                     <div key={category.id} className="space-y-1">
-                                        {/* Category Header — toggles dropdown */}
                                         <div
                                             className={`flex items-center justify-between cursor-pointer px-4 py-3 rounded-xl transition-all text-sm font-bold border
                                                 ${isActive
@@ -119,12 +102,10 @@ export function MobileShopFilterDrawer({
                                             </span>
                                         </div>
 
-                                        {/* Subcategories dropdown */}
                                         <div
                                             className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
                                         >
                                             <div className="pl-2 grid grid-cols-2 gap-1.5 py-1">
-                                                {/* All [Category] */}
                                                 <div
                                                     className={`cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold text-center border transition-all
                                                         ${isActive && !selectedSubcategory
@@ -165,7 +146,6 @@ export function MobileShopFilterDrawer({
                     {/* Price Range */}
                     <section>
                         <h4 className="font-bold text-slate-900 dark:text-white mb-4">Price Range</h4>
-
                         <PriceRangeSlider
                             min={minPrice}
                             max={maxPrice}

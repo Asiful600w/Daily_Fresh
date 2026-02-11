@@ -1,0 +1,26 @@
+﻿
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\app\global-error.tsx
+  4:5  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  5:5  warning  '_reset' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\components\ui\PriceRangeSlider.tsx
+  3:27  warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\context\AuthContext.tsx
+  98:8  warning  React Hook useEffect has a missing dependency: 'loading'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\context\WishlistContext.tsx
+  19:11  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\client.ts
+  4:5  warning  'client' is defined but never used  @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\middleware.ts
+   1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+  23:58  warning  'options' is defined but never used        @typescript-eslint/no-unused-vars
+
+F:\Ecommerce\Flutter-ecommerce-app-with-getx-master\grocery\apps\web\lib\supabase\server.ts
+  2:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 9 problems (0 errors, 9 warnings)
+
