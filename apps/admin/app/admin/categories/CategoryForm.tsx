@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createCategory, updateCategory, getCategoryById, uploadCategoryImage } from '@/lib/api';
+import { processImage, processImageForBanner } from '@/lib/imageProcessor';
 
 interface CategoryFormProps {
     id?: string; // If ID is provided, it's edit mode
@@ -13,6 +14,8 @@ export default function CategoryForm({ id }: CategoryFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(!!id);
+    const [uploading, setUploading] = useState<'icon' | 'banner' | null>(null);
+    const [processing, setProcessing] = useState<'icon' | 'banner' | null>(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -89,9 +92,33 @@ export default function CategoryForm({ id }: CategoryFormProps) {
             return;
         }
 
+        // Validate formats and size
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            alert('Please upload a supported image format (JPG, PNG, WebP, GIF).');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size is too large. Maximum is 5MB.');
+            return;
+        }
+
         try {
-            setLoading(true);
-            const publicUrl = await uploadCategoryImage(file, formData.slug, type);
+            setProcessing(type);
+
+            // Process image based on type
+            let processedFile: File;
+            if (type === 'icon') {
+                processedFile = await processImage(file);
+            } else {
+                processedFile = await processImageForBanner(file);
+            }
+
+            setProcessing(null);
+            setUploading(type);
+
+            const publicUrl = await uploadCategoryImage(processedFile, formData.slug, type);
 
             if (type === 'icon') {
                 setFormData(prev => ({ ...prev, image_url: publicUrl }));
@@ -100,9 +127,10 @@ export default function CategoryForm({ id }: CategoryFormProps) {
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            alert('Failed to upload image.');
+            alert('Failed to process or upload image.');
         } finally {
-            setLoading(false);
+            setProcessing(null);
+            setUploading(null);
         }
     };
 
@@ -163,69 +191,111 @@ export default function CategoryForm({ id }: CategoryFormProps) {
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted">Icon / Slider Image</label>
-                    <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors text-primary font-bold text-xs">
-                            <span className="material-symbols-outlined text-sm">cloud_upload</span>
-                            Upload Icon
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, 'icon')}
-                                className="hidden"
-                                disabled={loading}
-                            />
-                        </label>
-                        <p className="text-[10px] text-slate-400 px-1">
-                            Supported formats: JPG, PNG, WebP. We recommend <span className="font-semibold text-slate-500">WebP</span> for superior performance.
-                        </p>
-                        <input
-                            type="url"
-                            value={formData.image_url || ''}
-                            onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
-                            placeholder="https://..."
-                            required
-                        />
-                    </div>
-                    {formData.image_url && (
-                        <div className="mt-2 w-16 h-16 relative rounded-lg overflow-hidden border border-border-subtle">
-                            <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
-                        </div>
-                    )}
-                </div>
+                <div className="space-y-4">
+                    <label className="text-sm font-bold text-text-muted">Category Assets</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Icon Upload */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-text-muted uppercase tracking-wider">Icon / Grid Image</label>
+                            <div className="relative group aspect-square rounded-xl border-2 border-dashed border-border-subtle overflow-hidden flex flex-col items-center justify-center bg-gray-50/50 dark:bg-slate-900/50 hover:border-primary/50 transition-colors">
+                                {formData.image_url ? (
+                                    <>
+                                        <Image src={formData.image_url} alt="Icon Preview" fill className="object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <label className="p-2 bg-white rounded-full text-primary cursor-pointer hover:scale-110 transition-transform">
+                                                <span className="material-symbols-outlined block">edit</span>
+                                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'icon')} className="hidden" />
+                                            </label>
+                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition-transform">
+                                                <span className="material-symbols-outlined block">delete</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-4 text-center">
+                                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
+                                            <span className="material-symbols-outlined">add_photo_alternate</span>
+                                        </div>
+                                        <span className="text-xs font-bold text-text-muted">Upload Icon</span>
+                                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'icon')} className="hidden" />
+                                    </label>
+                                )}
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted">Hero Banner Image</label>
-                    <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors text-primary font-bold text-xs">
-                            <span className="material-symbols-outlined text-sm">cloud_upload</span>
-                            Upload Banner
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, 'banner')}
-                                className="hidden"
-                                disabled={loading}
-                            />
-                        </label>
-                        <p className="text-[10px] text-slate-400 px-1">
-                            Supported formats: JPG, PNG, WebP. We recommend <span className="font-semibold text-slate-500">WebP</span> for superior performance.
-                        </p>
-                        <input
-                            type="url"
-                            value={formData.banner_url}
-                            onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
-                            placeholder="https://..."
-                        />
-                    </div>
-                    {formData.banner_url && (
-                        <div className="mt-2 w-full h-32 relative rounded-lg overflow-hidden border border-border-subtle">
-                            <Image src={formData.banner_url} alt="Preview" fill className="object-cover" />
+                                {(processing === 'icon' || uploading === 'icon') && (
+                                    <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-[10px] font-bold text-primary mt-2">
+                                            {processing === 'icon' ? 'PROCESSING...' : 'UPLOADING...'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 text-center italic">Square 800x800 recommended</p>
                         </div>
-                    )}
+
+                        {/* Banner Upload */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-text-muted uppercase tracking-wider">Hero Banner</label>
+                            <div className="relative group aspect-square md:aspect-auto md:h-full rounded-xl border-2 border-dashed border-border-subtle overflow-hidden flex flex-col items-center justify-center bg-gray-50/50 dark:bg-slate-900/50 hover:border-primary/50 transition-colors" style={{ minHeight: '160px' }}>
+                                {formData.banner_url ? (
+                                    <>
+                                        <Image src={formData.banner_url} alt="Banner Preview" fill className="object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <label className="p-2 bg-white rounded-full text-primary cursor-pointer hover:scale-110 transition-transform">
+                                                <span className="material-symbols-outlined block">edit</span>
+                                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'banner')} className="hidden" />
+                                            </label>
+                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, banner_url: '' }))} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition-transform">
+                                                <span className="material-symbols-outlined block">delete</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-4 text-center">
+                                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
+                                            <span className="material-symbols-outlined">imagesmode</span>
+                                        </div>
+                                        <span className="text-xs font-bold text-text-muted">Upload Banner</span>
+                                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'banner')} className="hidden" />
+                                    </label>
+                                )}
+
+                                {(processing === 'banner' || uploading === 'banner') && (
+                                    <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-[10px] font-bold text-primary mt-2">
+                                            {processing === 'banner' ? 'PROCESSING...' : 'UPLOADING...'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 text-center italic">Wide aspect ratio optimized</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-text-muted uppercase px-1">Icon URL</label>
+                            <input
+                                type="url"
+                                value={formData.image_url}
+                                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                                className="w-full px-3 py-1.5 text-xs rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
+                                placeholder="Backup Icon URL"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-text-muted uppercase px-1">Banner URL</label>
+                            <input
+                                type="url"
+                                value={formData.banner_url}
+                                onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
+                                className="w-full px-3 py-1.5 text-xs rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
+                                placeholder="Backup Banner URL"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-border-subtle">
@@ -236,38 +306,40 @@ export default function CategoryForm({ id }: CategoryFormProps) {
                         </button>
                     </div>
 
-                    {formData.subcategories.map((sub, index) => (
-                        <div key={index} className="flex gap-2">
-                            <input
-                                type="text"
-                                value={sub.name}
-                                onChange={(e) => handleSubcategoryChange(index, e.target.value)}
-                                className="flex-1 px-4 py-2 rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
-                                placeholder="Subcategory Name"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => removeSubcategory(index)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <span className="material-symbols-outlined">delete</span>
-                            </button>
-                        </div>
-                    ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {formData.subcategories.map((sub, index) => (
+                            <div key={index} className="flex gap-2 group animate-in slide-in-from-top-1 duration-200">
+                                <input
+                                    type="text"
+                                    value={sub.name}
+                                    onChange={(e) => handleSubcategoryChange(index, e.target.value)}
+                                    className="flex-1 px-4 py-2 rounded-lg border border-border-subtle bg-transparent text-text-main focus:ring-primary focus:border-primary"
+                                    placeholder="Subcategory Name"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeSubcategory(index)}
+                                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                >
+                                    <span className="material-symbols-outlined">delete</span>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                     {formData.subcategories.length === 0 && (
-                        <p className="text-sm text-text-muted italic">No subcategories added.</p>
+                        <p className="text-sm text-text-muted italic text-center py-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-border-subtle">No subcategories added yet.</p>
                     )}
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-border-subtle">
-                    <Link href="/admin/categories" className="px-6 py-2 rounded-lg font-bold border border-border-subtle text-text-muted hover:bg-gray-50 transition-colors">
+                <div className="flex justify-end gap-4 pt-6 border-t border-border-subtle">
+                    <Link href="/admin/categories" className="px-8 py-2.5 rounded-lg font-bold border border-border-subtle text-text-muted hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                         Cancel
                     </Link>
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="px-6 py-2 rounded-lg font-bold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                        disabled={loading || !!uploading || !!processing}
+                        className="px-8 py-2.5 rounded-lg font-bold bg-primary text-white hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50 disabled:grayscale"
                     >
                         {loading ? 'Saving...' : id ? 'Update Category' : 'Create Category'}
                     </button>
