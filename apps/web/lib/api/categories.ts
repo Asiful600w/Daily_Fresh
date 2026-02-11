@@ -24,7 +24,7 @@ const fetchCategories = async (): Promise<Category[]> => {
 export const getCategories = unstable_cache(
     fetchCategories,
     ['categories-list'],
-    { revalidate: 3600, tags: ['categories'] }
+    { revalidate: 60, tags: ['categories'] } // Reduced for faster updates
 );
 
 export async function getCategory(slug: string): Promise<Category | null> {

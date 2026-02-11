@@ -95,12 +95,11 @@ export function CategoryScroller({ categories }: CategoryScrollerProps) {
                         draggable={false} // Prevent default ghost image drag
                         className="flex-shrink-0 flex items-center gap-4 bg-white dark:bg-slate-800 p-3 pr-6 rounded-2xl border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-primary transition-all group/item min-w-[220px] select-none"
                     >
-                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0 pointer-events-none relative">
+                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-center group-hover/item:bg-primary/10 transition-colors shrink-0 pointer-events-none relative overflow-hidden">
                             <Image
                                 alt={cat.name}
-                                width={40}
-                                height={40}
-                                className="object-contain pointer-events-none"
+                                fill
+                                className="object-cover pointer-events-none group-hover/item:scale-110 transition-transform duration-300"
                                 src={cat.img}
                             />
                         </div>
